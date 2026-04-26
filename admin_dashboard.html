@@ -177,7 +177,6 @@ tr:hover td{background:rgba(0,220,255,.025);color:var(--t1)}
     <button class="tab" onclick="go('us',this)">👥 Users</button>
     <button class="tab" onclick="go('dv',this)">🔌 Devices</button>
     <button class="tab" onclick="go('pt',this)">🧠 PTI Analysis</button>
-    <button class="tab" onclick="go('btu',this)">❄ BTU Calculator</button>
   </div>
 
   <div class="pg">
@@ -214,8 +213,8 @@ tr:hover td{background:rgba(0,220,255,.025);color:var(--t1)}
       <div class="cf">
         <div class="cf-t">📡 SEND COMMAND TO ESP32</div>
         <div class="cf-row">
-          <div class="cf-f"><label>ACTION</label>
-            <select id="cmd-a">
+          <div class="cf-f"><label id="lbl-action">ACTION</label>
+            <select id="cmd-a" onchange="onActionChange()">
               <option value="coolDown">❄ Cool Down</option>
               <option value="warmUp">🔥 Warm Up</option>
               <option value="maintain">✅ Maintain</option>
@@ -224,7 +223,7 @@ tr:hover td{background:rgba(0,220,255,.025);color:var(--t1)}
               <option value="powerOff">⏻ Power Off</option>
             </select>
           </div>
-          <div class="cf-f"><label>SETPOINT °C</label><input type="number" id="cmd-t" value="24" min="16" max="30" step="0.5" style="width:85px"></div>
+          <div class="cf-f" id="temp-field"><label id="lbl-setpoint">SETPOINT °C</label><input type="number" id="cmd-t" value="24" min="12" max="30" step="0.5" style="width:85px"></div>
           <div class="cf-f"><label>FAN LEVEL</label>
             <select id="cmd-f"><option>1</option><option selected>2</option><option>3</option><option>4</option><option>5</option></select>
           </div>
@@ -275,119 +274,6 @@ tr:hover td{background:rgba(0,220,255,.025);color:var(--t1)}
       <div class="tc">
         <div class="tc-h"><span class="tc-t">PTI RESULTS HISTORY</span><span class="tc-c" id="pt-cnt"></span></div>
         <div class="tw"><table><thead><tr><th>TIME</th><th>SCORE</th><th>COMFORT</th><th>ACTION</th><th>REC TEMP</th><th>FAN</th><th>CONFIDENCE</th></tr></thead><tbody id="pt-tb"></tbody></table></div>
-      </div>
-    </div>
-
-    <!-- BTU CALCULATOR -->
-    <div class="pnl" id="pnl-btu">
-      <div class="cf">
-        <div class="cf-t">❄ BTU / COOLING LOAD CALCULATOR</div>
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:16px">
-
-          <div class="cf-f">
-            <label>ROOM AREA (m²)</label>
-            <input type="number" id="b-area" value="20" min="1" max="1000" oninput="calcBtu()">
-          </div>
-          <div class="cf-f">
-            <label>CEILING HEIGHT (m)</label>
-            <input type="number" id="b-height" value="3" min="2" max="6" step="0.1" oninput="calcBtu()">
-          </div>
-          <div class="cf-f">
-            <label>OUTDOOR TEMP (°C)</label>
-            <input type="number" id="b-outdoor" value="45" min="20" max="55" oninput="calcBtu()">
-          </div>
-          <div class="cf-f">
-            <label>INDOOR TARGET (°C)</label>
-            <input type="number" id="b-indoor" value="24" min="16" max="30" oninput="calcBtu()">
-          </div>
-          <div class="cf-f">
-            <label>OCCUPANTS</label>
-            <input type="number" id="b-people" value="2" min="0" max="50" oninput="calcBtu()">
-          </div>
-          <div class="cf-f">
-            <label>WINDOWS (count)</label>
-            <input type="number" id="b-windows" value="2" min="0" max="20" oninput="calcBtu()">
-          </div>
-          <div class="cf-f">
-            <label>WINDOW SIZE</label>
-            <select id="b-winsize" onchange="calcBtu()">
-              <option value="0.5">Small (0.5 m²)</option>
-              <option value="1.2" selected>Medium (1.2 m²)</option>
-              <option value="2.0">Large (2.0 m²)</option>
-            </select>
-          </div>
-          <div class="cf-f">
-            <label>INSULATION</label>
-            <select id="b-insul" onchange="calcBtu()">
-              <option value="1.3">Poor</option>
-              <option value="1.0" selected>Average</option>
-              <option value="0.75">Good</option>
-              <option value="0.55">Excellent</option>
-            </select>
-          </div>
-          <div class="cf-f">
-            <label>SUN EXPOSURE</label>
-            <select id="b-sun" onchange="calcBtu()">
-              <option value="1.0">Shaded</option>
-              <option value="1.1" selected>Partial sun</option>
-              <option value="1.2">Direct sun</option>
-            </select>
-          </div>
-          <div class="cf-f">
-            <label>ROOM TYPE</label>
-            <select id="b-type" onchange="calcBtu()">
-              <option value="1.0" selected>Bedroom / Office</option>
-              <option value="1.1">Living Room</option>
-              <option value="1.2">Kitchen</option>
-              <option value="1.3">Server Room</option>
-              <option value="0.9">Storage</option>
-            </select>
-          </div>
-          <div class="cf-f">
-            <label>ELECTRONICS (Watts)</label>
-            <input type="number" id="b-elec" value="300" min="0" max="5000" step="50" oninput="calcBtu()">
-          </div>
-          <div class="cf-f">
-            <label>LIGHTING (Watts)</label>
-            <input type="number" id="b-light" value="100" min="0" max="2000" step="10" oninput="calcBtu()">
-          </div>
-        </div>
-      </div>
-
-      <!-- RESULTS -->
-      <div class="sg" id="btu-results" style="margin-bottom:20px"></div>
-
-      <!-- RECOMMENDATION -->
-      <div class="tc">
-        <div class="tc-h"><span class="tc-t">❄ AC UNIT RECOMMENDATION</span></div>
-        <div style="padding:18px" id="btu-rec"></div>
-      </div>
-
-      <!-- BREAKDOWN -->
-      <div class="cg">
-        <div class="cc">
-          <div class="cc-t">HEAT LOAD BREAKDOWN</div>
-          <div style="position:relative;height:220px"><canvas id="cBTU" role="img" aria-label="BTU breakdown">BTU breakdown</canvas></div>
-        </div>
-        <div class="cc">
-          <div class="cc-t">BTU vs ROOM SIZE REFERENCE</div>
-          <div style="position:relative;height:220px"><canvas id="cBTU2" role="img" aria-label="BTU reference">BTU reference</canvas></div>
-        </div>
-      </div>
-
-      <!-- STANDARDS TABLE -->
-      <div class="tc">
-        <div class="tc-h"><span class="tc-t">ASHRAE REFERENCE TABLE — BTU PER m²</span></div>
-        <div class="tw"><table>
-          <thead><tr><th>ROOM TYPE</th><th>BTU/m²</th><th>EXAMPLE 20m²</th><th>EXAMPLE 40m²</th><th>EXAMPLE 60m²</th></tr></thead>
-          <tbody>
-            <tr><td>Bedroom</td><td style="color:var(--cy)">400–500</td><td>8,000–10,000</td><td>16,000–20,000</td><td>24,000–30,000</td></tr>
-            <tr><td>Living Room</td><td style="color:var(--cy)">500–600</td><td>10,000–12,000</td><td>20,000–24,000</td><td>30,000–36,000</td></tr>
-            <tr><td>Kitchen</td><td style="color:var(--or)">600–800</td><td>12,000–16,000</td><td>24,000–32,000</td><td>36,000–48,000</td></tr>
-            <tr><td>Office</td><td style="color:var(--cy)">450–550</td><td>9,000–11,000</td><td>18,000–22,000</td><td>27,000–33,000</td></tr>
-            <tr><td>Server Room</td><td style="color:var(--rd)">1000–2000</td><td>20,000–40,000</td><td>40,000–80,000</td><td>60,000–120,000</td></tr>
-          </tbody>
-        </table></div>
       </div>
     </div>
 
@@ -500,6 +386,21 @@ function applyTranslations() {
   const labels = document.querySelectorAll('.cf-f label');
   const labelKeys = ['action','setpoint','fan','power'];
   labels.forEach((lb,i) => { if(labelKeys[i]) lb.textContent = t(labelKeys[i]); });
+
+  // Action options
+  const actionOpts = document.querySelectorAll('#cmd-a option');
+  const actionEn = ['❄ Cool Down','🔥 Warm Up','✅ Maintain','💨 Increase Fan','🌬 Ventilate','⏻ Power Off'];
+  const actionAr = ['❄ تبريد','🔥 تدفئة','✅ الحفاظ','💨 زيادة المروحة','🌬 تهوية','⏻ إيقاف'];
+  actionOpts.forEach((opt,i) => { opt.textContent = isAr ? actionAr[i] : actionEn[i]; });
+
+  // Fan options
+  const fanOpts = document.querySelectorAll('#cmd-f option');
+  fanOpts.forEach((opt,i) => { opt.textContent = isAr ? `مستوى ${i+1}` : `${i+1}`; });
+
+  // Power options
+  const powerOpts = document.querySelectorAll('#cmd-p option');
+  if(powerOpts[0]) powerOpts[0].textContent = isAr ? '⚡ تشغيل' : '⚡ ON';
+  if(powerOpts[1]) powerOpts[1].textContent = isAr ? '⏻ إيقاف' : '⏻ OFF';
 
   // Section titles (tc-t)
   const tcTitles = document.querySelectorAll('.tc-t');
@@ -910,6 +811,18 @@ function comfortBadge(l) {
   const [cls,lbl] = map[l]||['b-x',l??'—'];
   return `<span class="b ${cls}">${lbl}</span>`;
 }
-</script>
+
+// ── Action → Auto Temperature ────────────────────────────
+function onActionChange() {
+  const a = document.getElementById('cmd-a').value;
+  const tf = document.getElementById('temp-field');
+  const ti = document.getElementById('cmd-t');
+  if (a === 'coolDown')    { tf.style.display='flex'; ti.value = 20; }
+  else if (a === 'warmUp') { tf.style.display='flex'; ti.value = 28; }
+  else if (a === 'maintain'){ tf.style.display='flex'; ti.value = 24; }
+  else if (a === 'powerOff'){ tf.style.display='none'; }
+  else                     { tf.style.display='flex'; ti.value = 24; }
+}
+
 </body>
 </html>
