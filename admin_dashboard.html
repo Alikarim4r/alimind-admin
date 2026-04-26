@@ -8,8 +8,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-:root{--bg:#03060e;--card:#08111f;--card2:#0d1a2e;--br:rgba(0,220,255,.08);--brh:rgba(0,220,255,.2);--cy:#00dcff;--cyd:#0097b2;--or:#ff9c3a;--gn:#00e090;--rd:#ff4f6a;--pu:#b794f4;--t1:#e2eeff;--t2:#5a7a9a;--t3:#1e3450}
+:root{--bg:#03060e;--card:#08111f;--card2:#0d1a2e;--br:rgba(0,220,255,.08);--brh:rgba(0,220,255,.2);--cy:#00dcff;--cyd:#0097b2;--or:#ff9c3a;--gn:#00e090;--rd:#ff4f6a;--pu:#b794f4;--t1:#e8f0ff;--t2:#8aabcc;--t3:#3a5a7a}
 body{background:var(--bg);color:var(--t1);font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;min-height:100vh}
+body.rtl{direction:rtl;font-family:'Segoe UI',Tahoma,sans-serif}
 
 /* LOGIN */
 #pg-login{display:flex;align-items:center;justify-content:center;min-height:100vh;background:radial-gradient(ellipse at 50% 0%,rgba(0,220,255,.06) 0%,transparent 60%)}
@@ -47,9 +48,9 @@ body{background:var(--bg);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
 /* TABS */
 .tabs{display:flex;background:var(--card);border-bottom:1px solid var(--br);padding:0 22px;overflow-x:auto;gap:1px}
 .tabs::-webkit-scrollbar{display:none}
-.tab{padding:13px 17px;font-size:11px;font-weight:600;color:var(--t2);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;letter-spacing:.5px;transition:.15s}
+.tab{padding:13px 17px;font-size:11px;font-weight:600;color:#8aabcc;background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;letter-spacing:.5px;transition:.15s}
 .tab.on{color:var(--cy);border-bottom-color:var(--cy)}
-.tab:hover:not(.on){color:var(--t1)}
+.tab:hover:not(.on){color:#c8d8ee}
 
 /* LAYOUT */
 .pg{padding:22px;max-width:1200px;margin:0 auto}
@@ -76,8 +77,8 @@ body{background:var(--bg);color:var(--t1);font-family:'Segoe UI',system-ui,sans-
 .tc-c{font-size:10px;color:var(--cy);font-weight:700}
 .tw{overflow-x:auto}
 table{width:100%;border-collapse:collapse}
-th{text-align:left;padding:8px 18px;font-size:9px;color:var(--t3);font-weight:700;letter-spacing:1.5px;border-bottom:1px solid var(--br);background:rgba(0,0,0,.2)}
-td{padding:10px 18px;font-size:12px;color:var(--t2);border-bottom:1px solid rgba(0,220,255,.03)}
+th{text-align:left;padding:8px 18px;font-size:9px;color:#6a8aaa;font-weight:700;letter-spacing:1.5px;border-bottom:1px solid var(--br);background:rgba(0,0,0,.2)}
+td{padding:10px 18px;font-size:12px;color:#b0c8e0;border-bottom:1px solid rgba(0,220,255,.03)}
 tr:last-child td{border-bottom:none}
 tr:hover td{background:rgba(0,220,255,.025);color:var(--t1)}
 
@@ -162,8 +163,9 @@ tr:hover td{background:rgba(0,220,255,.025);color:var(--t1)}
     </div>
     <div class="bar-r">
       <span class="upd-t"><span class="dot"></span><span id="upd">Live</span></span>
-      <button class="ibtn" onclick="loadAll()">↻ Refresh</button>
-      <button class="ibtn ibtn-rd" onclick="signOut()">Sign out</button>
+      <button class="ibtn" id="lang-btn" onclick="toggleLang()">🌐 عربي</button>
+      <button class="ibtn" onclick="loadAll()">↻ <span data-en="Refresh" data-ar="تحديث">Refresh</span></button>
+      <button class="ibtn ibtn-rd" onclick="signOut()"><span data-en="Sign out" data-ar="تسجيل خروج">Sign out</span></button>
     </div>
   </div>
 
@@ -284,6 +286,59 @@ const SB_KEY = 'sb_publishable_gen23HpCRSO7gVV4cdw0PQ_MeB1QOvt';
 const sb = window.supabase.createClient(SB_URL, SB_KEY);
 const CH = {};
 let TK;
+let isAr = false;
+
+const T = {
+  en: {
+    overview:'📊 Overview', readings:'🌡 Live Readings', commands:'📡 HVAC Commands',
+    sites:'🏢 Sites', users:'👥 Users', devices:'🔌 Devices', pti:'🧠 PTI Analysis',
+    refresh:'↻ Refresh', signout:'Sign out', live:'Live',
+    sendCmd:'SEND COMMAND TO ESP32', send:'SEND →',
+    users_lbl:'REGISTERED USERS', devices_lbl:'REGISTERED DEVICES',
+    sites_lbl:'REGISTERED SITES', readings_lbl:'SENSOR READINGS HISTORY',
+    commands_lbl:'COMMANDS LOG', activity:'⚡ RECENT ACTIVITY',
+    noDevices:'No devices registered yet', noSites:'No sites registered yet',
+    noPti:'No PTI data yet', noActivity:'No activity yet',
+    updated:'Updated', lang:'🌐 عربي',
+  },
+  ar: {
+    overview:'📊 نظرة عامة', readings:'🌡 القراءات المباشرة', commands:'📡 أوامر التكييف',
+    sites:'🏢 المواقع', users:'👥 المستخدمون', devices:'🔌 الأجهزة', pti:'🧠 تحليل PTI',
+    refresh:'↻ تحديث', signout:'تسجيل خروج', live:'مباشر',
+    sendCmd:'إرسال أمر للـ ESP32', send:'إرسال ←',
+    users_lbl:'المستخدمون المسجلون', devices_lbl:'الأجهزة المسجلة',
+    sites_lbl:'المواقع المسجلة', readings_lbl:'سجل قراءات الحساسات',
+    commands_lbl:'سجل الأوامر', activity:'⚡ آخر الأحداث',
+    noDevices:'لا توجد أجهزة مسجلة بعد', noSites:'لا توجد مواقع مسجلة بعد',
+    noPti:'لا توجد بيانات PTI بعد', noActivity:'لا توجد أحداث بعد',
+    updated:'آخر تحديث', lang:'🌐 English',
+  }
+};
+
+function t(key) { return (isAr ? T.ar : T.en)[key] || key; }
+
+function toggleLang() {
+  isAr = !isAr;
+  document.body.classList.toggle('rtl', isAr);
+  document.documentElement.lang = isAr ? 'ar' : 'en';
+  document.getElementById('lang-btn').textContent = t('lang');
+
+  // Update tabs
+  const tabKeys = ['overview','readings','commands','sites','users','devices','pti'];
+  document.querySelectorAll('.tab').forEach((el,i) => { if(tabKeys[i]) el.textContent = t(tabKeys[i]); });
+
+  // Update table headers direction
+  document.querySelectorAll('th').forEach(th => { th.style.textAlign = isAr ? 'right' : 'left'; });
+
+  // Update send command section
+  const cfT = document.querySelector('.cf-t');
+  if(cfT) cfT.textContent = t('sendCmd');
+  const cfBtn = document.querySelector('.cf-btn');
+  if(cfBtn) cfBtn.textContent = t('send');
+
+  // Update section titles
+  document.getElementById('upd').textContent = isAr ? t('live') : (document.getElementById('upd').textContent);
+}
 
 // ── Session check ─────────────────────────────────────────
 sb.auth.getSession().then(({data:{session}}) => { if(session) showApp(); });
