@@ -211,32 +211,76 @@ tr:hover td{background:rgba(0,220,255,.025);color:var(--t1)}
     <!-- HVAC COMMANDS -->
     <div class="pnl" id="pnl-cm">
       <div class="cf">
-        <div class="cf-t">📡 SEND COMMAND TO ESP32</div>
+        <div class="cf-t" id="lbl-sendCmd">📡 SEND COMMAND TO ESP32</div>
+
+        <!-- Step 1: Select User → Site → Device -->
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--br)">
+          <div class="cf-f">
+            <label id="lbl-sel-user">SELECT USER</label>
+            <select id="sel-user" onchange="onUserChange()">
+              <option value="">— Choose user —</option>
+            </select>
+          </div>
+          <div class="cf-f">
+            <label id="lbl-sel-site">SELECT SITE</label>
+            <select id="sel-site" onchange="onSiteChange()" disabled>
+              <option value="">— Choose site —</option>
+            </select>
+          </div>
+          <div class="cf-f">
+            <label id="lbl-sel-device">SELECT DEVICE</label>
+            <select id="sel-device" disabled>
+              <option value="">— Choose device —</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Step 2: Command fields -->
         <div class="cf-row">
-          <div class="cf-f"><label id="lbl-action">ACTION</label>
+          <div class="cf-f">
+            <label id="lbl-action">ACTION</label>
             <select id="cmd-a" onchange="onActionChange()">
               <option value="coolDown">❄ Cool Down</option>
               <option value="warmUp">🔥 Warm Up</option>
               <option value="maintain">✅ Maintain</option>
-              <option value="increaseFan">💨 Increase Fan</option>
+              <option value="fanOnly">💨 Fan Only</option>
               <option value="ventilate">🌬 Ventilate</option>
-              <option value="powerOff">⏻ Power Off</option>
+              <option value="swing">💫 Swing</option>
             </select>
           </div>
-          <div class="cf-f" id="temp-field"><label id="lbl-setpoint">SETPOINT °C</label><input type="number" id="cmd-t" value="24" min="12" max="30" step="0.5" style="width:85px"></div>
-          <div class="cf-f"><label>FAN LEVEL</label>
-            <select id="cmd-f"><option>1</option><option selected>2</option><option>3</option><option>4</option><option>5</option></select>
+          <div class="cf-f" id="temp-field">
+            <label id="lbl-setpoint">SETPOINT °C</label>
+            <input type="number" id="cmd-t" value="24" min="12" max="30" step="0.5" style="width:85px">
           </div>
-          <div class="cf-f"><label>POWER</label>
-            <select id="cmd-p"><option value="true">⚡ ON</option><option value="false">⏻ OFF</option></select>
+          <div class="cf-f" id="fan-field">
+            <label id="lbl-fan">FAN LEVEL</label>
+            <select id="cmd-f">
+              <option>1</option><option selected>2</option>
+              <option>3</option><option>4</option><option>5</option>
+            </select>
           </div>
-          <button class="cf-btn" onclick="sendCmd()">SEND →</button>
+          <div class="cf-f" id="swing-field" style="display:none">
+            <label id="lbl-swing">SWING</label>
+            <select id="cmd-sw">
+              <option value="auto">🔄 Auto</option>
+              <option value="on">✅ On</option>
+              <option value="off">❌ Off</option>
+            </select>
+          </div>
+          <div class="cf-f">
+            <label id="lbl-power">POWER</label>
+            <select id="cmd-p">
+              <option value="true">⚡ ON</option>
+              <option value="false">⏻ OFF</option>
+            </select>
+          </div>
+          <button class="cf-btn" onclick="sendCmd()" id="send-btn">SEND →</button>
         </div>
         <div class="cf-msg" id="cmd-msg"></div>
       </div>
       <div class="tc">
-        <div class="tc-h"><span class="tc-t">COMMANDS LOG</span><span class="tc-c" id="cm-cnt"></span></div>
-        <div class="tw"><table><thead><tr><th>TIME</th><th>ACTION</th><th>TEMP</th><th>FAN</th><th>POWER</th><th>STATUS</th></tr></thead><tbody id="cm-tb"></tbody></table></div>
+        <div class="tc-h"><span class="tc-t" id="lbl-commands_lbl">COMMANDS LOG</span><span class="tc-c" id="cm-cnt"></span></div>
+        <div class="tw"><table><thead><tr><th>TIME</th><th>DEVICE</th><th>ACTION</th><th>TEMP</th><th>FAN</th><th>POWER</th><th>STATUS</th></tr></thead><tbody id="cm-tb"></tbody></table></div>
       </div>
     </div>
 
@@ -458,8 +502,8 @@ async function signOut() {
 function showApp() {
   document.getElementById('pg-login').style.display='none';
   document.getElementById('pg-app').style.display='block';
-  setTimeout(loadAll, 100);
-  TK = setInterval(()=>{loadReadings();loadCommands();stamp();}, 15000);
+  setTimeout(()=>{ loadAll(); loadSelectors(); }, 100);
+  TK = setInterval(()=>{ loadReadings(); loadCommands(); stamp(); }, 15000);
 }
 
 function stamp() {
@@ -634,33 +678,64 @@ async function loadCommands() {
     } else {
       document.getElementById('cm-cnt').textContent = data.length+' records';
     }
-    document.getElementById('cm-tb').innerHTML = data.map(r=>`<tr>
-      <td>${ft(r.created_at)}</td>
-      <td style="color:var(--cy)">${r.action_type??'—'}</td>
-      <td style="color:var(--or)">${r.setpoint_c??'—'}°C</td>
-      <td>${r.fan_level??'—'}</td>
-      <td>${r.power?'<span style="color:var(--gn)">ON</span>':'<span style="color:var(--rd)">OFF</span>'}</td>
-      <td>${stbdg(r.status)}</td>
-    </tr>`).join('');
+    document.getElementById('cm-tb').innerHTML = data.map(r=>{
+      const dev = allDevices.find(d=>d.id===r.device_id);
+      const devName = dev ? dev.name : (r.device_id ? r.device_id.slice(0,12)+'...' : '—');
+      return `<tr>
+        <td>${ft(r.created_at)}</td>
+        <td style="color:var(--cy);font-weight:600">${devName}</td>
+        <td style="color:var(--pu)">${r.action_type??'—'}</td>
+        <td style="color:var(--or)">${r.setpoint_c!=null?r.setpoint_c+'°C':'—'}</td>
+        <td>${r.fan_level??'—'}</td>
+        <td>${r.power?'<span style="color:var(--gn)">ON</span>':'<span style="color:var(--rd)">OFF</span>'}</td>
+        <td>${stbdg(r.status)}</td>
+      </tr>`;
+    }).join('');
   } catch(e) {}
 }
 
 async function sendCmd() {
-  const a = document.getElementById('cmd-a').value;
-  const t = parseFloat(document.getElementById('cmd-t').value);
-  const f = parseInt(document.getElementById('cmd-f').value);
-  const p = document.getElementById('cmd-p').value==='true';
-  const m = document.getElementById('cmd-msg');
-  m.style.display='block'; m.style.background='rgba(0,220,255,.05)'; m.style.color='var(--t2)'; m.textContent='Sending command...';
+  const deviceId = document.getElementById('sel-device').value;
+  const siteId   = document.getElementById('sel-site').value;
+  const a  = document.getElementById('cmd-a').value;
+  const t  = parseFloat(document.getElementById('cmd-t').value);
+  const f  = parseInt(document.getElementById('cmd-f').value);
+  const p  = document.getElementById('cmd-p').value === 'true';
+  const sw = document.getElementById('cmd-sw')?.value || 'auto';
+  const m  = document.getElementById('cmd-msg');
+
+  if (!deviceId) {
+    m.style.display='block'; m.style.background='rgba(255,156,58,.08)';
+    m.style.color='var(--or)';
+    m.textContent = isAr ? '⚠️ الرجاء اختيار مستخدم وموقع وجهاز أولاً' : '⚠️ Please select user, site and device first';
+    return;
+  }
+
+  m.style.display='block'; m.style.background='rgba(0,220,255,.05)';
+  m.style.color='var(--t2)'; m.textContent = isAr ? 'جارٍ الإرسال...' : 'Sending command...';
+
   try {
-    const {error} = await sb.from('hvac_commands').insert({action_type:a,setpoint_c:t,fan_level:f,power:p,status:'pending'});
-    if(error) throw error;
+    const payload = {
+      action_type: a,
+      setpoint_c:  a==='fanOnly'||a==='swing' ? null : t,
+      fan_level:   f,
+      power:       p,
+      status:      'pending',
+      device_id:   deviceId,
+      site_id:     siteId || null,
+    };
+    if (a === 'swing') payload.swing = sw;
+
+    const {error} = await sb.from('hvac_commands').insert(payload);
+    if (error) throw error;
     m.style.background='rgba(0,224,144,.08)'; m.style.color='var(--gn)';
-    m.textContent='✓ Command sent successfully — ESP32 will execute within 5 seconds';
+    m.textContent = isAr
+      ? '✓ تم إرسال الأمر — ESP32 سينفذ خلال 5 ثوانٍ'
+      : '✓ Command sent — ESP32 will execute within 5 seconds';
     loadCommands();
   } catch(e) {
     m.style.background='rgba(255,79,106,.08)'; m.style.color='var(--rd)';
-    m.textContent='✗ Error: '+e.message;
+    m.textContent = '✗ Error: ' + e.message;
   }
 }
 
@@ -812,16 +887,67 @@ function comfortBadge(l) {
   return `<span class="b ${cls}">${lbl}</span>`;
 }
 
-// ── Action → Auto Temperature ────────────────────────────
+// ── Action → Auto defaults ────────────────────────────────
 function onActionChange() {
-  const a = document.getElementById('cmd-a').value;
+  const a  = document.getElementById('cmd-a').value;
   const tf = document.getElementById('temp-field');
+  const ff = document.getElementById('fan-field');
+  const sf = document.getElementById('swing-field');
   const ti = document.getElementById('cmd-t');
-  if (a === 'coolDown')    { tf.style.display='flex'; ti.value = 20; }
-  else if (a === 'warmUp') { tf.style.display='flex'; ti.value = 28; }
-  else if (a === 'maintain'){ tf.style.display='flex'; ti.value = 24; }
-  else if (a === 'powerOff'){ tf.style.display='none'; }
-  else                     { tf.style.display='flex'; ti.value = 24; }
+  const fi = document.getElementById('cmd-f');
+
+  // Reset visibility
+  tf.style.display='flex'; ff.style.display='flex'; sf.style.display='none';
+
+  if (a === 'coolDown')  { ti.value = 20; fi.value = 2; }
+  else if (a === 'warmUp')   { ti.value = 28; fi.value = 2; }
+  else if (a === 'maintain') { ti.value = 24; fi.value = 2; }
+  else if (a === 'fanOnly')  { tf.style.display='none'; fi.value = 3; }
+  else if (a === 'ventilate'){ ti.value = 24; fi.value = 4; }
+  else if (a === 'swing')    { tf.style.display='none'; ff.style.display='none'; sf.style.display='flex'; }
+}
+
+// ── User → Site → Device cascade ─────────────────────────
+let allUsers = [], allSites = [], allDevices = [];
+
+async function loadSelectors() {
+  try {
+    const [u, s, d] = await Promise.all([
+      sb.from('profiles').select('id,full_name').order('full_name'),
+      sb.from('sites').select('id,name,owner_id').order('name'),
+      sb.from('devices').select('id,name,site_id,status').order('name'),
+    ]);
+    allUsers   = u.data || [];
+    allSites   = s.data || [];
+    allDevices = d.data || [];
+
+    const uSel = document.getElementById('sel-user');
+    uSel.innerHTML = `<option value="">— ${isAr?'اختر مستخدماً':'Choose user'} —</option>`
+      + allUsers.map(u=>`<option value="${u.id}">${u.full_name??'Unknown'}</option>`).join('');
+  } catch(e) { console.error(e); }
+}
+
+function onUserChange() {
+  const uid  = document.getElementById('sel-user').value;
+  const sSel = document.getElementById('sel-site');
+  const dSel = document.getElementById('sel-device');
+
+  const sites = allSites.filter(s => s.owner_id === uid);
+  sSel.innerHTML = `<option value="">— ${isAr?'اختر موقعاً':'Choose site'} —</option>`
+    + sites.map(s=>`<option value="${s.id}">${s.name}</option>`).join('');
+  sSel.disabled = !uid;
+  dSel.innerHTML = `<option value="">— ${isAr?'اختر جهازاً':'Choose device'} —</option>`;
+  dSel.disabled = true;
+}
+
+function onSiteChange() {
+  const sid  = document.getElementById('sel-site').value;
+  const dSel = document.getElementById('sel-device');
+
+  const devs = allDevices.filter(d => d.site_id === sid);
+  dSel.innerHTML = `<option value="">— ${isAr?'اختر جهازاً':'Choose device'} —</option>`
+    + devs.map(d=>`<option value="${d.id}">${d.name} ${d.status==='online'?'🟢':'⚫'}</option>`).join('');
+  dSel.disabled = !sid;
 }
 
 </script>
