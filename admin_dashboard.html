@@ -8,120 +8,151 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-:root{--bg:#05080f;--card:#0b1422;--br:rgba(0,220,255,.1);--cy:#00dcff;--or:#ff9c3a;--gn:#00e090;--rd:#ff4f6a;--pu:#b794f4;--t1:#e2eeff;--t2:#6a8aaa;--t3:#2e4560}
-body{background:var(--bg);color:var(--t1);font-family:'Segoe UI',sans-serif;font-size:14px}
+:root{--bg:#03060e;--card:#08111f;--card2:#0d1a2e;--br:rgba(0,220,255,.08);--brh:rgba(0,220,255,.2);--cy:#00dcff;--cyd:#0097b2;--or:#ff9c3a;--gn:#00e090;--rd:#ff4f6a;--pu:#b794f4;--t1:#e2eeff;--t2:#5a7a9a;--t3:#1e3450}
+body{background:var(--bg);color:var(--t1);font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;min-height:100vh}
 
 /* LOGIN */
-#pg-login{display:flex;align-items:center;justify-content:center;min-height:100vh}
-.lbox{background:var(--card);border:1px solid var(--br);border-radius:18px;padding:40px 32px;width:360px}
-.llogo{width:52px;height:52px;border-radius:13px;background:linear-gradient(135deg,var(--cy),#0097b2);display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 12px}
-.ltit{text-align:center;font-size:20px;font-weight:700;letter-spacing:3px;margin-bottom:3px}
+#pg-login{display:flex;align-items:center;justify-content:center;min-height:100vh;background:radial-gradient(ellipse at 50% 0%,rgba(0,220,255,.06) 0%,transparent 60%)}
+.lbox{background:var(--card);border:1px solid var(--br);border-radius:20px;padding:42px 34px;width:360px;box-shadow:0 40px 80px rgba(0,0,0,.5)}
+.llogo{width:54px;height:54px;border-radius:14px;background:linear-gradient(135deg,var(--cy),var(--cyd));display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto 13px}
+.ltit{text-align:center;font-size:21px;font-weight:700;letter-spacing:3px;margin-bottom:3px}
 .lsub{text-align:center;color:var(--t2);font-size:11px;margin-bottom:8px}
-.lbdg{display:block;width:fit-content;margin:0 auto 24px;background:rgba(255,156,58,.12);border:1px solid rgba(255,156,58,.35);color:var(--or);font-size:10px;font-weight:700;letter-spacing:2px;padding:2px 9px;border-radius:4px}
-.llbl{display:block;font-size:10px;color:var(--t2);font-weight:700;letter-spacing:1px;margin-bottom:5px}
-.linp{width:100%;background:rgba(0,220,255,.04);border:1px solid var(--br);border-radius:9px;padding:10px 13px;color:var(--t1);font-size:13px;outline:none;margin-bottom:11px}
-.linp:focus{border-color:var(--cy)}
-.lbtn{width:100%;background:linear-gradient(135deg,var(--cy),#0097b2);border:none;border-radius:10px;padding:12px;color:#05080f;font-size:13px;font-weight:700;letter-spacing:2px;cursor:pointer;margin-top:3px}
+.lbdg{display:block;width:fit-content;margin:0 auto 26px;background:rgba(255,156,58,.1);border:1px solid rgba(255,156,58,.3);color:var(--or);font-size:10px;font-weight:700;letter-spacing:2px;padding:2px 10px;border-radius:4px}
+.llbl{display:block;font-size:10px;color:var(--t2);font-weight:700;letter-spacing:1px;margin-bottom:5px;margin-top:10px}
+.linp{width:100%;background:rgba(0,220,255,.03);border:1px solid var(--br);border-radius:10px;padding:11px 14px;color:var(--t1);font-size:13px;outline:none;transition:.2s}
+.linp:focus{border-color:var(--cy);background:rgba(0,220,255,.05)}
+.lbtn{width:100%;background:linear-gradient(135deg,var(--cy),var(--cyd));border:none;border-radius:11px;padding:13px;color:#03060e;font-size:13px;font-weight:700;letter-spacing:2px;cursor:pointer;margin-top:18px;transition:.15s}
+.lbtn:hover{filter:brightness(1.1)}
 .lbtn:disabled{opacity:.5;cursor:not-allowed}
-.lerr{color:var(--rd);font-size:12px;text-align:center;margin-top:9px;min-height:18px}
+.lerr{color:var(--rd);font-size:12px;text-align:center;margin-top:10px;min-height:16px}
 
 /* APP */
 #pg-app{display:none}
-.bar{background:var(--card);border-bottom:1px solid var(--br);padding:0 20px;height:50px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:99}
-.bar-l{display:flex;align-items:center;gap:9px}
-.bar-ico{width:28px;height:28px;border-radius:7px;background:linear-gradient(135deg,var(--cy),#0097b2);display:flex;align-items:center;justify-content:center;font-size:13px}
-.bar-nm{font-size:14px;font-weight:700;letter-spacing:2px}
-.bar-bdg{background:rgba(255,156,58,.12);border:1px solid rgba(255,156,58,.3);color:var(--or);font-size:9px;font-weight:700;letter-spacing:2px;padding:2px 6px;border-radius:4px}
-.bar-r{display:flex;align-items:center;gap:7px}
-.dot{width:6px;height:6px;border-radius:50%;background:var(--gn);display:inline-block;margin-right:4px;animation:blink 1.4s infinite}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
-.upd{font-size:10px;color:var(--t3)}
-.btn{background:rgba(0,220,255,.04);border:1px solid var(--br);border-radius:6px;padding:5px 11px;color:var(--t2);font-size:10px;font-weight:600;cursor:pointer}
-.btn:hover{color:var(--t1)}
-.btn-rd{color:var(--rd)}
+
+/* TOPBAR */
+.bar{background:rgba(8,17,31,.95);backdrop-filter:blur(10px);border-bottom:1px solid var(--br);padding:0 22px;height:52px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:99}
+.bar-l{display:flex;align-items:center;gap:10px}
+.bar-ico{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,var(--cy),var(--cyd));display:flex;align-items:center;justify-content:center;font-size:14px}
+.bar-nm{font-size:15px;font-weight:700;letter-spacing:2px;color:var(--t1)}
+.bar-bdg{background:rgba(255,156,58,.1);border:1px solid rgba(255,156,58,.25);color:var(--or);font-size:9px;font-weight:700;letter-spacing:2px;padding:2px 7px;border-radius:4px}
+.bar-r{display:flex;align-items:center;gap:8px}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--gn);display:inline-block;margin-right:5px;animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.8)}}
+.upd-t{font-size:10px;color:var(--t3)}
+.ibtn{background:rgba(255,255,255,.04);border:1px solid var(--br);border-radius:7px;padding:5px 12px;color:var(--t2);font-size:10px;font-weight:600;cursor:pointer;transition:.15s}
+.ibtn:hover{color:var(--t1);border-color:var(--brh);background:rgba(0,220,255,.06)}
+.ibtn-rd{color:rgba(255,79,106,.7)}
+.ibtn-rd:hover{color:var(--rd);border-color:rgba(255,79,106,.3)}
 
 /* TABS */
-.tabs{display:flex;background:var(--card);border-bottom:1px solid var(--br);padding:0 20px;overflow-x:auto}
+.tabs{display:flex;background:var(--card);border-bottom:1px solid var(--br);padding:0 22px;overflow-x:auto;gap:1px}
 .tabs::-webkit-scrollbar{display:none}
-.tab{padding:12px 16px;font-size:11px;font-weight:600;color:var(--t2);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;letter-spacing:.5px}
+.tab{padding:13px 17px;font-size:11px;font-weight:600;color:var(--t2);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;letter-spacing:.5px;transition:.15s}
 .tab.on{color:var(--cy);border-bottom-color:var(--cy)}
+.tab:hover:not(.on){color:var(--t1)}
 
-/* CONTENT */
-.pg{padding:20px;max-width:1100px;margin:0 auto}
+/* LAYOUT */
+.pg{padding:22px;max-width:1200px;margin:0 auto}
 .pnl{display:none}.pnl.on{display:block}
 
 /* STAT GRID */
-.sg{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:18px}
-.sc{background:var(--card);border:1px solid var(--br);border-radius:11px;padding:14px}
-.sc-l{font-size:9px;color:var(--t2);font-weight:700;letter-spacing:1.5px;margin-bottom:6px}
-.sc-v{font-size:26px;font-weight:700}
+.sg{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:11px;margin-bottom:20px}
+.sc{background:var(--card);border:1px solid var(--br);border-radius:12px;padding:15px 16px;transition:.2s;cursor:default}
+.sc:hover{border-color:var(--brh);transform:translateY(-1px)}
+.sc-l{font-size:9px;color:var(--t2);font-weight:700;letter-spacing:1.5px;margin-bottom:7px;display:flex;align-items:center;gap:5px}
+.sc-v{font-size:26px;font-weight:700;line-height:1}
+.sc-sub{font-size:10px;color:var(--t3);margin-top:3px}
 
 /* CHART GRID */
-.cg{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px}
-@media(max-width:600px){.cg{grid-template-columns:1fr}}
-.cc{background:var(--card);border:1px solid var(--br);border-radius:11px;padding:14px}
-.cc-t{font-size:9px;color:var(--t2);font-weight:700;letter-spacing:1.5px;margin-bottom:10px}
+.cg{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-bottom:20px}
+@media(max-width:640px){.cg{grid-template-columns:1fr}}
+.cc{background:var(--card);border:1px solid var(--br);border-radius:12px;padding:16px}
+.cc-t{font-size:9px;color:var(--t2);font-weight:700;letter-spacing:1.5px;margin-bottom:12px}
 
-/* TABLE */
-.tc{background:var(--card);border:1px solid var(--br);border-radius:11px;overflow:hidden;margin-bottom:18px}
-.tc-h{padding:11px 16px;border-bottom:1px solid var(--br);display:flex;justify-content:space-between;align-items:center}
+/* TABLE CARD */
+.tc{background:var(--card);border:1px solid var(--br);border-radius:12px;overflow:hidden;margin-bottom:20px}
+.tc-h{padding:12px 18px;border-bottom:1px solid var(--br);display:flex;justify-content:space-between;align-items:center;background:rgba(0,220,255,.02)}
 .tc-t{font-size:9px;color:var(--t2);font-weight:700;letter-spacing:1.5px}
 .tc-c{font-size:10px;color:var(--cy);font-weight:700}
 .tw{overflow-x:auto}
 table{width:100%;border-collapse:collapse}
-th{text-align:left;padding:8px 16px;font-size:9px;color:var(--t3);font-weight:700;letter-spacing:1.5px;border-bottom:1px solid var(--br)}
-td{padding:9px 16px;font-size:11px;color:var(--t2);border-bottom:1px solid rgba(0,220,255,.04)}
+th{text-align:left;padding:8px 18px;font-size:9px;color:var(--t3);font-weight:700;letter-spacing:1.5px;border-bottom:1px solid var(--br);background:rgba(0,0,0,.2)}
+td{padding:10px 18px;font-size:12px;color:var(--t2);border-bottom:1px solid rgba(0,220,255,.03)}
 tr:last-child td{border-bottom:none}
-tr:hover td{background:rgba(0,220,255,.02)}
+tr:hover td{background:rgba(0,220,255,.025);color:var(--t1)}
 
 /* LIVE CARDS */
-.lg{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:9px;margin-bottom:16px}
-.lc{background:var(--card);border:1px solid var(--br);border-radius:10px;padding:12px;text-align:center}
-.lc-v{font-size:18px;font-weight:700}
+.lg{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:18px}
+.lc{background:var(--card);border:1px solid var(--br);border-radius:11px;padding:14px 12px;text-align:center;transition:.2s}
+.lc:hover{border-color:var(--brh)}
+.lc-ico{font-size:18px;margin-bottom:5px}
+.lc-v{font-size:19px;font-weight:700;line-height:1}
 .lc-u{font-size:10px;color:var(--t3)}
-.lc-l{font-size:8px;color:var(--t3);margin-top:2px;letter-spacing:1px}
+.lc-l{font-size:8px;color:var(--t3);margin-top:3px;letter-spacing:1px}
 
 /* BADGE */
-.b{display:inline-block;padding:2px 7px;border-radius:20px;font-size:9px;font-weight:700}
-.b-g{background:rgba(0,224,144,.12);color:var(--gn);border:1px solid rgba(0,224,144,.25)}
+.b{display:inline-block;padding:2px 8px;border-radius:20px;font-size:9px;font-weight:700;letter-spacing:.3px}
+.b-g{background:rgba(0,224,144,.1);color:var(--gn);border:1px solid rgba(0,224,144,.2)}
 .b-r{background:rgba(255,79,106,.1);color:var(--rd);border:1px solid rgba(255,79,106,.2)}
-.b-o{background:rgba(255,156,58,.12);color:var(--or);border:1px solid rgba(255,156,58,.25)}
-.b-x{background:rgba(0,220,255,.06);color:var(--t2);border:1px solid var(--br)}
+.b-o{background:rgba(255,156,58,.1);color:var(--or);border:1px solid rgba(255,156,58,.2)}
+.b-x{background:rgba(255,255,255,.05);color:var(--t2);border:1px solid var(--br)}
+.b-c{background:rgba(0,220,255,.08);color:var(--cy);border:1px solid rgba(0,220,255,.2)}
 
 /* CMD FORM */
-.cf{background:var(--card);border:1px solid var(--br);border-radius:11px;padding:16px;margin-bottom:18px}
-.cf-t{font-size:9px;color:var(--t2);font-weight:700;letter-spacing:1.5px;margin-bottom:11px}
-.cf-row{display:flex;gap:9px;flex-wrap:wrap;align-items:flex-end}
+.cf{background:var(--card);border:1px solid var(--br);border-radius:12px;padding:18px;margin-bottom:20px}
+.cf-t{font-size:9px;color:var(--t2);font-weight:700;letter-spacing:1.5px;margin-bottom:13px}
+.cf-row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
 .cf-f{display:flex;flex-direction:column;gap:4px}
 .cf-f label{font-size:9px;color:var(--t2);font-weight:700;letter-spacing:1px}
-.cf-f select,.cf-f input{background:#0d1928;border:1px solid var(--br);border-radius:7px;padding:7px 11px;color:var(--t1);font-size:12px;outline:none}
-.cf-f select option{background:#0d1928;color:var(--t1)}
+.cf-f select,.cf-f input{background:#0a1525;border:1px solid var(--br);border-radius:8px;padding:8px 12px;color:var(--t1);font-size:12px;outline:none;transition:.2s}
+.cf-f select option{background:#0a1525;color:var(--t1)}
 .cf-f select:focus,.cf-f input:focus{border-color:var(--cy)}
-.cf-btn{background:linear-gradient(135deg,var(--cy),#0097b2);border:none;border-radius:8px;padding:8px 18px;color:#05080f;font-size:11px;font-weight:700;letter-spacing:1px;cursor:pointer;height:34px}
-.cf-msg{font-size:11px;margin-top:9px;display:none}
+.cf-btn{background:linear-gradient(135deg,var(--cy),var(--cyd));border:none;border-radius:9px;padding:8px 20px;color:#03060e;font-size:11px;font-weight:700;letter-spacing:1px;cursor:pointer;height:34px;transition:.15s}
+.cf-btn:hover{filter:brightness(1.1)}
+.cf-msg{font-size:11px;margin-top:10px;display:none;padding:8px 12px;border-radius:7px}
 
-.spin{width:24px;height:24px;border:2px solid var(--br);border-top-color:var(--cy);border-radius:50%;animation:spin .6s linear infinite;margin:24px auto 8px}
+/* ALERTS */
+.alert-box{background:rgba(255,156,58,.07);border:1px solid rgba(255,156,58,.2);border-radius:10px;padding:12px 16px;margin-bottom:18px;font-size:12px;color:var(--or)}
+
+/* SPINNER */
+.spin{width:22px;height:22px;border:2px solid var(--br);border-top-color:var(--cy);border-radius:50%;animation:spin .5s linear infinite;margin:24px auto 8px}
 @keyframes spin{to{transform:rotate(360deg)}}
-.ld{text-align:center;color:var(--t3);padding:20px}
+.ld{text-align:center;color:var(--t3);padding:20px;font-size:12px}
+
+/* SECTION ROW */
+.sec-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.sec-title{font-size:10px;color:var(--t2);font-weight:700;letter-spacing:1.5px}
+.sec-btn{background:rgba(0,220,255,.08);border:1px solid rgba(0,220,255,.2);border-radius:7px;padding:5px 12px;color:var(--cy);font-size:10px;font-weight:600;cursor:pointer;transition:.15s}
+.sec-btn:hover{background:rgba(0,220,255,.15)}
+
+/* MINI GAUGE */
+.gauge-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
+.gauge{background:var(--card);border:1px solid var(--br);border-radius:11px;padding:14px;text-align:center}
+.gauge-val{font-size:28px;font-weight:700}
+.gauge-lbl{font-size:9px;color:var(--t2);letter-spacing:1px;margin-top:3px}
+.gauge-bar{height:4px;background:var(--br);border-radius:2px;margin-top:8px;overflow:hidden}
+.gauge-fill{height:100%;border-radius:2px;transition:width .5s}
 </style>
 </head>
 <body>
 
+<!-- LOGIN -->
 <div id="pg-login">
   <div class="lbox">
     <div class="llogo">❄</div>
     <div class="ltit">AliMind</div>
-    <div class="lsub">AI-Powered HVAC Intelligence</div>
+    <div class="lsub">AI-Powered HVAC Intelligence Platform</div>
     <span class="lbdg">ADMIN PORTAL</span>
     <label class="llbl">EMAIL</label>
-    <input class="linp" type="email" id="em" placeholder="admin@alimind.com">
+    <input class="linp" type="email" id="em" placeholder="admin@alimind.com" onkeydown="if(event.key==='Enter')signIn()">
     <label class="llbl">PASSWORD</label>
-    <input class="linp" type="password" id="pw" placeholder="••••••••">
+    <input class="linp" type="password" id="pw" placeholder="••••••••" onkeydown="if(event.key==='Enter')signIn()">
     <button class="lbtn" id="lbtn" onclick="signIn()">SIGN IN</button>
     <div class="lerr" id="lerr"></div>
   </div>
 </div>
 
+<!-- APP -->
 <div id="pg-app">
   <div class="bar">
     <div class="bar-l">
@@ -130,53 +161,72 @@ tr:hover td{background:rgba(0,220,255,.02)}
       <div class="bar-bdg">ADMIN</div>
     </div>
     <div class="bar-r">
-      <span class="upd"><span class="dot"></span><span id="upd">Live</span></span>
-      <button class="btn" onclick="loadAll()">↻ Refresh</button>
-      <button class="btn btn-rd" onclick="signOut()">Sign out</button>
+      <span class="upd-t"><span class="dot"></span><span id="upd">Live</span></span>
+      <button class="ibtn" onclick="loadAll()">↻ Refresh</button>
+      <button class="ibtn ibtn-rd" onclick="signOut()">Sign out</button>
     </div>
   </div>
+
   <div class="tabs">
-    <button class="tab on" onclick="go('ov',this)">Overview</button>
-    <button class="tab" onclick="go('rd',this)">Live Readings</button>
-    <button class="tab" onclick="go('cm',this)">HVAC Commands</button>
-    <button class="tab" onclick="go('us',this)">Users</button>
-    <button class="tab" onclick="go('dv',this)">Devices</button>
+    <button class="tab on" onclick="go('ov',this)">📊 Overview</button>
+    <button class="tab" onclick="go('rd',this)">🌡 Live Readings</button>
+    <button class="tab" onclick="go('cm',this)">📡 HVAC Commands</button>
+    <button class="tab" onclick="go('si',this)">🏢 Sites</button>
+    <button class="tab" onclick="go('us',this)">👥 Users</button>
+    <button class="tab" onclick="go('dv',this)">🔌 Devices</button>
+    <button class="tab" onclick="go('pt',this)">🧠 PTI Analysis</button>
   </div>
+
   <div class="pg">
 
+    <!-- OVERVIEW -->
     <div class="pnl on" id="pnl-ov">
       <div class="sg" id="stats"><div class="ld"><div class="spin"></div></div></div>
       <div class="cg">
-        <div class="cc"><div class="cc-t">TEMPERATURE °C</div><div style="position:relative;height:170px"><canvas id="cT" role="img" aria-label="temp">temp</canvas></div></div>
-        <div class="cc"><div class="cc-t">HUMIDITY %</div><div style="position:relative;height:170px"><canvas id="cH" role="img" aria-label="hum">hum</canvas></div></div>
+        <div class="cc"><div class="cc-t">🌡 TEMPERATURE °C — LAST 24 READINGS</div><div style="position:relative;height:170px"><canvas id="cT" role="img" aria-label="Temperature">Temperature</canvas></div></div>
+        <div class="cc"><div class="cc-t">💧 HUMIDITY % — LAST 24 READINGS</div><div style="position:relative;height:170px"><canvas id="cH" role="img" aria-label="Humidity">Humidity</canvas></div></div>
       </div>
       <div class="cg">
-        <div class="cc"><div class="cc-t">PTI SCORE</div><div style="position:relative;height:170px"><canvas id="cP" role="img" aria-label="pti">pti</canvas></div></div>
-        <div class="cc"><div class="cc-t">COMFORT LEVELS</div><div style="position:relative;height:170px"><canvas id="cD" role="img" aria-label="comfort">comfort</canvas></div></div>
+        <div class="cc"><div class="cc-t">🧠 PTI SCORE TREND</div><div style="position:relative;height:170px"><canvas id="cP" role="img" aria-label="PTI">PTI</canvas></div></div>
+        <div class="cc"><div class="cc-t">😊 COMFORT DISTRIBUTION</div><div style="position:relative;height:170px"><canvas id="cD" role="img" aria-label="Comfort">Comfort</canvas></div></div>
+      </div>
+      <div class="tc">
+        <div class="tc-h"><span class="tc-t">⚡ RECENT ACTIVITY</span></div>
+        <div class="tw"><table><thead><tr><th>TIME</th><th>EVENT</th><th>DETAILS</th></tr></thead><tbody id="activity-tb"></tbody></table></div>
       </div>
     </div>
 
+    <!-- LIVE READINGS -->
     <div class="pnl" id="pnl-rd">
       <div class="lg" id="live-cards"><div class="ld"><div class="spin"></div></div></div>
+      <div class="gauge-row" id="gauges"></div>
       <div class="tc">
-        <div class="tc-h"><span class="tc-t">SENSOR READINGS</span><span class="tc-c" id="rd-cnt"></span></div>
-        <div class="tw"><table><thead><tr><th>TIME</th><th>TEMP</th><th>HUMIDITY</th><th>CO₂</th><th>AIR</th><th>HR</th><th>SPO₂</th></tr></thead><tbody id="rd-tb"></tbody></table></div>
+        <div class="tc-h"><span class="tc-t">SENSOR READINGS HISTORY</span><span class="tc-c" id="rd-cnt"></span></div>
+        <div class="tw"><table><thead><tr><th>TIME</th><th>TEMP °C</th><th>HUMIDITY %</th><th>CO₂ PPM</th><th>AIR m/s</th><th>HEART RATE</th><th>SPO₂ %</th><th>HRV ms</th></tr></thead><tbody id="rd-tb"></tbody></table></div>
       </div>
     </div>
 
+    <!-- HVAC COMMANDS -->
     <div class="pnl" id="pnl-cm">
       <div class="cf">
-        <div class="cf-t">SEND COMMAND TO ESP32</div>
+        <div class="cf-t">📡 SEND COMMAND TO ESP32</div>
         <div class="cf-row">
           <div class="cf-f"><label>ACTION</label>
-            <select id="cmd-a"><option value="coolDown">Cool Down</option><option value="warmUp">Warm Up</option><option value="maintain">Maintain</option><option value="powerOff">Power Off</option></select>
+            <select id="cmd-a">
+              <option value="coolDown">❄ Cool Down</option>
+              <option value="warmUp">🔥 Warm Up</option>
+              <option value="maintain">✅ Maintain</option>
+              <option value="increaseFan">💨 Increase Fan</option>
+              <option value="ventilate">🌬 Ventilate</option>
+              <option value="powerOff">⏻ Power Off</option>
+            </select>
           </div>
-          <div class="cf-f"><label>TEMP °C</label><input type="number" id="cmd-t" value="24" min="16" max="30" step="0.5" style="width:80px"></div>
-          <div class="cf-f"><label>FAN</label>
+          <div class="cf-f"><label>SETPOINT °C</label><input type="number" id="cmd-t" value="24" min="16" max="30" step="0.5" style="width:85px"></div>
+          <div class="cf-f"><label>FAN LEVEL</label>
             <select id="cmd-f"><option>1</option><option selected>2</option><option>3</option><option>4</option><option>5</option></select>
           </div>
           <div class="cf-f"><label>POWER</label>
-            <select id="cmd-p"><option value="true">ON</option><option value="false">OFF</option></select>
+            <select id="cmd-p"><option value="true">⚡ ON</option><option value="false">⏻ OFF</option></select>
           </div>
           <button class="cf-btn" onclick="sendCmd()">SEND →</button>
         </div>
@@ -188,17 +238,40 @@ tr:hover td{background:rgba(0,220,255,.02)}
       </div>
     </div>
 
+    <!-- SITES -->
+    <div class="pnl" id="pnl-si">
+      <div class="tc">
+        <div class="tc-h"><span class="tc-t">REGISTERED SITES</span><span class="tc-c" id="si-cnt"></span></div>
+        <div class="tw"><table><thead><tr><th>NAME</th><th>MODE</th><th>COUNTRY</th><th>CITY</th><th>OWNER</th><th>CREATED</th></tr></thead><tbody id="si-tb"></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- USERS -->
     <div class="pnl" id="pnl-us">
       <div class="tc">
-        <div class="tc-h"><span class="tc-t">USERS</span><span class="tc-c" id="us-cnt"></span></div>
+        <div class="tc-h"><span class="tc-t">REGISTERED USERS</span><span class="tc-c" id="us-cnt"></span></div>
         <div class="tw"><table><thead><tr><th>NAME</th><th>ID</th><th>ROLE</th><th>JOINED</th></tr></thead><tbody id="us-tb"></tbody></table></div>
       </div>
     </div>
 
+    <!-- DEVICES -->
     <div class="pnl" id="pnl-dv">
       <div class="tc">
-        <div class="tc-h"><span class="tc-t">DEVICES</span><span class="tc-c" id="dv-cnt"></span></div>
-        <div class="tw"><table><thead><tr><th>NAME</th><th>TYPE</th><th>CONN</th><th>STATUS</th><th>LAST SEEN</th></tr></thead><tbody id="dv-tb"></tbody></table></div>
+        <div class="tc-h"><span class="tc-t">REGISTERED DEVICES</span><span class="tc-c" id="dv-cnt"></span></div>
+        <div class="tw"><table><thead><tr><th>NAME</th><th>TYPE</th><th>CONNECTION</th><th>SITE</th><th>STATUS</th><th>LAST SEEN</th></tr></thead><tbody id="dv-tb"></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- PTI ANALYSIS -->
+    <div class="pnl" id="pnl-pt">
+      <div class="sg" id="pti-stats"></div>
+      <div class="cg">
+        <div class="cc"><div class="cc-t">PTI SCORE DISTRIBUTION</div><div style="position:relative;height:200px"><canvas id="cPD" role="img" aria-label="PTI distribution">PTI dist</canvas></div></div>
+        <div class="cc"><div class="cc-t">COMFORT LEVEL OVER TIME</div><div style="position:relative;height:200px"><canvas id="cCT" role="img" aria-label="Comfort time">Comfort time</canvas></div></div>
+      </div>
+      <div class="tc">
+        <div class="tc-h"><span class="tc-t">PTI RESULTS HISTORY</span><span class="tc-c" id="pt-cnt"></span></div>
+        <div class="tw"><table><thead><tr><th>TIME</th><th>SCORE</th><th>COMFORT</th><th>ACTION</th><th>REC TEMP</th><th>FAN</th><th>CONFIDENCE</th></tr></thead><tbody id="pt-tb"></tbody></table></div>
       </div>
     </div>
 
@@ -206,17 +279,14 @@ tr:hover td{background:rgba(0,220,255,.02)}
 </div>
 
 <script>
-// ── Init ──────────────────────────────────────────────────
-const URL2 = 'https://bzqupgbaelbahcdsxusq.supabase.co';
-const KEY  = 'sb_publishable_gen23HpCRSO7gVV4cdw0PQ_MeB1QOvt';
-const sb   = window.supabase.createClient(URL2, KEY);
-const CH   = {};
-let   TK;
+const SB_URL = 'https://bzqupgbaelbahcdsxusq.supabase.co';
+const SB_KEY = 'sb_publishable_gen23HpCRSO7gVV4cdw0PQ_MeB1QOvt';
+const sb = window.supabase.createClient(SB_URL, SB_KEY);
+const CH = {};
+let TK;
 
-// ── Check session ─────────────────────────────────────────
-sb.auth.getSession().then(({data:{session}}) => {
-  if (session) showApp();
-});
+// ── Session check ─────────────────────────────────────────
+sb.auth.getSession().then(({data:{session}}) => { if(session) showApp(); });
 
 // ── Auth ──────────────────────────────────────────────────
 async function signIn() {
@@ -226,139 +296,174 @@ async function signIn() {
   const er = document.getElementById('lerr');
   er.textContent = '';
   bt.disabled = true; bt.textContent = 'SIGNING IN...';
-  const { error } = await sb.auth.signInWithPassword({ email: em, password: pw });
-  if (error) {
-    er.textContent = error.message;
-    bt.disabled = false; bt.textContent = 'SIGN IN';
-  } else {
-    showApp();
-  }
+  const {error} = await sb.auth.signInWithPassword({email:em, password:pw});
+  if (error) { er.textContent = error.message; bt.disabled=false; bt.textContent='SIGN IN'; }
+  else showApp();
 }
 
 async function signOut() {
-  await sb.auth.signOut();
-  clearInterval(TK);
-  Object.values(CH).forEach(c => c.destroy());
-  document.getElementById('pg-app').style.display = 'none';
-  document.getElementById('pg-login').style.display = 'flex';
+  await sb.auth.signOut(); clearInterval(TK);
+  Object.values(CH).forEach(c=>c.destroy());
+  document.getElementById('pg-app').style.display='none';
+  document.getElementById('pg-login').style.display='flex';
 }
 
 function showApp() {
-  document.getElementById('pg-login').style.display = 'none';
-  document.getElementById('pg-app').style.display = 'block';
+  document.getElementById('pg-login').style.display='none';
+  document.getElementById('pg-app').style.display='block';
   setTimeout(loadAll, 100);
-  TK = setInterval(() => { loadReadings(); loadCommands(); stamp(); }, 15000);
+  TK = setInterval(()=>{loadReadings();loadCommands();stamp();}, 15000);
 }
 
 function stamp() {
-  document.getElementById('upd').textContent = 'Updated ' + new Date().toLocaleTimeString();
+  document.getElementById('upd').textContent = 'Updated '+new Date().toLocaleTimeString();
 }
 
 // ── Load All ──────────────────────────────────────────────
 async function loadAll() {
-  await Promise.allSettled([loadStats(), loadReadings(), loadCommands(), loadUsers(), loadDevices()]);
+  await Promise.allSettled([
+    loadStats(), loadReadings(), loadCommands(),
+    loadSites(), loadUsers(), loadDevices(), loadPTI()
+  ]);
   stamp();
 }
 
 // ── Stats ─────────────────────────────────────────────────
 async function loadStats() {
   try {
-    const [p, s, d, o, r, c] = await Promise.all([
+    const [p,s,d,o,r,c,pt] = await Promise.all([
       sb.from('profiles').select('id'),
       sb.from('sites').select('id'),
       sb.from('devices').select('id'),
       sb.from('devices').select('id').eq('status','online'),
       sb.from('sensor_readings').select('id'),
       sb.from('hvac_commands').select('id').eq('status','pending'),
+      sb.from('pti_results').select('score').gte('created_at',new Date(Date.now()-86400000).toISOString()),
     ]);
-    const pt = await sb.from('pti_results').select('score')
-      .gte('created_at', new Date(Date.now()-86400000).toISOString());
-    const avg = pt.data?.length
-      ? (pt.data.reduce((a,b) => a+b.score, 0) / pt.data.length).toFixed(1) : '—';
-    const list = [
-      { l:'USERS',   v:p.data?.length??0, c:'var(--cy)' },
-      { l:'SITES',   v:s.data?.length??0, c:'var(--pu)' },
-      { l:'DEVICES', v:d.data?.length??0, c:'var(--or)' },
-      { l:'ONLINE',  v:o.data?.length??0, c:'var(--gn)' },
-      { l:'READINGS',v:r.data?.length??0, c:'var(--cy)' },
-      { l:'PENDING', v:c.data?.length??0, c:'var(--or)' },
-      { l:'AVG PTI', v:avg,               c:'var(--pu)' },
+    const avg = pt.data?.length ? (pt.data.reduce((a,b)=>a+b.score,0)/pt.data.length).toFixed(1) : '—';
+    const stats = [
+      {l:'USERS',    v:p.data?.length??0, c:'var(--cy)',  s:'registered'},
+      {l:'SITES',    v:s.data?.length??0, c:'var(--pu)',  s:'locations'},
+      {l:'DEVICES',  v:d.data?.length??0, c:'var(--or)',  s:'total'},
+      {l:'ONLINE',   v:o.data?.length??0, c:'var(--gn)',  s:'active now'},
+      {l:'READINGS', v:r.data?.length??0, c:'var(--cy)',  s:'sensor logs'},
+      {l:'PENDING',  v:c.data?.length??0, c:'var(--or)',  s:'awaiting ESP32'},
+      {l:'AVG PTI',  v:avg,               c:'var(--pu)',  s:'last 24 hours'},
     ];
-    document.getElementById('stats').innerHTML = list.map(x =>
-      `<div class="sc"><div class="sc-l">${x.l}</div><div class="sc-v" style="color:${x.c}">${x.v}</div></div>`
-    ).join('');
-    drawCharts();
+    document.getElementById('stats').innerHTML = stats.map(x=>`
+      <div class="sc">
+        <div class="sc-l" style="color:${x.c}">${x.l}</div>
+        <div class="sc-v" style="color:${x.c}">${x.v}</div>
+        <div class="sc-sub">${x.s}</div>
+      </div>`).join('');
+    drawMainCharts();
+    loadActivity();
   } catch(e) { console.error(e); }
+}
+
+// ── Activity Feed ─────────────────────────────────────────
+async function loadActivity() {
+  try {
+    const [rd, cm] = await Promise.all([
+      sb.from('sensor_readings').select('created_at,room_temp_c,humidity').order('created_at',{ascending:false}).limit(5),
+      sb.from('hvac_commands').select('created_at,action_type,setpoint_c,status').order('created_at',{ascending:false}).limit(5),
+    ]);
+    const events = [
+      ...(rd.data||[]).map(r=>({t:r.created_at, e:'Sensor Reading', d:`${r.room_temp_c?.toFixed(1)}°C / ${r.humidity?.toFixed(0)}%`, c:'var(--cy)'})),
+      ...(cm.data||[]).map(r=>({t:r.created_at, e:'HVAC Command', d:`${r.action_type} → ${r.setpoint_c}°C [${r.status}]`, c:'var(--or)'})),
+    ].sort((a,b)=>new Date(b.t)-new Date(a.t)).slice(0,10);
+    document.getElementById('activity-tb').innerHTML = events.map(e=>`<tr>
+      <td>${ft(e.t)}</td>
+      <td style="color:${e.c};font-weight:600">${e.e}</td>
+      <td>${e.d}</td>
+    </tr>`).join('') || '<tr><td colspan="3" class="ld">No activity yet</td></tr>';
+  } catch(e) {}
 }
 
 // ── Charts ────────────────────────────────────────────────
-async function drawCharts() {
+async function drawMainCharts() {
   try {
-    const { data: rd } = await sb.from('sensor_readings')
-      .select('room_temp_c,humidity,created_at')
-      .order('created_at',{ascending:false}).limit(24);
-    const { data: pt } = await sb.from('pti_results')
-      .select('score,comfort_level,created_at')
-      .order('created_at',{ascending:false}).limit(20);
+    const {data:rd} = await sb.from('sensor_readings').select('room_temp_c,humidity,created_at').order('created_at',{ascending:false}).limit(24);
+    const {data:pt} = await sb.from('pti_results').select('score,comfort_level,created_at').order('created_at',{ascending:false}).limit(20);
     if (rd?.length) {
-      const rv = [...rd].reverse();
-      const lb = rv.map(r => new Date(r.created_at).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}));
-      mkLine('cT', lb, rv.map(r=>r.room_temp_c), '#00dcff', '°C');
-      mkLine('cH', lb, rv.map(r=>r.humidity),    '#b794f4', '%');
+      const rv=[...rd].reverse();
+      const lb=rv.map(r=>new Date(r.created_at).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}));
+      mkLine('cT',lb,rv.map(r=>r.room_temp_c),'#00dcff','°C');
+      mkLine('cH',lb,rv.map(r=>r.humidity),'#b794f4','%');
     }
     if (pt?.length) {
-      const rv = [...pt].reverse();
-      const lb = rv.map(r => new Date(r.created_at).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}));
-      mkLine('cP', lb, rv.map(r=>r.score), '#00e090', 'PTI');
-      const dist = {};
-      pt.forEach(r => { dist[r.comfort_level] = (dist[r.comfort_level]||0)+1; });
-      mkDonut('cD', Object.keys(dist), Object.values(dist));
+      const rv=[...pt].reverse();
+      const lb=rv.map(r=>new Date(r.created_at).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}));
+      mkLine('cP',lb,rv.map(r=>r.score),'#00e090','');
+      const dist={};
+      pt.forEach(r=>{dist[r.comfort_level]=(dist[r.comfort_level]||0)+1;});
+      mkDonut('cD',Object.keys(dist),Object.values(dist));
     }
-  } catch(e) { console.error(e); }
+  } catch(e) {}
 }
 
 function mkLine(id, labels, data, color, unit) {
-  if (CH[id]) CH[id].destroy();
+  if(CH[id]) CH[id].destroy();
   CH[id] = new Chart(document.getElementById(id), {
-    type: 'line',
-    data: { labels, datasets:[{ data, borderColor:color, backgroundColor:color+'18',
-      borderWidth:2, pointRadius:2, tension:.4, fill:true }] },
-    options: { responsive:true, maintainAspectRatio:false,
-      plugins:{ legend:{display:false}, tooltip:{callbacks:{label:v=>v.parsed.y.toFixed(1)+' '+unit}} },
-      scales:{ x:{ticks:{color:'#2e4560',font:{size:9},maxRotation:0,autoSkip:true},grid:{color:'rgba(0,220,255,.05)'}},
-               y:{ticks:{color:'#2e4560',font:{size:9}},grid:{color:'rgba(0,220,255,.05)'}} } }
+    type:'line',
+    data:{labels, datasets:[{data, borderColor:color, backgroundColor:color+'15', borderWidth:2, pointRadius:2, tension:.4, fill:true}]},
+    options:{responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false}, tooltip:{callbacks:{label:v=>v.parsed.y.toFixed(1)+(unit?' '+unit:'')}}},
+      scales:{
+        x:{ticks:{color:'#1e3450',font:{size:9},maxRotation:0,autoSkip:true}, grid:{color:'rgba(0,220,255,.04)'}},
+        y:{ticks:{color:'#1e3450',font:{size:9}}, grid:{color:'rgba(0,220,255,.04)'}}
+      }
+    }
   });
 }
 
 function mkDonut(id, labels, data) {
-  if (CH[id]) CH[id].destroy();
-  const cols = { excellent:'#00e090', comfortable:'#00dcff', mildDiscomfort:'#b794f4',
-                 uncomfortable:'#ff9c3a', critical:'#ff4f6a' };
+  if(CH[id]) CH[id].destroy();
+  const cols={excellent:'#00e090',comfortable:'#00dcff',mildDiscomfort:'#b794f4',uncomfortable:'#ff9c3a',critical:'#ff4f6a'};
   CH[id] = new Chart(document.getElementById(id), {
-    type: 'doughnut',
-    data: { labels, datasets:[{ data, backgroundColor:labels.map(l=>cols[l]||'#2e4560'), borderWidth:0 }] },
-    options: { responsive:true, maintainAspectRatio:false, cutout:'62%',
-      plugins:{ legend:{ position:'bottom', labels:{ color:'#6a8aaa', font:{size:9}, boxWidth:9, padding:7 } } } }
+    type:'doughnut',
+    data:{labels, datasets:[{data, backgroundColor:labels.map(l=>cols[l]||'#1e3450'), borderWidth:0, hoverOffset:4}]},
+    options:{responsive:true, maintainAspectRatio:false, cutout:'60%',
+      plugins:{legend:{position:'bottom', labels:{color:'#5a7a9a', font:{size:9}, boxWidth:8, padding:7}}}}
   });
 }
 
 // ── Readings ──────────────────────────────────────────────
 async function loadReadings() {
   try {
-    const { data } = await sb.from('sensor_readings')
-      .select('*').order('created_at',{ascending:false}).limit(100);
+    const {data} = await sb.from('sensor_readings').select('*').order('created_at',{ascending:false}).limit(100);
     if (!data) return;
-    const L = data[0] || {};
+    const L = data[0]||{};
     document.getElementById('live-cards').innerHTML = [
-      { v:L.room_temp_c?.toFixed(1)??'—', u:'°C',  l:'ROOM TEMP',  c:'var(--or)' },
-      { v:L.humidity?.toFixed(0)??'—',    u:'%',   l:'HUMIDITY',   c:'var(--cy)' },
-      { v:L.co2_ppm?.toFixed(0)??'—',     u:'ppm', l:'CO₂',        c:'var(--pu)' },
-      { v:L.air_speed?.toFixed(2)??'—',   u:'m/s', l:'AIR SPEED',  c:'var(--t2)' },
-      { v:L.heart_rate?.toFixed(0)??'—',  u:'bpm', l:'HEART RATE', c:'var(--rd)' },
-      { v:L.spo2?.toFixed(0)??'—',        u:'%',   l:'SPO₂',       c:'var(--gn)' },
-    ].map(x => `<div class="lc"><div class="lc-v" style="color:${x.c}">${x.v}<span class="lc-u"> ${x.u}</span></div><div class="lc-l">${x.l}</div></div>`).join('');
-    document.getElementById('rd-cnt').textContent = data.length + ' records';
-    document.getElementById('rd-tb').innerHTML = data.map(r => `<tr>
+      {ico:'🌡',v:L.room_temp_c?.toFixed(1)??'—',u:'°C', l:'ROOM TEMP', c:'var(--or)'},
+      {ico:'💧',v:L.humidity?.toFixed(0)??'—',   u:'%',  l:'HUMIDITY',  c:'var(--cy)'},
+      {ico:'🫧',v:L.co2_ppm?.toFixed(0)??'—',    u:'ppm',l:'CO₂',       c:'var(--pu)'},
+      {ico:'💨',v:L.air_speed?.toFixed(2)??'—',  u:'m/s',l:'AIR SPEED', c:'var(--t2)'},
+      {ico:'❤',v:L.heart_rate?.toFixed(0)??'—', u:'bpm',l:'HEART RATE',c:'var(--rd)'},
+      {ico:'🩸',v:L.spo2?.toFixed(0)??'—',       u:'%',  l:'SPO₂',      c:'var(--gn)'},
+    ].map(x=>`<div class="lc">
+      <div class="lc-ico">${x.ico}</div>
+      <div class="lc-v" style="color:${x.c}">${x.v}<span class="lc-u"> ${x.u}</span></div>
+      <div class="lc-l">${x.l}</div>
+    </div>`).join('');
+
+    // Mini gauges
+    const tempPct = L.room_temp_c ? Math.min(100, ((L.room_temp_c-15)/20)*100) : 0;
+    const humPct  = L.humidity    ? Math.min(100, L.humidity) : 0;
+    document.getElementById('gauges').innerHTML = `
+      <div class="gauge">
+        <div class="gauge-val" style="color:var(--or)">${L.room_temp_c?.toFixed(1)??'—'}°C</div>
+        <div class="gauge-lbl">TEMPERATURE</div>
+        <div class="gauge-bar"><div class="gauge-fill" style="width:${tempPct}%;background:var(--or)"></div></div>
+      </div>
+      <div class="gauge">
+        <div class="gauge-val" style="color:var(--cy)">${L.humidity?.toFixed(0)??'—'}%</div>
+        <div class="gauge-lbl">HUMIDITY</div>
+        <div class="gauge-bar"><div class="gauge-fill" style="width:${humPct}%;background:var(--cy)"></div></div>
+      </div>`;
+
+    document.getElementById('rd-cnt').textContent = data.length+' records';
+    document.getElementById('rd-tb').innerHTML = data.map(r=>`<tr>
       <td>${ft(r.created_at)}</td>
       <td style="color:var(--or)">${r.room_temp_c?.toFixed(1)??'—'}</td>
       <td style="color:var(--cy)">${r.humidity?.toFixed(0)??'—'}</td>
@@ -366,6 +471,7 @@ async function loadReadings() {
       <td>${r.air_speed?.toFixed(2)??'—'}</td>
       <td style="color:var(--rd)">${r.heart_rate?.toFixed(0)??'—'}</td>
       <td style="color:var(--gn)">${r.spo2?.toFixed(0)??'—'}</td>
+      <td>${r.hrv?.toFixed(0)??'—'}</td>
     </tr>`).join('');
   } catch(e) { console.error(e); }
 }
@@ -373,89 +479,190 @@ async function loadReadings() {
 // ── Commands ──────────────────────────────────────────────
 async function loadCommands() {
   try {
-    const { data } = await sb.from('hvac_commands')
-      .select('*').order('created_at',{ascending:false}).limit(100);
+    const {data} = await sb.from('hvac_commands').select('*').order('created_at',{ascending:false}).limit(100);
     if (!data) return;
-    document.getElementById('cm-cnt').textContent = data.length + ' records';
-    document.getElementById('cm-tb').innerHTML = data.map(r => `<tr>
+    const pending = data.filter(r=>r.status==='pending').length;
+    if (pending > 0) {
+      document.getElementById('cm-cnt').textContent = `${data.length} records · ${pending} pending`;
+    } else {
+      document.getElementById('cm-cnt').textContent = data.length+' records';
+    }
+    document.getElementById('cm-tb').innerHTML = data.map(r=>`<tr>
       <td>${ft(r.created_at)}</td>
       <td style="color:var(--cy)">${r.action_type??'—'}</td>
       <td style="color:var(--or)">${r.setpoint_c??'—'}°C</td>
       <td>${r.fan_level??'—'}</td>
-      <td>${r.power ? '<span style="color:var(--gn)">ON</span>' : '<span style="color:var(--rd)">OFF</span>'}</td>
+      <td>${r.power?'<span style="color:var(--gn)">ON</span>':'<span style="color:var(--rd)">OFF</span>'}</td>
       <td>${stbdg(r.status)}</td>
     </tr>`).join('');
-  } catch(e) { console.error(e); }
+  } catch(e) {}
 }
 
 async function sendCmd() {
   const a = document.getElementById('cmd-a').value;
   const t = parseFloat(document.getElementById('cmd-t').value);
   const f = parseInt(document.getElementById('cmd-f').value);
-  const p = document.getElementById('cmd-p').value === 'true';
+  const p = document.getElementById('cmd-p').value==='true';
   const m = document.getElementById('cmd-msg');
-  m.style.display = 'block'; m.style.color = 'var(--t2)'; m.textContent = 'Sending...';
+  m.style.display='block'; m.style.background='rgba(0,220,255,.05)'; m.style.color='var(--t2)'; m.textContent='Sending command...';
   try {
-    const { error } = await sb.from('hvac_commands').insert({
-      action_type:a, setpoint_c:t, fan_level:f, power:p, status:'pending'
-    });
-    if (error) throw error;
-    m.style.color = 'var(--gn)';
-    m.textContent = '✓ Sent — ESP32 will execute within 5 seconds';
+    const {error} = await sb.from('hvac_commands').insert({action_type:a,setpoint_c:t,fan_level:f,power:p,status:'pending'});
+    if(error) throw error;
+    m.style.background='rgba(0,224,144,.08)'; m.style.color='var(--gn)';
+    m.textContent='✓ Command sent successfully — ESP32 will execute within 5 seconds';
     loadCommands();
   } catch(e) {
-    m.style.color = 'var(--rd)'; m.textContent = 'Error: ' + e.message;
+    m.style.background='rgba(255,79,106,.08)'; m.style.color='var(--rd)';
+    m.textContent='✗ Error: '+e.message;
   }
+}
+
+// ── Sites ─────────────────────────────────────────────────
+async function loadSites() {
+  try {
+    const {data} = await sb.from('sites').select('*').order('created_at',{ascending:false});
+    if (!data) return;
+    document.getElementById('si-cnt').textContent = data.length+' sites';
+    document.getElementById('si-tb').innerHTML = data.length
+      ? data.map(r=>`<tr>
+          <td style="color:var(--t1);font-weight:600">${r.name??'—'}</td>
+          <td><span class="b b-c">${r.mode??'—'}</span></td>
+          <td>${r.country??'—'}</td>
+          <td>${r.city??'—'}</td>
+          <td style="font-size:10px;color:var(--t3)">${r.owner_id?.slice(0,16)}...</td>
+          <td>${fd(r.created_at)}</td>
+        </tr>`).join('')
+      : '<tr><td colspan="6" class="ld">No sites registered yet</td></tr>';
+  } catch(e) {}
 }
 
 // ── Users ─────────────────────────────────────────────────
 async function loadUsers() {
   try {
-    const { data } = await sb.from('profiles').select('*').order('created_at',{ascending:false});
+    const {data} = await sb.from('profiles').select('*').order('created_at',{ascending:false});
     if (!data) return;
-    document.getElementById('us-cnt').textContent = data.length + ' users';
-    document.getElementById('us-tb').innerHTML = data.map(r => `<tr>
+    document.getElementById('us-cnt').textContent = data.length+' users';
+    document.getElementById('us-tb').innerHTML = data.map(r=>`<tr>
       <td style="color:var(--t1);font-weight:600">${r.full_name??'—'}</td>
-      <td style="font-size:10px;color:var(--t3)">${r.id?.slice(0,20)}...</td>
+      <td style="font-size:10px;color:var(--t3)">${r.id?.slice(0,22)}...</td>
       <td><span class="b ${r.role==='admin'?'b-o':'b-x'}">${r.role??'user'}</span></td>
       <td>${fd(r.created_at)}</td>
     </tr>`).join('');
-  } catch(e) { console.error(e); }
+  } catch(e) {}
 }
 
 // ── Devices ───────────────────────────────────────────────
 async function loadDevices() {
   try {
-    const { data } = await sb.from('devices').select('*').order('created_at',{ascending:false});
+    const {data} = await sb.from('devices').select('*').order('created_at',{ascending:false});
     if (!data) return;
-    document.getElementById('dv-cnt').textContent = data.length + ' devices';
+    document.getElementById('dv-cnt').textContent = data.length+' devices';
     document.getElementById('dv-tb').innerHTML = data.length
-      ? data.map(r => `<tr>
+      ? data.map(r=>`<tr>
           <td style="color:var(--t1);font-weight:600">${r.name??'—'}</td>
           <td>${r.device_type??'—'}</td>
           <td>${r.connection_type??'—'}</td>
+          <td style="font-size:10px;color:var(--t3)">${r.site_id?.slice(0,14)??'—'}...</td>
           <td><span class="b ${r.status==='online'?'b-g':'b-r'}">${r.status??'offline'}</span></td>
           <td>${r.last_seen?fd(r.last_seen):'Never'}</td>
         </tr>`).join('')
-      : '<tr><td colspan="5" style="text-align:center;color:var(--t3);padding:24px">No devices yet</td></tr>';
+      : '<tr><td colspan="6" class="ld">No devices registered yet</td></tr>';
+  } catch(e) {}
+}
+
+// ── PTI Analysis ──────────────────────────────────────────
+async function loadPTI() {
+  try {
+    const {data} = await sb.from('pti_results').select('*').order('created_at',{ascending:false}).limit(100);
+    if (!data || !data.length) {
+      document.getElementById('pti-stats').innerHTML = '<div class="ld">No PTI data yet — run the app to generate results</div>';
+      document.getElementById('pt-tb').innerHTML = '<tr><td colspan="7" class="ld">No PTI results yet</td></tr>';
+      return;
+    }
+
+    const avg   = (data.reduce((a,b)=>a+b.score,0)/data.length).toFixed(1);
+    const maxS  = Math.max(...data.map(r=>r.score)).toFixed(1);
+    const minS  = Math.min(...data.map(r=>r.score)).toFixed(1);
+    const safeN = data.filter(r=>r.safe_mode).length;
+
+    document.getElementById('pti-stats').innerHTML = [
+      {l:'AVG SCORE',v:avg,  c:'var(--pu)', s:'overall comfort'},
+      {l:'MAX SCORE',v:maxS, c:'var(--gn)', s:'best session'},
+      {l:'MIN SCORE',v:minS, c:'var(--rd)', s:'worst session'},
+      {l:'SAFE MODE', v:safeN,c:'var(--or)',s:'activations'},
+      {l:'SESSIONS', v:data.length,c:'var(--cy)',s:'total analyzed'},
+    ].map(x=>`<div class="sc"><div class="sc-l" style="color:${x.c}">${x.l}</div><div class="sc-v" style="color:${x.c}">${x.v}</div><div class="sc-sub">${x.s}</div></div>`).join('');
+
+    // PTI distribution chart
+    const bins = [0,20,40,60,80,100];
+    const binLabels = ['0-20','20-40','40-60','60-80','80-100'];
+    const binCounts = binLabels.map((_,i) => data.filter(r=>r.score>=bins[i]&&r.score<bins[i+1]).length);
+    if(CH['cPD']) CH['cPD'].destroy();
+    CH['cPD'] = new Chart(document.getElementById('cPD'), {
+      type:'bar',
+      data:{labels:binLabels, datasets:[{data:binCounts, backgroundColor:['#ff4f6a','#ff9c3a','#b794f4','#00dcff','#00e090'], borderWidth:0, borderRadius:6}]},
+      options:{responsive:true, maintainAspectRatio:false,
+        plugins:{legend:{display:false}},
+        scales:{x:{ticks:{color:'#1e3450',font:{size:9}},grid:{display:false}},y:{ticks:{color:'#1e3450',font:{size:9}},grid:{color:'rgba(0,220,255,.04)'}}}
+      }
+    });
+
+    // Comfort over time
+    const rv=[...data].reverse().slice(-20);
+    const lb=rv.map(r=>new Date(r.created_at).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}));
+    mkLine('cCT',lb,rv.map(r=>r.score),'#b794f4','');
+
+    document.getElementById('pt-cnt').textContent = data.length+' results';
+    document.getElementById('pt-tb').innerHTML = data.map(r=>`<tr>
+      <td>${ft(r.created_at)}</td>
+      <td style="color:${ptiColor(r.score)};font-weight:700">${r.score?.toFixed(1)??'—'}</td>
+      <td>${comfortBadge(r.comfort_level)}</td>
+      <td style="color:var(--cy)">${r.action_type??'—'}</td>
+      <td style="color:var(--or)">${r.recommended_temp_c??'—'}°C</td>
+      <td>${r.recommended_fan_level??'—'}</td>
+      <td style="color:var(--pu)">${r.confidence?Math.round(r.confidence*100)+'%':'—'}</td>
+    </tr>`).join('');
   } catch(e) { console.error(e); }
 }
 
 // ── Tab Switch ────────────────────────────────────────────
 function go(id, el) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('on'));
-  document.querySelectorAll('.pnl').forEach(p => p.classList.remove('on'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  document.querySelectorAll('.pnl').forEach(p=>p.classList.remove('on'));
   el.classList.add('on');
   document.getElementById('pnl-'+id).classList.add('on');
 }
 
 // ── Helpers ───────────────────────────────────────────────
-function ft(ts) { return ts ? new Date(ts).toLocaleString([],{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}) : '—'; }
-function fd(ts) { return ts ? new Date(ts).toLocaleDateString() : '—'; }
+function ft(ts) { return ts?new Date(ts).toLocaleString([],{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}):'—'; }
+function fd(ts) { return ts?new Date(ts).toLocaleDateString():'—'; }
+
 function stbdg(s) {
-  if (s==='executed') return '<span class="b b-g">executed</span>';
-  if (s==='pending')  return '<span class="b b-o">pending</span>';
-  return `<span class="b b-r">${s??'—'}</span>`;
+  if(s==='executed') return '<span class="b b-g">executed</span>';
+  if(s==='pending')  return '<span class="b b-o">pending</span>';
+  if(s==='failed')   return '<span class="b b-r">failed</span>';
+  return `<span class="b b-x">${s??'—'}</span>`;
+}
+
+function ptiColor(v) {
+  if(!v) return 'var(--t2)';
+  if(v>=78) return 'var(--gn)';
+  if(v>=62) return 'var(--cy)';
+  if(v>=47) return 'var(--pu)';
+  if(v>=32) return 'var(--or)';
+  return 'var(--rd)';
+}
+
+function comfortBadge(l) {
+  const map = {
+    excellent:      ['b-g','Excellent'],
+    comfortable:    ['b-c','Comfortable'],
+    mildDiscomfort: ['b-x','Mild Discomfort'],
+    uncomfortable:  ['b-o','Uncomfortable'],
+    critical:       ['b-r','Critical'],
+  };
+  const [cls,lbl] = map[l]||['b-x',l??'—'];
+  return `<span class="b ${cls}">${lbl}</span>`;
 }
 </script>
 </body>
