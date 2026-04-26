@@ -39,10 +39,10 @@ body.rtl{direction:rtl;font-family:'Segoe UI',Tahoma,sans-serif}
 .bar-r{display:flex;align-items:center;gap:8px}
 .dot{width:6px;height:6px;border-radius:50%;background:var(--gn);display:inline-block;margin-right:5px;animation:pulse 1.5s infinite}
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.8)}}
-.upd-t{font-size:10px;color:var(--t3)}
-.ibtn{background:rgba(255,255,255,.04);border:1px solid var(--br);border-radius:7px;padding:5px 12px;color:var(--t2);font-size:10px;font-weight:600;cursor:pointer;transition:.15s}
+.upd-t{font-size:10px;color:#6a8aaa}
+.ibtn{background:rgba(255,255,255,.04);border:1px solid rgba(0,220,255,.15);border-radius:7px;padding:5px 12px;color:#a0c0e0;font-size:10px;font-weight:600;cursor:pointer;transition:.15s}
 .ibtn:hover{color:var(--t1);border-color:var(--brh);background:rgba(0,220,255,.06)}
-.ibtn-rd{color:rgba(255,79,106,.7)}
+.ibtn-rd{color:rgba(255,79,106,.8)}
 .ibtn-rd:hover{color:var(--rd);border-color:rgba(255,79,106,.3)}
 
 /* TABS */
@@ -60,20 +60,20 @@ body.rtl{direction:rtl;font-family:'Segoe UI',Tahoma,sans-serif}
 .sg{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:11px;margin-bottom:20px}
 .sc{background:var(--card);border:1px solid var(--br);border-radius:12px;padding:15px 16px;transition:.2s;cursor:default}
 .sc:hover{border-color:var(--brh);transform:translateY(-1px)}
-.sc-l{font-size:9px;color:var(--t2);font-weight:700;letter-spacing:1.5px;margin-bottom:7px;display:flex;align-items:center;gap:5px}
+.sc-l{font-size:9px;color:#8aabcc;font-weight:700;letter-spacing:1.5px;margin-bottom:7px;display:flex;align-items:center;gap:5px}
 .sc-v{font-size:26px;font-weight:700;line-height:1}
-.sc-sub{font-size:10px;color:var(--t3);margin-top:3px}
+.sc-sub{font-size:10px;color:#6a8aaa;margin-top:3px}
 
 /* CHART GRID */
 .cg{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-bottom:20px}
 @media(max-width:640px){.cg{grid-template-columns:1fr}}
 .cc{background:var(--card);border:1px solid var(--br);border-radius:12px;padding:16px}
-.cc-t{font-size:9px;color:var(--t2);font-weight:700;letter-spacing:1.5px;margin-bottom:12px}
+.cc-t{font-size:9px;color:#8aabcc;font-weight:700;letter-spacing:1.5px;margin-bottom:12px}
 
 /* TABLE CARD */
 .tc{background:var(--card);border:1px solid var(--br);border-radius:12px;overflow:hidden;margin-bottom:20px}
 .tc-h{padding:12px 18px;border-bottom:1px solid var(--br);display:flex;justify-content:space-between;align-items:center;background:rgba(0,220,255,.02)}
-.tc-t{font-size:9px;color:var(--t2);font-weight:700;letter-spacing:1.5px}
+.tc-t{font-size:9px;color:#8aabcc;font-weight:700;letter-spacing:1.5px}
 .tc-c{font-size:10px;color:var(--cy);font-weight:700}
 .tw{overflow-x:auto}
 table{width:100%;border-collapse:collapse}
@@ -88,8 +88,8 @@ tr:hover td{background:rgba(0,220,255,.025);color:var(--t1)}
 .lc:hover{border-color:var(--brh)}
 .lc-ico{font-size:18px;margin-bottom:5px}
 .lc-v{font-size:19px;font-weight:700;line-height:1}
-.lc-u{font-size:10px;color:var(--t3)}
-.lc-l{font-size:8px;color:var(--t3);margin-top:3px;letter-spacing:1px}
+.lc-u{font-size:10px;color:#6a8aaa}
+.lc-l{font-size:9px;color:#8aabcc;margin-top:3px;letter-spacing:1px;font-weight:600}
 
 /* BADGE */
 .b{display:inline-block;padding:2px 8px;border-radius:20px;font-size:9px;font-weight:700;letter-spacing:.3px}
@@ -118,7 +118,7 @@ tr:hover td{background:rgba(0,220,255,.025);color:var(--t1)}
 /* SPINNER */
 .spin{width:22px;height:22px;border:2px solid var(--br);border-top-color:var(--cy);border-radius:50%;animation:spin .5s linear infinite;margin:24px auto 8px}
 @keyframes spin{to{transform:rotate(360deg)}}
-.ld{text-align:center;color:var(--t3);padding:20px;font-size:12px}
+.ld{text-align:center;color:#8aabcc;padding:20px;font-size:12px}
 
 /* SECTION ROW */
 .sec-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
@@ -130,7 +130,7 @@ tr:hover td{background:rgba(0,220,255,.025);color:var(--t1)}
 .gauge-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
 .gauge{background:var(--card);border:1px solid var(--br);border-radius:11px;padding:14px;text-align:center}
 .gauge-val{font-size:28px;font-weight:700}
-.gauge-lbl{font-size:9px;color:var(--t2);letter-spacing:1px;margin-top:3px}
+.gauge-lbl{font-size:9px;color:#8aabcc;letter-spacing:1px;margin-top:3px;font-weight:600}
 .gauge-bar{height:4px;background:var(--br);border-radius:2px;margin-top:8px;overflow:hidden}
 .gauge-fill{height:100%;border-radius:2px;transition:width .5s}
 </style>
@@ -177,6 +177,7 @@ tr:hover td{background:rgba(0,220,255,.025);color:var(--t1)}
     <button class="tab" onclick="go('us',this)">👥 Users</button>
     <button class="tab" onclick="go('dv',this)">🔌 Devices</button>
     <button class="tab" onclick="go('pt',this)">🧠 PTI Analysis</button>
+    <button class="tab" onclick="go('btu',this)">❄ BTU Calculator</button>
   </div>
 
   <div class="pg">
@@ -277,6 +278,119 @@ tr:hover td{background:rgba(0,220,255,.025);color:var(--t1)}
       </div>
     </div>
 
+    <!-- BTU CALCULATOR -->
+    <div class="pnl" id="pnl-btu">
+      <div class="cf">
+        <div class="cf-t">❄ BTU / COOLING LOAD CALCULATOR</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:16px">
+
+          <div class="cf-f">
+            <label>ROOM AREA (m²)</label>
+            <input type="number" id="b-area" value="20" min="1" max="1000" oninput="calcBtu()">
+          </div>
+          <div class="cf-f">
+            <label>CEILING HEIGHT (m)</label>
+            <input type="number" id="b-height" value="3" min="2" max="6" step="0.1" oninput="calcBtu()">
+          </div>
+          <div class="cf-f">
+            <label>OUTDOOR TEMP (°C)</label>
+            <input type="number" id="b-outdoor" value="45" min="20" max="55" oninput="calcBtu()">
+          </div>
+          <div class="cf-f">
+            <label>INDOOR TARGET (°C)</label>
+            <input type="number" id="b-indoor" value="24" min="16" max="30" oninput="calcBtu()">
+          </div>
+          <div class="cf-f">
+            <label>OCCUPANTS</label>
+            <input type="number" id="b-people" value="2" min="0" max="50" oninput="calcBtu()">
+          </div>
+          <div class="cf-f">
+            <label>WINDOWS (count)</label>
+            <input type="number" id="b-windows" value="2" min="0" max="20" oninput="calcBtu()">
+          </div>
+          <div class="cf-f">
+            <label>WINDOW SIZE</label>
+            <select id="b-winsize" onchange="calcBtu()">
+              <option value="0.5">Small (0.5 m²)</option>
+              <option value="1.2" selected>Medium (1.2 m²)</option>
+              <option value="2.0">Large (2.0 m²)</option>
+            </select>
+          </div>
+          <div class="cf-f">
+            <label>INSULATION</label>
+            <select id="b-insul" onchange="calcBtu()">
+              <option value="1.3">Poor</option>
+              <option value="1.0" selected>Average</option>
+              <option value="0.75">Good</option>
+              <option value="0.55">Excellent</option>
+            </select>
+          </div>
+          <div class="cf-f">
+            <label>SUN EXPOSURE</label>
+            <select id="b-sun" onchange="calcBtu()">
+              <option value="1.0">Shaded</option>
+              <option value="1.1" selected>Partial sun</option>
+              <option value="1.2">Direct sun</option>
+            </select>
+          </div>
+          <div class="cf-f">
+            <label>ROOM TYPE</label>
+            <select id="b-type" onchange="calcBtu()">
+              <option value="1.0" selected>Bedroom / Office</option>
+              <option value="1.1">Living Room</option>
+              <option value="1.2">Kitchen</option>
+              <option value="1.3">Server Room</option>
+              <option value="0.9">Storage</option>
+            </select>
+          </div>
+          <div class="cf-f">
+            <label>ELECTRONICS (Watts)</label>
+            <input type="number" id="b-elec" value="300" min="0" max="5000" step="50" oninput="calcBtu()">
+          </div>
+          <div class="cf-f">
+            <label>LIGHTING (Watts)</label>
+            <input type="number" id="b-light" value="100" min="0" max="2000" step="10" oninput="calcBtu()">
+          </div>
+        </div>
+      </div>
+
+      <!-- RESULTS -->
+      <div class="sg" id="btu-results" style="margin-bottom:20px"></div>
+
+      <!-- RECOMMENDATION -->
+      <div class="tc">
+        <div class="tc-h"><span class="tc-t">❄ AC UNIT RECOMMENDATION</span></div>
+        <div style="padding:18px" id="btu-rec"></div>
+      </div>
+
+      <!-- BREAKDOWN -->
+      <div class="cg">
+        <div class="cc">
+          <div class="cc-t">HEAT LOAD BREAKDOWN</div>
+          <div style="position:relative;height:220px"><canvas id="cBTU" role="img" aria-label="BTU breakdown">BTU breakdown</canvas></div>
+        </div>
+        <div class="cc">
+          <div class="cc-t">BTU vs ROOM SIZE REFERENCE</div>
+          <div style="position:relative;height:220px"><canvas id="cBTU2" role="img" aria-label="BTU reference">BTU reference</canvas></div>
+        </div>
+      </div>
+
+      <!-- STANDARDS TABLE -->
+      <div class="tc">
+        <div class="tc-h"><span class="tc-t">ASHRAE REFERENCE TABLE — BTU PER m²</span></div>
+        <div class="tw"><table>
+          <thead><tr><th>ROOM TYPE</th><th>BTU/m²</th><th>EXAMPLE 20m²</th><th>EXAMPLE 40m²</th><th>EXAMPLE 60m²</th></tr></thead>
+          <tbody>
+            <tr><td>Bedroom</td><td style="color:var(--cy)">400–500</td><td>8,000–10,000</td><td>16,000–20,000</td><td>24,000–30,000</td></tr>
+            <tr><td>Living Room</td><td style="color:var(--cy)">500–600</td><td>10,000–12,000</td><td>20,000–24,000</td><td>30,000–36,000</td></tr>
+            <tr><td>Kitchen</td><td style="color:var(--or)">600–800</td><td>12,000–16,000</td><td>24,000–32,000</td><td>36,000–48,000</td></tr>
+            <tr><td>Office</td><td style="color:var(--cy)">450–550</td><td>9,000–11,000</td><td>18,000–22,000</td><td>27,000–33,000</td></tr>
+            <tr><td>Server Room</td><td style="color:var(--rd)">1000–2000</td><td>20,000–40,000</td><td>40,000–80,000</td><td>60,000–120,000</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -298,8 +412,27 @@ const T = {
     sites_lbl:'REGISTERED SITES', readings_lbl:'SENSOR READINGS HISTORY',
     commands_lbl:'COMMANDS LOG', activity:'⚡ RECENT ACTIVITY',
     noDevices:'No devices registered yet', noSites:'No sites registered yet',
-    noPti:'No PTI data yet', noActivity:'No activity yet',
-    updated:'Updated', lang:'🌐 عربي',
+    noPti:'No PTI data yet — run the app to generate results',
+    noActivity:'No activity yet', updated:'Updated', lang:'🌐 عربي',
+    roomTemp:'ROOM TEMP', humidity:'HUMIDITY', co2:'CO₂',
+    airSpeed:'AIR SPEED', heartRate:'HEART RATE', spo2:'SPO₂',
+    temp:'TEMPERATURE', humidityChart:'HUMIDITY',
+    ptiScore:'PTI SCORE', comfortLevels:'COMFORT LEVELS',
+    action:'ACTION', setpoint:'SETPOINT °C', fan:'FAN LEVEL', power:'POWER',
+    time:'TIME', status:'STATUS', name:'NAME', type:'TYPE',
+    connection:'CONNECTION', site:'SITE', lastSeen:'LAST SEEN',
+    role:'ROLE', joined:'JOINED', mode:'MODE', country:'COUNTRY',
+    city:'CITY', owner:'OWNER', created:'CREATED', comfort:'COMFORT',
+    recTemp:'REC TEMP', confidence:'CONFIDENCE', sessions:'SESSIONS',
+    avgPti:'AVG PTI', maxScore:'MAX SCORE', minScore:'MIN SCORE',
+    safeMode:'SAFE MODE', totalSessions:'TOTAL SESSIONS',
+    recentActivity:'RECENT ACTIVITY', event:'EVENT', details:'DETAILS',
+    ptiDist:'PTI SCORE DISTRIBUTION', comfortTime:'COMFORT LEVEL OVER TIME',
+    ptiHistory:'PTI RESULTS HISTORY', sensorReadings:'SENSOR READINGS',
+    online:'ONLINE', pending:'PENDING', users_stat:'USERS',
+    sites_stat:'SITES', devices_stat:'DEVICES', readings_stat:'READINGS',
+    signIn:'SIGN IN', email:'EMAIL', password:'PASSWORD', adminPortal:'ADMIN PORTAL',
+    signingIn:'SIGNING IN...',
   },
   ar: {
     overview:'📊 نظرة عامة', readings:'🌡 القراءات المباشرة', commands:'📡 أوامر التكييف',
@@ -310,8 +443,27 @@ const T = {
     sites_lbl:'المواقع المسجلة', readings_lbl:'سجل قراءات الحساسات',
     commands_lbl:'سجل الأوامر', activity:'⚡ آخر الأحداث',
     noDevices:'لا توجد أجهزة مسجلة بعد', noSites:'لا توجد مواقع مسجلة بعد',
-    noPti:'لا توجد بيانات PTI بعد', noActivity:'لا توجد أحداث بعد',
-    updated:'آخر تحديث', lang:'🌐 English',
+    noPti:'لا توجد بيانات PTI بعد — شغّل التطبيق لتوليد نتائج',
+    noActivity:'لا توجد أحداث بعد', updated:'آخر تحديث', lang:'🌐 English',
+    roomTemp:'حرارة الغرفة', humidity:'الرطوبة', co2:'ثاني أكسيد الكربون',
+    airSpeed:'سرعة الهواء', heartRate:'معدل القلب', spo2:'تشبع الأكسجين',
+    temp:'درجة الحرارة', humidityChart:'الرطوبة',
+    ptiScore:'نقاط PTI', comfortLevels:'مستويات الراحة',
+    action:'الإجراء', setpoint:'درجة الحرارة', fan:'مستوى المروحة', power:'التشغيل',
+    time:'الوقت', status:'الحالة', name:'الاسم', type:'النوع',
+    connection:'الاتصال', site:'الموقع', lastSeen:'آخر ظهور',
+    role:'الدور', joined:'تاريخ الانضمام', mode:'الوضع', country:'الدولة',
+    city:'المدينة', owner:'المالك', created:'تاريخ الإنشاء', comfort:'الراحة',
+    recTemp:'الحرارة الموصى بها', confidence:'الثقة', sessions:'الجلسات',
+    avgPti:'متوسط PTI', maxScore:'أعلى نقاط', minScore:'أدنى نقاط',
+    safeMode:'الوضع الآمن', totalSessions:'إجمالي الجلسات',
+    recentActivity:'آخر الأحداث', event:'الحدث', details:'التفاصيل',
+    ptiDist:'توزيع نقاط PTI', comfortTime:'مستوى الراحة عبر الزمن',
+    ptiHistory:'سجل نتائج PTI', sensorReadings:'قراءات الحساسات',
+    online:'متصل', pending:'معلّق', users_stat:'المستخدمون',
+    sites_stat:'المواقع', devices_stat:'الأجهزة', readings_stat:'القراءات',
+    signIn:'تسجيل الدخول', email:'البريد الإلكتروني', password:'كلمة المرور',
+    adminPortal:'لوحة المشرف', signingIn:'جارٍ التسجيل...',
   }
 };
 
@@ -322,22 +474,61 @@ function toggleLang() {
   document.body.classList.toggle('rtl', isAr);
   document.documentElement.lang = isAr ? 'ar' : 'en';
   document.getElementById('lang-btn').textContent = t('lang');
+  applyTranslations();
+}
 
-  // Update tabs
-  const tabKeys = ['overview','readings','commands','sites','users','devices','pti'];
-  document.querySelectorAll('.tab').forEach((el,i) => { if(tabKeys[i]) el.textContent = t(tabKeys[i]); });
+function applyTranslations() {
+  // Tabs
+  const tabIds = ['overview','readings','commands','sites','users','devices','pti'];
+  document.querySelectorAll('.tab').forEach((el,i) => { if(tabIds[i]) el.textContent = t(tabIds[i]); });
 
-  // Update table headers direction
+  // Table headers direction
   document.querySelectorAll('th').forEach(th => { th.style.textAlign = isAr ? 'right' : 'left'; });
+  document.querySelectorAll('td').forEach(td => { td.style.textAlign = isAr ? 'right' : 'left'; });
 
-  // Update send command section
+  // Topbar buttons
+  document.querySelector('.ibtn:not(#lang-btn):not(.ibtn-rd)').textContent = '↻ '+t('refresh').replace('↻ ','');
+  document.querySelector('.ibtn-rd').textContent = t('signout');
+
+  // CMD form
   const cfT = document.querySelector('.cf-t');
   if(cfT) cfT.textContent = t('sendCmd');
   const cfBtn = document.querySelector('.cf-btn');
   if(cfBtn) cfBtn.textContent = t('send');
 
-  // Update section titles
-  document.getElementById('upd').textContent = isAr ? t('live') : (document.getElementById('upd').textContent);
+  // CMD form labels
+  const labels = document.querySelectorAll('.cf-f label');
+  const labelKeys = ['action','setpoint','fan','power'];
+  labels.forEach((lb,i) => { if(labelKeys[i]) lb.textContent = t(labelKeys[i]); });
+
+  // Section titles (tc-t)
+  const tcTitles = document.querySelectorAll('.tc-t');
+  const tcKeys = ['activity','readings_lbl','commands_lbl','sites_lbl','users_lbl','devices_lbl','ptiHistory'];
+  tcTitles.forEach((el,i) => { if(tcKeys[i]) el.textContent = t(tcKeys[i]); });
+
+  // Chart titles (cc-t)
+  const ccTitles = document.querySelectorAll('.cc-t');
+  const ccKeys = ['temp','humidityChart','ptiScore','comfortLevels','ptiDist','comfortTime'];
+  ccTitles.forEach((el,i) => { if(ccKeys[i]) el.textContent = t(ccKeys[i]).toUpperCase(); });
+
+  // Live card labels
+  const lcLabels = document.querySelectorAll('.lc-l');
+  const lcKeys = ['roomTemp','humidity','co2','airSpeed','heartRate','spo2'];
+  lcLabels.forEach((el,i) => { if(lcKeys[i]) el.textContent = t(lcKeys[i]); });
+
+  // Gauge labels
+  const gaugeLabels = document.querySelectorAll('.gauge-lbl');
+  const gaugeKeys = ['temp','humidity'];
+  gaugeLabels.forEach((el,i) => { if(gaugeKeys[i]) el.textContent = t(gaugeKeys[i]).toUpperCase(); });
+
+  // Login page
+  const llbls = document.querySelectorAll('.llbl');
+  if(llbls[0]) llbls[0].textContent = t('email');
+  if(llbls[1]) llbls[1].textContent = t('password');
+  const lbdg = document.querySelector('.lbdg');
+  if(lbdg) lbdg.textContent = t('adminPortal');
+  const lbtn = document.getElementById('lbtn');
+  if(lbtn && !lbtn.disabled) lbtn.textContent = t('signIn');
 }
 
 // ── Session check ─────────────────────────────────────────
