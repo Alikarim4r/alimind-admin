@@ -240,12 +240,12 @@ tr:hover td{background:rgba(0,220,255,.025);color:var(--t1)}
           <div class="cf-f">
             <label id="lbl-action">ACTION</label>
             <select id="cmd-a" onchange="onActionChange()">
-              <option value="coolDown">❄ Cool Down</option>
-              <option value="warmUp">🔥 Warm Up</option>
-              <option value="maintain">✅ Maintain</option>
-              <option value="fanOnly">💨 Fan Only</option>
-              <option value="ventilate">🌬 Ventilate</option>
-              <option value="swing">💫 Swing</option>
+              <option value="coolDown">Cool Down</option>
+              <option value="warmUp">Warm Up</option>
+              <option value="maintain">Maintain</option>
+              <option value="fanOnly">Fan Only</option>
+              <option value="ventilate">Ventilate</option>
+              <option value="swing">Swing</option>
             </select>
           </div>
           <div class="cf-f" id="temp-field">
@@ -270,8 +270,8 @@ tr:hover td{background:rgba(0,220,255,.025);color:var(--t1)}
           <div class="cf-f">
             <label id="lbl-power">POWER</label>
             <select id="cmd-p">
-              <option value="true">⚡ ON</option>
-              <option value="false">⏻ OFF</option>
+              <option value="true">ON</option>
+              <option value="false">OFF</option>
             </select>
           </div>
           <button class="cf-btn" onclick="sendCmd()" id="send-btn">SEND →</button>
@@ -433,18 +433,14 @@ function applyTranslations() {
 
   // Action options
   const actionOpts = document.querySelectorAll('#cmd-a option');
-  const actionEn = ['❄ Cool Down','🔥 Warm Up','✅ Maintain','💨 Increase Fan','🌬 Ventilate','⏻ Power Off'];
-  const actionAr = ['❄ تبريد','🔥 تدفئة','✅ الحفاظ','💨 زيادة المروحة','🌬 تهوية','⏻ إيقاف'];
+  const actionEn = ['Cool Down','Warm Up','Maintain','Fan Only','Ventilate','Swing'];
+  const actionAr = ['تبريد','تدفئة','الحفاظ','مروحة فقط','تهوية','سوينغ'];
   actionOpts.forEach((opt,i) => { opt.textContent = isAr ? actionAr[i] : actionEn[i]; });
-
-  // Fan options
-  const fanOpts = document.querySelectorAll('#cmd-f option');
-  fanOpts.forEach((opt,i) => { opt.textContent = isAr ? `مستوى ${i+1}` : `${i+1}`; });
 
   // Power options
   const powerOpts = document.querySelectorAll('#cmd-p option');
-  if(powerOpts[0]) powerOpts[0].textContent = isAr ? '⚡ تشغيل' : '⚡ ON';
-  if(powerOpts[1]) powerOpts[1].textContent = isAr ? '⏻ إيقاف' : '⏻ OFF';
+  if(powerOpts[0]) powerOpts[0].textContent = isAr ? 'تشغيل' : 'ON';
+  if(powerOpts[1]) powerOpts[1].textContent = isAr ? 'إيقاف' : 'OFF';
 
   // Section titles (tc-t)
   const tcTitles = document.querySelectorAll('.tc-t');
@@ -946,7 +942,7 @@ function onSiteChange() {
 
   const devs = allDevices.filter(d => d.site_id === sid);
   dSel.innerHTML = `<option value="">— ${isAr?'اختر جهازاً':'Choose device'} —</option>`
-    + devs.map(d=>`<option value="${d.id}">${d.name} ${d.status==='online'?'🟢':'⚫'}</option>`).join('');
+    + devs.map(d=>`<option value="${d.id}">${d.name} ${d.status==='online'?'●':'○'}</option>`).join('');
   dSel.disabled = !sid;
 }
 
