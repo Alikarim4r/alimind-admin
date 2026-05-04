@@ -630,9 +630,16 @@
 // ── Auto refresh ──
 let countdownVal = 30;
 // ================================================================
+// CONFIG
+// ================================================================
+const SB_URL  = 'https://bzqupgbaelbahcdsxusq.supabase.co';
+const SB_KEY  = 'sb_publishable_gen23HpCRSO7gVV4cdw0PQ_MeB1QOvt';
+const SB_AUTH = SB_URL + '/auth/v1';
+const DEVICE  = 'alimind-gateway-001';
+
+// ================================================================
 // AUTH
 // ================================================================
-const SB_AUTH = SB_URL + '/auth/v1';
 let   authToken = localStorage.getItem('sb_token') || '';
 let   authEmail = localStorage.getItem('sb_email') || '';
 
@@ -710,13 +717,6 @@ document.addEventListener('keydown', e => {
     doLogin();
   }
 });
-
-// ================================================================
-// TABS
-// ================================================================
-const SB_URL = 'https://bzqupgbaelbahcdsxusq.supabase.co';
-const SB_KEY = 'sb_publishable_gen23HpCRSO7gVV4cdw0PQ_MeB1QOvt';
-const DEVICE = 'alimind-gateway-001';
 
 // ================================================================
 // TABS
