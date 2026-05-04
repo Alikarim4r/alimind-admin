@@ -13,8 +13,6 @@
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;min-height:100vh}
-
-/* LOGIN */
 #loginScreen{display:flex;align-items:center;justify-content:center;min-height:100vh}
 .login-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:40px;width:100%;max-width:400px;text-align:center}
 .login-logo{font-size:32px;font-weight:800;color:var(--cyan);letter-spacing:4px;margin-bottom:6px}
@@ -25,73 +23,73 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;mi
 .login-btn:disabled{opacity:0.5;cursor:not-allowed}
 .login-error{color:var(--red);font-size:13px;margin-top:12px;min-height:20px}
 #dashboardWrap{display:none}
-
-/* HEADER */
 header{background:var(--card);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100}
 .logo{font-size:22px;font-weight:800;color:var(--cyan);letter-spacing:2px}
 .hbadge{background:var(--cyan);color:var(--bg);font-size:10px;font-weight:700;padding:3px 8px;border-radius:4px;letter-spacing:1px}
 .live-dot{width:8px;height:8px;background:var(--green);border-radius:50%;animation:pulse 2s infinite;margin-left:auto}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
-
-/* LAYOUT */
 .container{max-width:1400px;margin:0 auto;padding:24px}
-
-/* TABS */
 .tabs{display:flex;gap:4px;margin-bottom:24px;border-bottom:1px solid var(--border)}
 .tab{padding:10px 20px;cursor:pointer;border-radius:8px 8px 0 0;font-size:13px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;transition:all .2s}
 .tab.active{color:var(--cyan);border-bottom-color:var(--cyan)}
 .tab:hover{color:var(--text)}
 .panel{display:none}
 .panel.active{display:block}
-
-/* STATS */
 .stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px;margin-bottom:24px}
 .stat-card{background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:18px}
 .stat-val{font-size:28px;font-weight:800;color:var(--cyan)}
 .stat-label{font-size:12px;color:var(--muted);margin-top:4px}
-
-/* CARD */
 .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:20px}
 .card-title{font-size:13px;font-weight:700;color:var(--muted);letter-spacing:1.5px;margin-bottom:16px}
-
-/* TABLE */
 table{width:100%;border-collapse:collapse;font-size:13px}
 th{text-align:left;padding:10px 12px;color:var(--muted);font-size:11px;font-weight:700;letter-spacing:1px;border-bottom:1px solid var(--border)}
 td{padding:12px;border-bottom:1px solid var(--border);color:var(--text)}
 tr:last-child td{border-bottom:none}
 tr:hover td{background:var(--glass)}
-
-/* BADGES */
 .b-online{color:var(--green);background:#00E09015;padding:3px 10px;border-radius:6px;font-size:11px;font-weight:700}
 .b-offline{color:var(--muted);background:#8AA8C015;padding:3px 10px;border-radius:6px;font-size:11px;font-weight:700}
 .b-pending{color:var(--orange);background:#FF9C3A15;padding:3px 10px;border-radius:6px;font-size:11px;font-weight:700}
 .b-exec{color:var(--green);background:#00E09015;padding:3px 10px;border-radius:6px;font-size:11px;font-weight:700}
 .b-fail{color:var(--red);background:#FF444415;padding:3px 10px;border-radius:6px;font-size:11px;font-weight:700}
-
-/* SCORE */
 .s-ex{color:var(--cyan);font-weight:700}
 .s-gd{color:var(--green);font-weight:700}
 .s-md{color:var(--orange);font-weight:700}
 .s-bd{color:var(--red);font-weight:700}
-
-/* SENSORS */
 .sensor-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px}
 .sensor-card{background:var(--glass);border:1px solid var(--border);border-radius:12px;padding:14px;text-align:center}
 .sensor-val{font-size:24px;font-weight:800;color:var(--cyan)}
 .sensor-unit{font-size:11px;color:var(--muted)}
 .sensor-name{font-size:11px;color:var(--muted);margin-top:6px}
-
-/* FORM */
 .cmd-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:16px}
 select,input[type=number],input[type=text]{width:100%;background:var(--glass);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:10px 12px;font-size:13px}
 label{font-size:11px;color:var(--muted);margin-bottom:6px;display:block;font-weight:700;letter-spacing:1px}
 .btn{background:linear-gradient(135deg,var(--cyan),var(--cyan2));color:var(--bg);border:none;border-radius:10px;padding:12px 24px;font-size:13px;font-weight:800;cursor:pointer;letter-spacing:1px}
 .btn-sm{background:transparent;border:1px solid var(--cyan);color:var(--cyan);border-radius:8px;padding:6px 14px;font-size:12px;cursor:pointer}
+.btn-edit{background:transparent;border:1px solid var(--cyan);color:var(--cyan);border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer;font-weight:700}
+.btn-edit:hover{background:var(--cyan);color:var(--bg)}
+.btn-danger{background:transparent;border:1px solid var(--red);color:var(--red);border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer;font-weight:700}
+.btn-danger:hover{background:var(--red);color:#fff}
 .alert-ok{padding:12px 16px;border-radius:10px;margin-bottom:16px;font-size:13px;background:#00E09015;border:1px solid #00E09040;color:var(--green)}
 .alert-err{padding:12px 16px;border-radius:10px;margin-bottom:16px;font-size:13px;background:#FF444415;border:1px solid #FF444440;color:var(--red)}
 .refresh-bar{display:flex;align-items:center;gap:12px;margin-bottom:20px;font-size:12px;color:var(--muted)}
 .table-wrap{overflow-x:auto}
 .empty{text-align:center;padding:40px;color:var(--muted)}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto}
+.modal-title{font-size:16px;font-weight:800;color:var(--cyan);letter-spacing:1px;margin-bottom:4px}
+.modal-sub{font-size:12px;color:var(--muted);margin-bottom:20px}
+.modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.modal-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid var(--border)}
+.modal-input{width:100%;background:var(--glass);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:10px 12px;font-size:13px;outline:none}
+.modal-input:focus{border-color:var(--cyan)}
+.modal-input:disabled{opacity:0.4;cursor:not-allowed}
+.modal-select{width:100%;background:var(--glass);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:10px 12px;font-size:13px}
+.field-group{display:flex;flex-direction:column;gap:6px}
+.field-label{font-size:11px;color:var(--muted);font-weight:700;letter-spacing:1px}
+.modal-alert{padding:10px 14px;border-radius:8px;font-size:12px;margin-bottom:12px}
 </style>
 </head>
 <body>
@@ -105,6 +103,66 @@ label{font-size:11px;color:var(--muted);margin-bottom:6px;display:block;font-wei
     <input class="login-input" type="password" id="loginPassword" placeholder="Password" />
     <button class="login-btn" id="loginBtn" onclick="doLogin()">SIGN IN</button>
     <div class="login-error" id="loginError"></div>
+  </div>
+</div>
+
+<!-- EDIT USER MODAL -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal">
+    <div class="modal-title">✏ Edit User</div>
+    <div class="modal-sub" id="editModalEmail">—</div>
+    <div id="editModalAlert"></div>
+    <input type="hidden" id="edit-uid">
+
+    <div class="field-group" style="margin-bottom:12px">
+      <span class="field-label">EMAIL <span style="color:var(--muted);font-weight:400">(cannot be changed)</span></span>
+      <input class="modal-input" type="text" id="edit-email" disabled style="opacity:0.5;cursor:not-allowed">
+    </div>
+
+    <div class="modal-grid">
+      <div class="field-group">
+        <span class="field-label">FULL NAME</span>
+        <input class="modal-input" type="text" id="edit-name" placeholder="Full Name">
+      </div>
+      <div class="field-group">
+        <span class="field-label">PHONE</span>
+        <input class="modal-input" type="text" id="edit-phone" placeholder="+974...">
+      </div>
+      <div class="field-group">
+        <span class="field-label">COUNTRY</span>
+        <input class="modal-input" type="text" id="edit-country" placeholder="Qatar">
+      </div>
+      <div class="field-group">
+        <span class="field-label">DATE OF BIRTH</span>
+        <input class="modal-input" type="date" id="edit-birth">
+      </div>
+      <div class="field-group">
+        <span class="field-label">GENDER</span>
+        <select class="modal-select" id="edit-gender">
+          <option value="">— Select —</option>
+          <option value="male">Male</option>
+          <option value="female">Female</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+      <div class="field-group">
+        <span class="field-label">ROLE</span>
+        <select class="modal-select" id="edit-role">
+          <option value="user">User</option>
+          <option value="admin">Admin</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="field-group" style="margin-bottom:12px">
+      <span class="field-label">NEW PASSWORD <span style="color:var(--muted);font-weight:400">(optional — leave blank to keep current)</span></span>
+      <input class="modal-input" type="password" id="edit-pass" placeholder="Min 6 characters" autocomplete="new-password">
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-sm" onclick="closeEditModal()">Cancel</button>
+      <button class="btn" id="editSaveBtn" onclick="saveUserEdit()">SAVE CHANGES</button>
+    </div>
   </div>
 </div>
 
@@ -202,8 +260,8 @@ label{font-size:11px;color:var(--muted);margin-bottom:6px;display:block;font-wei
             <option value="ventilate">Ventilate</option>
             <option value="dry">Dry</option>
           </select></div>
-          <div id="wrap-temp"><label>TEMPERATURE °C</label><input type="number" id="cmd-temp" value="23" min="16" max="30" step="0.5"></div>
-          <div id="wrap-fan"><label>FAN (1-5)</label><input type="number" id="cmd-fan" value="2" min="1" max="5"></div>
+          <div id="wrap-temp"><label>TEMPERATURE °C</label><input type="number" id="cmd-temp" value="19" min="16" max="30" step="0.5"></div>
+          <div id="wrap-fan"><label>FAN (1-5)</label><input type="number" id="cmd-fan" value="3" min="1" max="5"></div>
           <div><label>POWER</label><select id="cmd-power" onchange="onPowerChange()"><option value="true">ON</option><option value="false">OFF</option></select></div>
         </div>
         <button class="btn" onclick="sendCommand()">SEND COMMAND</button>
@@ -232,31 +290,27 @@ label{font-size:11px;color:var(--muted);margin-bottom:6px;display:block;font-wei
     <div id="tab-users" class="panel">
       <div class="card">
         <div class="card-title">REGISTERED USERS</div>
+        <div id="usersAlert"></div>
         <div class="table-wrap"><table>
-          <thead><tr><th>Name</th><th>Role</th><th>Gender</th><th>Country</th><th>Joined</th></tr></thead>
-          <tbody id="usersTable"><tr><td colspan="5" class="empty">Loading...</td></tr></tbody>
+          <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Gender</th><th>Birth Date</th><th>Phone</th><th>Country</th><th>Joined</th><th>Actions</th></tr></thead>
+          <tbody id="usersTable"><tr><td colspan="8" class="empty">Loading...</td></tr></tbody>
         </table></div>
       </div>
     </div>
 
-  </div><!-- /container -->
-</div><!-- /dashboardWrap -->
+  </div>
+</div>
 
 <script>
-// ================================================================
-// ALL CONSTANTS FIRST — no forward references
-// ================================================================
-var SB_URL   = 'https://bzqupgbaelbahcdsxusq.supabase.co';
-var SB_KEY   = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ6cXVwZ2JhZWxiYWhjZHN4dXNxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcxMjc5NzYsImV4cCI6MjA5MjcwMzk3Nn0.XzjkSsop-rJ1VsVPqRdA8E3Q91TgmguFDh3h7WMa4gk';
-var SB_AUTH  = SB_URL + '/auth/v1';
-var DEVICE   = 'alimind-gateway-001';
-var authToken= localStorage.getItem('sb_token') || '';
-var authEmail= localStorage.getItem('sb_email') || '';
+var SB_URL  = 'https://bzqupgbaelbahcdsxusq.supabase.co';
+var SB_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ6cXVwZ2JhZWxiYWhjZHN4dXNxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcxMjc5NzYsImV4cCI6MjA5MjcwMzk3Nn0.XzjkSsop-rJ1VsVPqRdA8E3Q91TgmguFDh3h7WMa4gk';
+var SB_AUTH = SB_URL + '/auth/v1';
+var DEVICE  = 'alimind-gateway-001';
+var authToken = localStorage.getItem('sb_token') || '';
+var authEmail = localStorage.getItem('sb_email') || '';
 var countdownVal = 30;
 
-// ================================================================
-// AUTH
-// ================================================================
+// ── AUTH ──────────────────────────────────────────────────────────
 async function doLogin() {
   var email = document.getElementById('loginEmail').value.trim();
   var pass  = document.getElementById('loginPassword').value;
@@ -265,7 +319,7 @@ async function doLogin() {
   if (!email || !pass) { err.textContent = 'Enter email and password'; return; }
   btn.disabled = true; btn.textContent = 'Signing in...'; err.textContent = '';
   try {
-    var res = await fetch(SB_AUTH + '/token?grant_type=password', {
+    var res  = await fetch(SB_AUTH + '/token?grant_type=password', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'apikey': SB_KEY },
       body: JSON.stringify({ email: email, password: pass }),
@@ -277,9 +331,7 @@ async function doLogin() {
     localStorage.setItem('sb_token', authToken);
     localStorage.setItem('sb_email', authEmail);
     showDashboard();
-  } catch(e) {
-    err.textContent = '✗ ' + e.message;
-  }
+  } catch(e) { err.textContent = '✗ ' + e.message; }
   btn.disabled = false; btn.textContent = 'SIGN IN';
 }
 
@@ -297,11 +349,10 @@ function showDashboard() {
   document.getElementById('loginScreen').style.display   = 'none';
   document.getElementById('dashboardWrap').style.display = 'block';
   document.getElementById('headerUser').textContent      = authEmail;
-  onActionChange(); // apply default temp/fan for initial action
+  onActionChange();
   loadAll();
 }
 
-// Check existing session
 (async function checkSession() {
   if (!authToken) return;
   try {
@@ -313,44 +364,35 @@ function showDashboard() {
   doSignOut();
 })();
 
-// Enter key
 document.addEventListener('keydown', function(e) {
-  if (e.key === 'Enter' &&
-      document.getElementById('loginScreen').style.display !== 'none') doLogin();
+  if (e.key === 'Enter' && document.getElementById('loginScreen').style.display !== 'none') doLogin();
 });
 
-// ================================================================
-// SUPABASE FETCH
-// ================================================================
+// ── SUPABASE FETCH ────────────────────────────────────────────────
 async function sb(path, opts) {
   opts = opts || {};
   var headers = Object.assign({
-    'apikey':        SB_KEY,
+    'apikey': SB_KEY,
     'Authorization': 'Bearer ' + (authToken || SB_KEY),
-    'Content-Type':  'application/json',
+    'Content-Type': 'application/json',
   }, opts.headers || {});
-  var res = await fetch(SB_URL + '/rest/v1/' + path,
-    Object.assign({}, opts, { headers: headers }));
+  var res = await fetch(SB_URL + '/rest/v1/' + path, Object.assign({}, opts, { headers: headers }));
   if (res.status === 401) { doSignOut(); throw new Error('Session expired'); }
   if (!res.ok) {
-    var errText = await res.text().catch(function(){return res.statusText;});
+    var errText = await res.text().catch(function(){ return res.statusText; });
     throw new Error(res.status + ': ' + errText);
   }
-  if (res.status === 204 || opts.method === 'POST') return {};
+  if (res.status === 204 || opts.method === 'POST' || opts.method === 'PATCH') return {};
   return res.json();
 }
 
-// ================================================================
-// TABS
-// ================================================================
+// ── TABS ──────────────────────────────────────────────────────────
 function showTab(name) {
-  var tabs  = ['overview','devices','sensors','commands','pti','users'];
+  var tabs = ['overview','devices','sensors','commands','pti','users'];
   document.querySelectorAll('.tab').forEach(function(t, i) {
     t.classList.toggle('active', tabs[i] === name);
   });
-  document.querySelectorAll('.panel').forEach(function(p) {
-    p.classList.remove('active');
-  });
+  document.querySelectorAll('.panel').forEach(function(p) { p.classList.remove('active'); });
   document.getElementById('tab-' + name).classList.add('active');
   if      (name === 'overview') loadAll();
   else if (name === 'devices')  loadDevices();
@@ -360,9 +402,7 @@ function showTab(name) {
   else if (name === 'users')    loadUsers();
 }
 
-// ================================================================
-// LOAD ALL
-// ================================================================
+// ── LOAD ALL ──────────────────────────────────────────────────────
 async function loadAll() {
   document.getElementById('lastUpdate').textContent =
     'Updated: ' + new Date().toLocaleTimeString('en-US', { hour12: false });
@@ -372,24 +412,15 @@ async function loadAll() {
 async function loadStats() {
   try {
     var r = await Promise.all([
-      sb('profiles?select=id'),
-      sb('sites?select=id'),
-      sb('devices?select=id'),
-      sb('devices?select=id&status=eq.online'),
-      sb('sensor_readings?select=id'),
-      sb('hvac_commands?select=id'),
-      sb('pti_results?select=id,score'),
+      sb('profiles?select=id'), sb('sites?select=id'), sb('devices?select=id'),
+      sb('devices?select=id&status=eq.online'), sb('sensor_readings?select=id'),
+      sb('hvac_commands?select=id'), sb('pti_results?select=id,score'),
     ]);
-    set('st-users',    r[0].length);
-    set('st-sites',    r[1].length);
-    set('st-devices',  r[2].length);
-    set('st-online',   r[3].length);
-    set('st-readings', r[4].length);
-    set('st-commands', r[5].length);
-    set('st-pti',      r[6].length);
-    var avg = r[6].length
-      ? (r[6].reduce(function(s,x){return s+(x.score||0)},0)/r[6].length).toFixed(1)
-      : '—';
+    set('st-users', r[0].length); set('st-sites', r[1].length);
+    set('st-devices', r[2].length); set('st-online', r[3].length);
+    set('st-readings', r[4].length); set('st-commands', r[5].length);
+    set('st-pti', r[6].length);
+    var avg = r[6].length ? (r[6].reduce(function(s,x){return s+(x.score||0)},0)/r[6].length).toFixed(1) : '—';
     set('st-avgpti', avg);
   } catch(e) { console.error(e); }
 }
@@ -399,16 +430,16 @@ async function loadLiveSensor() {
     var rows = await sb('sensor_readings?device_id=eq.'+DEVICE+'&order=created_at.desc&limit=1');
     if (!rows.length) return;
     var r = rows[0];
-    set('sv-temp', r.room_temp_c  != null ? r.room_temp_c.toFixed(1)  : '—');
-    set('sv-hum',  r.humidity     != null ? r.humidity.toFixed(0)     : '—');
-    set('sv-co2',  r.co2_ppm      != null ? r.co2_ppm.toFixed(0)      : '—');
-    set('sv-hr',   r.heart_rate   != null ? r.heart_rate.toFixed(0)   : '—');
-    set('sv-spo2', r.spo2         != null ? r.spo2.toFixed(0)         : '—');
+    set('sv-temp', r.room_temp_c != null ? r.room_temp_c.toFixed(1) : '—');
+    set('sv-hum',  r.humidity    != null ? r.humidity.toFixed(0)    : '—');
+    set('sv-co2',  r.co2_ppm     != null ? r.co2_ppm.toFixed(0)     : '—');
+    set('sv-hr',   r.heart_rate  != null ? r.heart_rate.toFixed(0)  : '—');
+    set('sv-spo2', r.spo2        != null ? r.spo2.toFixed(0)        : '—');
     var pti = await sb('pti_results?order=created_at.desc&limit=1');
     if (pti.length) {
       var el = document.getElementById('sv-pti');
       el.textContent = pti[0].score != null ? pti[0].score.toFixed(1) : '—';
-      el.className   = 'sensor-val ' + sClass(pti[0].score);
+      el.className = 'sensor-val ' + sClass(pti[0].score);
     }
   } catch(e) { console.error(e); }
 }
@@ -429,9 +460,7 @@ async function loadRecentCommands() {
   } catch(e) { console.error(e); }
 }
 
-// ================================================================
-// DEVICES
-// ================================================================
+// ── DEVICES ───────────────────────────────────────────────────────
 async function loadDevices() {
   try {
     var rows  = await sb('devices?order=status.asc');
@@ -439,8 +468,7 @@ async function loadDevices() {
     if (!rows.length) { tbody.innerHTML='<tr><td colspan="8" class="empty">No devices</td></tr>'; return; }
     tbody.innerHTML = rows.map(function(r){ return '<tr>'+
       '<td style="color:var(--cyan);font-size:11px">'+(r.device_id||r.id)+'</td>'+
-      '<td>'+(r.name||'—')+'</td>'+
-      '<td>'+(r.ac_brand||'—')+'</td>'+
+      '<td>'+(r.name||'—')+'</td>'+'<td>'+(r.ac_brand||'—')+'</td>'+
       '<td style="font-size:11px;color:var(--muted)">'+(r.ac_protocol||'—')+'</td>'+
       '<td>'+sBadge(r.status)+'</td>'+
       '<td style="font-size:11px;color:var(--muted)">'+(r.last_seen?fmtTime(r.last_seen):'—')+'</td>'+
@@ -450,9 +478,7 @@ async function loadDevices() {
   } catch(e) { console.error(e); }
 }
 
-// ================================================================
-// SENSORS
-// ================================================================
+// ── SENSORS ───────────────────────────────────────────────────────
 async function loadSensors() {
   try {
     var rows  = await sb('sensor_readings?order=created_at.desc&limit=100');
@@ -471,78 +497,52 @@ async function loadSensors() {
   } catch(e) { console.error(e); }
 }
 
-// ================================================================
-// COMMANDS
-// ================================================================
-
-// Default temp & fan per action
+// ── COMMANDS ──────────────────────────────────────────────────────
 var ACTION_DEFAULTS = {
-  coolDown:  { temp: 19, fan: 3 },
-  warmUp:    { temp: 26, fan: 2 },
-  maintain:  { temp: 22, fan: 2 },
-  fanOnly:   { temp: 22, fan: 4 },
-  ventilate: { temp: 22, fan: 3 },
-  dry:       { temp: 24, fan: 2 },
+  coolDown:{temp:19,fan:3}, warmUp:{temp:26,fan:2}, maintain:{temp:22,fan:2},
+  fanOnly:{temp:22,fan:4},  ventilate:{temp:22,fan:3}, dry:{temp:24,fan:2},
 };
 
 function onActionChange() {
-  var action  = document.getElementById('cmd-action').value;
-  var def     = ACTION_DEFAULTS[action];
+  var def = ACTION_DEFAULTS[document.getElementById('cmd-action').value];
   if (!def) return;
-  var tempEl  = document.getElementById('cmd-temp');
-  var fanEl   = document.getElementById('cmd-fan');
-  // Only update if user hasn't manually changed the value from last default
-  tempEl.value = def.temp;
-  fanEl.value  = def.fan;
+  document.getElementById('cmd-temp').value = def.temp;
+  document.getElementById('cmd-fan').value  = def.fan;
 }
 
 function onPowerChange() {
-  var isPowerOff = document.getElementById('cmd-power').value === 'false';
-  document.getElementById('wrap-temp').style.opacity   = isPowerOff ? '0.35' : '1';
-  document.getElementById('wrap-fan').style.opacity    = isPowerOff ? '0.35' : '1';
-  document.getElementById('cmd-temp').disabled         = isPowerOff;
-  document.getElementById('cmd-fan').disabled          = isPowerOff;
-  document.getElementById('cmd-action').disabled       = isPowerOff;
+  var off = document.getElementById('cmd-power').value === 'false';
+  document.getElementById('wrap-temp').style.opacity    = off ? '0.35' : '1';
+  document.getElementById('wrap-fan').style.opacity     = off ? '0.35' : '1';
+  document.getElementById('cmd-temp').disabled          = off;
+  document.getElementById('cmd-fan').disabled           = off;
+  document.getElementById('cmd-action').disabled        = off;
 }
 
 async function sendCommand() {
-  var alertEl = document.getElementById('cmdAlert');
+  var alertEl  = document.getElementById('cmdAlert');
   alertEl.innerHTML = '';
   var deviceId = document.getElementById('cmd-device').value.trim();
-  if (!deviceId) {
-    alertEl.innerHTML = '<div class="alert-err">✗ Device ID is required</div>';
-    return;
-  }
+  if (!deviceId) { alertEl.innerHTML='<div class="alert-err">✗ Device ID is required</div>'; return; }
   try {
-    var isPowerOff = document.getElementById('cmd-power').value === 'false';
+    var off  = document.getElementById('cmd-power').value === 'false';
     var body = {
       device_id:   deviceId,
-      action_type: isPowerOff ? 'powerOff' : document.getElementById('cmd-action').value,
-      setpoint_c:  isPowerOff ? null : parseFloat(document.getElementById('cmd-temp').value),
-      fan_level:   isPowerOff ? null : parseInt(document.getElementById('cmd-fan').value),
-      power:       !isPowerOff,
-      status:      'pending',
-      source:      'manual',
+      action_type: off ? 'powerOff' : document.getElementById('cmd-action').value,
+      setpoint_c:  off ? null : parseFloat(document.getElementById('cmd-temp').value),
+      fan_level:   off ? null : parseInt(document.getElementById('cmd-fan').value),
+      power: !off, status: 'pending', source: 'manual',
     };
     var res = await fetch(SB_URL + '/rest/v1/hvac_commands', {
       method: 'POST',
-      headers: {
-        'apikey':        SB_KEY,
-        'Authorization': 'Bearer ' + (authToken || SB_KEY),
-        'Content-Type':  'application/json',
-        'Prefer':        'return=minimal',
-      },
+      headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer '+(authToken||SB_KEY),
+                 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
       body: JSON.stringify(body),
     });
-    if (!res.ok) {
-      var errText = await res.text();
-      throw new Error('HTTP ' + res.status + ' — ' + errText);
-    }
+    if (!res.ok) { var t = await res.text(); throw new Error('HTTP '+res.status+' — '+t); }
     alertEl.innerHTML = '<div class="alert-ok">✓ Command sent: <b>'+body.action_type+'</b>'+(body.setpoint_c?' → '+body.setpoint_c+'°C':'')+'</div>';
     loadCommands();
-  } catch(e) {
-    alertEl.innerHTML = '<div class="alert-err">✗ ' + e.message + '</div>';
-  }
+  } catch(e) { alertEl.innerHTML = '<div class="alert-err">✗ '+e.message+'</div>'; }
 }
 
 async function loadCommands() {
@@ -555,17 +555,14 @@ async function loadCommands() {
       '<td style="color:var(--cyan);font-size:11px">'+(r.device_id||'—')+'</td>'+
       '<td>'+r.action_type+'</td>'+
       '<td>'+(r.setpoint_c!=null?r.setpoint_c.toFixed(1):'—')+'°C</td>'+
-      '<td>'+(r.fan_level||'—')+'</td>'+
-      '<td>'+(r.power?'ON':'OFF')+'</td>'+
+      '<td>'+(r.fan_level||'—')+'</td>'+'<td>'+(r.power?'✓ ON':'OFF')+'</td>'+
       '<td>'+sBadge(r.status)+'</td>'+
       '<td style="font-size:11px;color:var(--muted)">'+(r.executed_at?fmtTime(r.executed_at):'—')+'</td>'+
     '</tr>'; }).join('');
   } catch(e) { console.error(e); }
 }
 
-// ================================================================
-// PTI
-// ================================================================
+// ── PTI ───────────────────────────────────────────────────────────
 async function loadPTI() {
   try {
     var rows  = await sb('pti_results?order=created_at.desc&limit=100');
@@ -574,8 +571,7 @@ async function loadPTI() {
     tbody.innerHTML = rows.map(function(r){ return '<tr>'+
       '<td style="font-size:11px;color:var(--muted)">'+fmtTime(r.created_at)+'</td>'+
       '<td class="'+sClass(r.score)+'">'+(r.score!=null?r.score.toFixed(1):'—')+'</td>'+
-      '<td>'+(r.comfort_level||'—')+'</td>'+
-      '<td>'+(r.action_type||'—')+'</td>'+
+      '<td>'+(r.comfort_level||'—')+'</td>'+'<td>'+(r.action_type||'—')+'</td>'+
       '<td>'+(r.recommended_temp_c!=null?r.recommended_temp_c.toFixed(1):'—')+'°C</td>'+
       '<td style="font-size:11px">'+(r.detected_context||'—')+'</td>'+
       '<td>'+(r.safe_mode?'<span style="color:var(--red)">⚠ YES</span>':'—')+'</td>'+
@@ -585,30 +581,153 @@ async function loadPTI() {
 }
 
 // ================================================================
-// USERS
+// USERS + EDIT
 // ================================================================
+var _usersCache = [];
+var _emailMap   = {};
+
 async function loadUsers() {
   try {
-    var rows  = await sb('profiles?order=created_at.desc');
+    // profiles جدول — كل بيانات التسجيل
+    var rows  = await sb('profiles?order=created_at.desc&select=id,full_name,role,gender,birth_date,phone,country,age,created_at');
+    _usersCache = rows;
     var tbody = document.getElementById('usersTable');
-    if (!rows.length) { tbody.innerHTML='<tr><td colspan="5" class="empty">No users</td></tr>'; return; }
-    tbody.innerHTML = rows.map(function(r){ return '<tr>'+
-      '<td>'+(r.full_name||'—')+'</td>'+
-      '<td><span class="'+(r.role==='admin'?'b-online':'b-offline')+'">'+r.role+'</span></td>'+
-      '<td>'+(r.gender||'—')+'</td>'+
-      '<td>'+(r.country||'—')+'</td>'+
-      '<td style="font-size:11px;color:var(--muted)">'+fmtDate(r.created_at)+'</td>'+
-    '</tr>'; }).join('');
+    if (!rows.length) { tbody.innerHTML='<tr><td colspan="9" class="empty">No users</td></tr>'; return; }
+
+    // نحاول نجلب emails من auth.users عبر admin API — قد يفشل مع anon key
+    var emailMap = {};
+    try {
+      var authUsers = await fetch(SB_URL + '/auth/v1/admin/users?per_page=200', {
+        headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + authToken }
+      });
+      if (authUsers.ok) {
+        var authData = await authUsers.json();
+        var list = authData.users || authData;
+        list.forEach(function(u) { emailMap[u.id] = u.email; });
+        _emailMap = emailMap;
+      }
+    } catch(_) {}
+
+    tbody.innerHTML = rows.map(function(r){
+      var email = emailMap[r.id] || '—';
+      return '<tr>'+
+        '<td><b>'+(r.full_name||'—')+'</b></td>'+
+        '<td style="font-size:11px;color:var(--cyan)">'+ email +'</td>'+
+        '<td><span class="'+(r.role==='admin'?'b-online':'b-offline')+'">'+r.role+'</span></td>'+
+        '<td>'+(r.gender||'—')+'</td>'+
+        '<td style="font-size:11px;color:var(--muted)">'+(r.birth_date||'—')+'</td>'+
+        '<td style="font-size:11px">'+(r.phone||'—')+'</td>'+
+        '<td>'+(r.country||'—')+'</td>'+
+        '<td style="font-size:11px;color:var(--muted)">'+fmtDate(r.created_at)+'</td>'+
+        '<td><button class="btn-edit" onclick="openEditModal(\''+r.id+'\')">✏ Edit</button></td>'+
+      '</tr>';
+    }).join('');
   } catch(e) { console.error(e); }
 }
 
-// ================================================================
-// HELPERS
-// ================================================================
-function set(id, val) {
-  var el = document.getElementById(id);
-  if (el) el.textContent = val;
+// ── Open modal with user data ─────────────────────────────────────
+function openEditModal(uid) {
+  var user = _usersCache.find(function(u){ return u.id === uid; });
+  if (!user) return;
+
+  // Try get email from table cell (stored in emailMap during loadUsers)
+  var emailEl = document.querySelector('#usersTable tr td[data-uid="'+uid+'"]');
+  var email   = _emailMap[uid] || '—';
+
+  document.getElementById('edit-uid').value      = uid;
+  document.getElementById('editModalEmail').textContent = uid;
+  document.getElementById('edit-email').value    = email;
+  document.getElementById('edit-name').value     = user.full_name  || '';
+  document.getElementById('edit-phone').value    = user.phone      || '';
+  document.getElementById('edit-country').value  = user.country    || '';
+  document.getElementById('edit-birth').value    = user.birth_date || '';
+  document.getElementById('edit-gender').value   = user.gender     || '';
+  document.getElementById('edit-role').value     = user.role       || 'user';
+  document.getElementById('edit-pass').value     = '';
+  document.getElementById('editModalAlert').innerHTML = '';
+  document.getElementById('editSaveBtn').disabled = false;
+  document.getElementById('editSaveBtn').textContent = 'SAVE CHANGES';
+  document.getElementById('editModal').classList.add('open');
 }
+
+function closeEditModal() {
+  document.getElementById('editModal').classList.remove('open');
+}
+
+// Close on overlay click
+document.getElementById('editModal').addEventListener('click', function(e) {
+  if (e.target === this) closeEditModal();
+});
+
+// ── Save user edits ───────────────────────────────────────────────
+async function saveUserEdit() {
+  var uid      = document.getElementById('edit-uid').value;
+  var alertEl  = document.getElementById('editModalAlert');
+  var saveBtn  = document.getElementById('editSaveBtn');
+  alertEl.innerHTML = '';
+
+  var updates = {
+    full_name:  document.getElementById('edit-name').value.trim(),
+    phone:      document.getElementById('edit-phone').value.trim(),
+    country:    document.getElementById('edit-country').value.trim(),
+    birth_date: document.getElementById('edit-birth').value || null,
+    gender:     document.getElementById('edit-gender').value || null,
+    role:       document.getElementById('edit-role').value,
+  };
+
+  if (!updates.full_name) {
+    alertEl.innerHTML = '<div class="alert-err">✗ Full name is required</div>';
+    return;
+  }
+
+  saveBtn.disabled = true;
+  saveBtn.textContent = 'Saving...';
+
+  try {
+    // Update profile table
+    await sb('profiles?id=eq.' + uid, {
+      method: 'PATCH',
+      headers: { Prefer: 'return=minimal' },
+      body: JSON.stringify(updates),
+    });
+
+    // Change password if filled
+    var newPass = document.getElementById('edit-pass').value.trim();
+    if (newPass) {
+      if (newPass.length < 6) {
+        alertEl.innerHTML = '<div class="alert-err">✗ Password must be at least 6 characters</div>';
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'SAVE CHANGES';
+        return;
+      }
+      // Use Supabase Admin API via service role would be needed for password change
+      // With anon key: only the user can change their own password
+      alertEl.innerHTML = '<div class="alert-err">⚠ Password change requires Admin API — profile data saved successfully</div>';
+    }
+
+    // Update cache
+    var idx = _usersCache.findIndex(function(u){ return u.id === uid; });
+    if (idx > -1) _usersCache[idx] = Object.assign({}, _usersCache[idx], updates);
+
+    // Show success
+    alertEl.innerHTML = '<div class="alert-ok">✓ User updated successfully</div>';
+    saveBtn.textContent = '✓ Saved';
+
+    // Refresh table
+    loadUsers();
+
+    // Auto close after 1.5s
+    setTimeout(function() { closeEditModal(); }, 1500);
+
+  } catch(e) {
+    alertEl.innerHTML = '<div class="alert-err">✗ ' + e.message + '</div>';
+    saveBtn.disabled = false;
+    saveBtn.textContent = 'SAVE CHANGES';
+  }
+}
+
+// ── HELPERS ───────────────────────────────────────────────────────
+function set(id, val) { var el = document.getElementById(id); if (el) el.textContent = val; }
 
 function fmtTime(iso) {
   if (!iso) return '—';
@@ -619,8 +738,7 @@ function fmtTime(iso) {
 
 function fmtDate(iso) {
   if (!iso) return '—';
-  return new Date(iso).toLocaleDateString('en-US',
-    {year:'numeric',month:'short',day:'numeric'});
+  return new Date(iso).toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'});
 }
 
 function sBadge(s) {
@@ -634,15 +752,11 @@ function sBadge(s) {
 
 function sClass(s) {
   if (!s) return '';
-  if (s>=80) return 's-ex';
-  if (s>=65) return 's-gd';
-  if (s>=48) return 's-md';
-  return 's-bd';
+  if (s>=80) return 's-ex'; if (s>=65) return 's-gd';
+  if (s>=48) return 's-md'; return 's-bd';
 }
 
-// ================================================================
-// AUTO REFRESH
-// ================================================================
+// ── AUTO REFRESH ──────────────────────────────────────────────────
 setInterval(function() {
   if (document.getElementById('dashboardWrap').style.display === 'none') return;
   countdownVal--;
