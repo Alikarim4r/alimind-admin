@@ -522,6 +522,7 @@ async function sendCommand() {
       fan_level:   isPowerOff ? null : parseInt(document.getElementById('cmd-fan').value),
       power:       !isPowerOff,
       status:      'pending',
+      source:      'manual',
     };
     var res = await fetch(SB_URL + '/rest/v1/hvac_commands', {
       method: 'POST',
