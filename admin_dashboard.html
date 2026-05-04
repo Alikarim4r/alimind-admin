@@ -304,7 +304,21 @@ label{font-size:11px;color:var(--muted);margin-bottom:6px;display:block;font-wei
   </div>
 </div>
 
-<!-- ADD USER MODAL -->
+<!-- DELETE USER MODAL -->
+<div class="modal-overlay" id="deleteUserModal">
+  <div class="modal" style="max-width:400px;text-align:center">
+    <div style="font-size:40px;margin-bottom:12px">⚠️</div>
+    <div class="modal-title" style="color:var(--red);justify-content:center">Delete User</div>
+    <p style="color:var(--muted);font-size:13px;margin:10px 0 20px" id="deleteUserMsg">Are you sure?</p>
+    <div id="deleteUserAlert"></div>
+    <input type="hidden" id="delete-uid">
+    <div class="modal-footer" style="justify-content:center">
+      <button class="btn-sm" onclick="closeDeleteModal()">Cancel</button>
+      <button class="btn" id="deleteConfirmBtn" onclick="executeDeleteUser()"
+        style="background:linear-gradient(135deg,var(--red),#cc0000)">DELETE</button>
+    </div>
+  </div>
+</div>
 <div class="modal-overlay" id="addUserModal">
   <div class="modal">
     <div class="modal-title">+ Add New User</div>
@@ -679,7 +693,8 @@ async function loadUsers() {
         '<td style="font-size:11px">'+(r.phone||'—')+'</td>'+
         '<td>'+(r.country||'—')+'</td>'+
         '<td style="font-size:11px;color:var(--muted)">'+fmtDate(r.created_at)+'</td>'+
-        '<td><button class="btn-edit" onclick="openEditModal(\''+r.id+'\')">✏ Edit</button></td>'+
+        '<td><button class="btn-edit" onclick="openEditModal(\''+r.id+'\')">✏ Edit</button> '+
+        '<button class="btn-danger" onclick="confirmDeleteUser(\''+r.id+'\',\''+( emailMap[r.id]||r.full_name||'this user' )+'\')">✕ Delete</button></td>'+
       '</tr>';
     }).join('');
   } catch(e) { console.error(e); }
@@ -787,6 +802,54 @@ async function saveUserEdit() {
 }
 
 // ================================================================
+// DELETE USER
+// ================================================================
+function confirmDeleteUser(uid, label) {
+  document.getElementById('delete-uid').value = uid;
+  document.getElementById('deleteUserMsg').textContent =
+    'This will permanently delete "' + label + '" and all their data. This cannot be undone.';
+  document.getElementById('deleteUserAlert').innerHTML = '';
+  document.getElementById('deleteConfirmBtn').disabled = false;
+  document.getElementById('deleteConfirmBtn').textContent = 'DELETE';
+  document.getElementById('deleteUserModal').classList.add('open');
+}
+
+function closeDeleteModal() {
+  document.getElementById('deleteUserModal').classList.remove('open');
+}
+
+document.getElementById('deleteUserModal').addEventListener('click', function(e) {
+  if (e.target === this) closeDeleteModal();
+});
+
+async function executeDeleteUser() {
+  var uid     = document.getElementById('delete-uid').value;
+  var alertEl = document.getElementById('deleteUserAlert');
+  var btn     = document.getElementById('deleteConfirmBtn');
+  alertEl.innerHTML = '';
+  btn.disabled = true;
+  btn.textContent = 'Deleting...';
+
+  try {
+    await sb('profiles?id=eq.' + uid, {
+      method: 'DELETE',
+      headers: { Prefer: 'return=minimal' },
+    });
+
+    alertEl.innerHTML = '<div class="alert-ok">✓ User deleted successfully</div>';
+    btn.textContent = '✓ Deleted';
+    _usersCache = _usersCache.filter(function(u){ return u.id !== uid; });
+    loadUsers();
+    setTimeout(function() { closeDeleteModal(); }, 1500);
+
+  } catch(e) {
+    alertEl.innerHTML = '<div class="alert-err">✗ ' + e.message + '</div>';
+    btn.disabled = false;
+    btn.textContent = 'DELETE';
+  }
+}
+
+// ================================================================
 // ADD USER
 // ================================================================
 function openAddUserModal() {
@@ -826,7 +889,6 @@ async function saveNewUser() {
   var gender  = document.getElementById('add-gender').value || null;
   var role    = document.getElementById('add-role').value;
 
-  // Validation
   if (!name)  { alertEl.innerHTML='<div class="alert-err">✗ Full name is required</div>'; return; }
   if (!email) { alertEl.innerHTML='<div class="alert-err">✗ Email is required</div>'; return; }
   if (!pass || pass.length < 6) { alertEl.innerHTML='<div class="alert-err">✗ Password must be at least 6 characters</div>'; return; }
@@ -835,7 +897,7 @@ async function saveNewUser() {
   saveBtn.textContent = 'Creating...';
 
   try {
-    // Step 1 — Sign up via Supabase Auth
+    // Step 1 — Sign up
     var signupRes = await fetch(SB_AUTH + '/signup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'apikey': SB_KEY },
@@ -847,28 +909,35 @@ async function saveNewUser() {
     var newUid = signupData.user?.id || signupData.id;
     if (!newUid) throw new Error('Could not get user ID');
 
-    // Step 2 — Insert profile data
-    await sb('profiles', {
+    var profileData = {
+      id:         newUid,
+      full_name:  name,
+      phone:      phone || null,
+      country:    country || null,
+      birth_date: birth,
+      gender:     gender,
+      role:       role,
+    };
+
+    // Step 2 — Upsert profile (fixes duplicate key error)
+    var profRes = await fetch(SB_URL + '/rest/v1/profiles', {
       method: 'POST',
-      headers: { Prefer: 'return=minimal' },
-      body: JSON.stringify({
-        id:         newUid,
-        full_name:  name,
-        phone:      phone || null,
-        country:    country || null,
-        birth_date: birth,
-        gender:     gender,
-        role:       role,
-      }),
+      headers: {
+        'apikey': SB_KEY,
+        'Authorization': 'Bearer ' + (authToken || SB_KEY),
+        'Content-Type': 'application/json',
+        'Prefer': 'resolution=merge-duplicates,return=minimal',
+      },
+      body: JSON.stringify(profileData),
     });
+    if (!profRes.ok) {
+      var t = await profRes.text();
+      throw new Error('Profile error: ' + t);
+    }
 
-    alertEl.innerHTML = '<div class="alert-ok">✅ Account created for <b>' + email + '</b><br><small>A confirmation email has been sent</small></div>';
+    alertEl.innerHTML = '<div class="alert-ok">✅ Account created for <b>' + email + '</b><br><small>Confirmation email sent</small></div>';
     saveBtn.textContent = '✓ Created';
-
-    // Refresh users table
     loadUsers();
-
-    // Auto close after 2s
     setTimeout(function() { closeAddUserModal(); }, 2000);
 
   } catch(e) {
