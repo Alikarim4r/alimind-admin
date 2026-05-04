@@ -380,8 +380,10 @@ var SB_URL  = 'https://bzqupgbaelbahcdsxusq.supabase.co';
 var SB_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ6cXVwZ2JhZWxiYWhjZHN4dXNxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcxMjc5NzYsImV4cCI6MjA5MjcwMzk3Nn0.XzjkSsop-rJ1VsVPqRdA8E3Q91TgmguFDh3h7WMa4gk';
 var SB_AUTH = SB_URL + '/auth/v1';
 var DEVICE  = 'alimind-gateway-001';
-var authToken = localStorage.getItem('sb_token') || '';
-var authEmail = localStorage.getItem('sb_email') || '';
+var authToken    = localStorage.getItem('sb_token') || '';
+var authEmail    = localStorage.getItem('sb_email') || '';
+var currentUid   = localStorage.getItem('sb_uid')   || '';
+var currentRole  = localStorage.getItem('sb_role')  || '';
 var countdownVal = 30;
 
 // ── AUTH ──────────────────────────────────────────────────────────
@@ -402,16 +404,33 @@ async function doLogin() {
     if (!res.ok) throw new Error(data.error_description || data.msg || 'Login failed');
     authToken = data.access_token;
     authEmail = email;
+    currentUid = data.user?.id || '';
     localStorage.setItem('sb_token', authToken);
     localStorage.setItem('sb_email', authEmail);
+    localStorage.setItem('sb_uid',   currentUid);
+
+    // Fetch role from profiles
+    var profRes  = await fetch(SB_URL + '/rest/v1/profiles?id=eq.' + currentUid + '&select=role', {
+      headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + authToken }
+    });
+    var profData = await profRes.json();
+    currentRole  = (profData[0]?.role) || 'user';
+    localStorage.setItem('sb_role', currentRole);
+
+    // Only allow admin or super_admin
+    if (currentRole !== 'admin' && currentRole !== 'super_admin') {
+      throw new Error('Access denied — admin account required');
+    }
+
     showDashboard();
   } catch(e) { err.textContent = '✗ ' + e.message; }
   btn.disabled = false; btn.textContent = 'SIGN IN';
 }
 
 function doSignOut() {
-  authToken = ''; authEmail = '';
+  authToken = ''; authEmail = ''; currentUid = ''; currentRole = '';
   localStorage.removeItem('sb_token'); localStorage.removeItem('sb_email');
+  localStorage.removeItem('sb_uid');   localStorage.removeItem('sb_role');
   document.getElementById('dashboardWrap').style.display = 'none';
   document.getElementById('loginScreen').style.display   = 'flex';
   document.getElementById('loginEmail').value    = '';
@@ -423,6 +442,17 @@ function showDashboard() {
   document.getElementById('loginScreen').style.display   = 'none';
   document.getElementById('dashboardWrap').style.display = 'block';
   document.getElementById('headerUser').textContent      = authEmail;
+  // Show role badge
+  var badge = document.querySelector('.hbadge');
+  if (currentRole === 'super_admin') {
+    badge.textContent = 'SUPER ADMIN';
+    badge.style.background = 'linear-gradient(135deg,#FFD700,#FFA500)';
+    badge.style.color = '#000';
+  } else {
+    badge.textContent = 'ADMIN';
+    badge.style.background = 'var(--cyan)';
+    badge.style.color = 'var(--bg)';
+  }
   onActionChange();
   loadAll();
 }
@@ -433,7 +463,20 @@ function showDashboard() {
     var res = await fetch(SB_AUTH + '/user', {
       headers: { 'Authorization': 'Bearer ' + authToken, 'apikey': SB_KEY }
     });
-    if (res.ok) { showDashboard(); return; }
+    if (res.ok) {
+      var userData = await res.json();
+      currentUid = userData.id || currentUid;
+      // Re-fetch role in case it changed
+      var profRes  = await fetch(SB_URL + '/rest/v1/profiles?id=eq.' + currentUid + '&select=role', {
+        headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + authToken }
+      });
+      var profData = await profRes.json();
+      currentRole  = (profData[0]?.role) || currentRole || 'user';
+      localStorage.setItem('sb_role', currentRole);
+      if (currentRole !== 'admin' && currentRole !== 'super_admin') { doSignOut(); return; }
+      showDashboard();
+      return;
+    }
   } catch(_) {}
   doSignOut();
 })();
@@ -683,18 +726,51 @@ async function loadUsers() {
     } catch(_) {}
 
     tbody.innerHTML = rows.map(function(r){
-      var email = emailMap[r.id] || '—';
-      return '<tr>'+
+      var email      = emailMap[r.id] || '—';
+      var isSelf     = r.id === currentUid;
+      var isSuper    = currentRole === 'super_admin';
+      var targetRole = r.role || 'user';
+
+      // Permissions:
+      // super_admin → can edit/delete everyone except themselves (can't delete self)
+      // admin       → can only edit/delete regular users (not admins or super_admin)
+      var canEdit   = isSuper
+        ? true
+        : (targetRole === 'user');
+      var canDelete = isSuper
+        ? !isSelf   // super_admin can delete anyone except themselves
+        : (targetRole === 'user');
+
+      // Role badge color
+      var roleBadge = targetRole === 'super_admin'
+        ? '<span style="color:#FFD700;background:#FFD70018;padding:3px 10px;border-radius:6px;font-size:11px;font-weight:700">super_admin</span>'
+        : targetRole === 'admin'
+          ? '<span class="b-online">admin</span>'
+          : '<span class="b-offline">user</span>';
+
+      var actions = '';
+      if (canEdit) {
+        actions += '<button class="btn-edit" onclick="openEditModal(\''+r.id+'\')">✏ Edit</button> ';
+      } else {
+        actions += '<span style="font-size:11px;color:var(--muted)">—</span> ';
+      }
+      if (canDelete) {
+        actions += '<button class="btn-danger" onclick="confirmDeleteUser(\''+r.id+'\',\''+(email||r.full_name||'this user')+'\')">✕ Delete</button>';
+      }
+      if (isSelf) {
+        actions = '<span style="font-size:11px;color:var(--cyan)">← you</span>';
+      }
+
+      return '<tr'+(isSelf?' style="background:rgba(0,188,212,0.05)"':'')+'>'+
         '<td><b>'+(r.full_name||'—')+'</b></td>'+
         '<td style="font-size:11px;color:var(--cyan)">'+ email +'</td>'+
-        '<td><span class="'+(r.role==='admin'?'b-online':'b-offline')+'">'+r.role+'</span></td>'+
+        '<td>'+ roleBadge +'</td>'+
         '<td>'+(r.gender||'—')+'</td>'+
         '<td style="font-size:11px;color:var(--muted)">'+(r.birth_date||'—')+'</td>'+
         '<td style="font-size:11px">'+(r.phone||'—')+'</td>'+
         '<td>'+(r.country||'—')+'</td>'+
         '<td style="font-size:11px;color:var(--muted)">'+fmtDate(r.created_at)+'</td>'+
-        '<td><button class="btn-edit" onclick="openEditModal(\''+r.id+'\')">✏ Edit</button> '+
-        '<button class="btn-danger" onclick="confirmDeleteUser(\''+r.id+'\',\''+( emailMap[r.id]||r.full_name||'this user' )+'\')">✕ Delete</button></td>'+
+        '<td>'+ actions +'</td>'+
       '</tr>';
     }).join('');
   } catch(e) { console.error(e); }
@@ -717,7 +793,14 @@ function openEditModal(uid) {
   document.getElementById('edit-country').value  = user.country    || '';
   document.getElementById('edit-birth').value    = user.birth_date || '';
   document.getElementById('edit-gender').value   = user.gender     || '';
-  document.getElementById('edit-role').value     = user.role       || 'user';
+  document.getElementById('edit-role').value     = user.role || 'user';
+
+  // Super admin can set any role — admin can only set user role
+  var roleSelect = document.getElementById('edit-role');
+  roleSelect.innerHTML = currentRole === 'super_admin'
+    ? '<option value="user">User</option><option value="admin">Admin</option><option value="super_admin">Super Admin</option>'
+    : '<option value="user">User</option>';
+  roleSelect.value = user.role || 'user';
   document.getElementById('edit-pass').value     = '';
   document.getElementById('editModalAlert').innerHTML = '';
   document.getElementById('editSaveBtn').disabled = false;
