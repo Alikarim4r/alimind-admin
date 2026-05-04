@@ -3,323 +3,100 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AliMind Admin Dashboard</title>
+<title>AliMind Admin</title>
 <style>
-  :root {
-    --bg:       #040C1A;
-    --card:     #081828;
-    --glass:    #0A2035;
-    --border:   #1A3A50;
-    --cyan:     #00BCD4;
-    --cyan2:    #00838F;
-    --green:    #00E090;
-    --orange:   #FF9C3A;
-    --red:      #FF4444;
-    --text:     #E8F4F8;
-    --muted:    #8AA8C0;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Segoe UI', sans-serif;
-    min-height: 100vh;
-  }
+:root {
+  --bg:#040C1A; --card:#081828; --glass:#0A2035;
+  --border:#1A3A50; --cyan:#00BCD4; --cyan2:#00838F;
+  --green:#00E090; --orange:#FF9C3A; --red:#FF4444;
+  --text:#E8F4F8; --muted:#8AA8C0;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;min-height:100vh}
 
-  /* ── Header ── */
-  header {
-    background: var(--card);
-    border-bottom: 1px solid var(--border);
-    padding: 14px 24px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
-  .logo { font-size: 22px; font-weight: 800; color: var(--cyan); letter-spacing: 2px; }
-  .badge {
-    background: var(--cyan);
-    color: var(--bg);
-    font-size: 10px;
-    font-weight: 700;
-    padding: 3px 8px;
-    border-radius: 4px;
-    letter-spacing: 1px;
-  }
-  .live-dot {
-    width: 8px; height: 8px;
-    background: var(--green);
-    border-radius: 50%;
-    animation: pulse 2s infinite;
-    margin-left: auto;
-  }
-  @keyframes pulse {
-    0%,100% { opacity: 1; }
-    50%      { opacity: 0.3; }
-  }
-  .header-info { font-size: 12px; color: var(--muted); margin-left: 4px; }
+/* LOGIN */
+#loginScreen{display:flex;align-items:center;justify-content:center;min-height:100vh}
+.login-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:40px;width:100%;max-width:400px;text-align:center}
+.login-logo{font-size:32px;font-weight:800;color:var(--cyan);letter-spacing:4px;margin-bottom:6px}
+.login-sub{color:var(--muted);font-size:13px;margin-bottom:32px}
+.login-input{width:100%;background:var(--glass);border:1px solid var(--border);border-radius:10px;color:var(--text);padding:12px 16px;font-size:14px;margin-bottom:12px;outline:none}
+.login-input:focus{border-color:var(--cyan)}
+.login-btn{width:100%;background:linear-gradient(135deg,var(--cyan),var(--cyan2));color:var(--bg);border:none;border-radius:10px;padding:14px;font-size:14px;font-weight:800;cursor:pointer;letter-spacing:1px;margin-top:8px}
+.login-btn:disabled{opacity:0.5;cursor:not-allowed}
+.login-error{color:var(--red);font-size:13px;margin-top:12px;min-height:20px}
+#dashboardWrap{display:none}
 
-  /* ── Layout ── */
-  .container { max-width: 1400px; margin: 0 auto; padding: 24px; }
+/* HEADER */
+header{background:var(--card);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100}
+.logo{font-size:22px;font-weight:800;color:var(--cyan);letter-spacing:2px}
+.hbadge{background:var(--cyan);color:var(--bg);font-size:10px;font-weight:700;padding:3px 8px;border-radius:4px;letter-spacing:1px}
+.live-dot{width:8px;height:8px;background:var(--green);border-radius:50%;animation:pulse 2s infinite;margin-left:auto}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 
-  /* ── Tabs ── */
-  .tabs {
-    display: flex;
-    gap: 4px;
-    margin-bottom: 24px;
-    border-bottom: 1px solid var(--border);
-    padding-bottom: 0;
-  }
-  .tab {
-    padding: 10px 20px;
-    cursor: pointer;
-    border-radius: 8px 8px 0 0;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--muted);
-    border-bottom: 2px solid transparent;
-    transition: all 0.2s;
-  }
-  .tab.active { color: var(--cyan); border-bottom-color: var(--cyan); }
-  .tab:hover  { color: var(--text); }
-  .panel { display: none; }
-  .panel.active { display: block; }
+/* LAYOUT */
+.container{max-width:1400px;margin:0 auto;padding:24px}
 
-  /* ── Stats grid ── */
-  .stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 16px;
-    margin-bottom: 24px;
-  }
-  .stat-card {
-    background: var(--glass);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 18px;
-  }
-  .stat-val  { font-size: 28px; font-weight: 800; color: var(--cyan); }
-  .stat-label{ font-size: 12px; color: var(--muted); margin-top: 4px; }
+/* TABS */
+.tabs{display:flex;gap:4px;margin-bottom:24px;border-bottom:1px solid var(--border)}
+.tab{padding:10px 20px;cursor:pointer;border-radius:8px 8px 0 0;font-size:13px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;transition:all .2s}
+.tab.active{color:var(--cyan);border-bottom-color:var(--cyan)}
+.tab:hover{color:var(--text)}
+.panel{display:none}
+.panel.active{display:block}
 
-  /* ── Cards ── */
-  .card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 20px;
-    margin-bottom: 20px;
-  }
-  .card-title {
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--muted);
-    letter-spacing: 1.5px;
-    margin-bottom: 16px;
-  }
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px;margin-bottom:24px}
+.stat-card{background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:18px}
+.stat-val{font-size:28px;font-weight:800;color:var(--cyan)}
+.stat-label{font-size:12px;color:var(--muted);margin-top:4px}
 
-  /* ── Table ── */
-  table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  th {
-    text-align: left;
-    padding: 10px 12px;
-    color: var(--muted);
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    border-bottom: 1px solid var(--border);
-  }
-  td {
-    padding: 12px;
-    border-bottom: 1px solid var(--border);
-    color: var(--text);
-  }
-  tr:last-child td { border-bottom: none; }
-  tr:hover td { background: var(--glass); }
+/* CARD */
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:20px}
+.card-title{font-size:13px;font-weight:700;color:var(--muted);letter-spacing:1.5px;margin-bottom:16px}
 
-  /* ── Status badges ── */
-  .badge-online  { color: var(--green);  background: #00E09015; padding: 3px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; }
-  .badge-offline { color: var(--muted);  background: #8AA8C015; padding: 3px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; }
-  .badge-pending { color: var(--orange); background: #FF9C3A15; padding: 3px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; }
-  .badge-exec    { color: var(--green);  background: #00E09015; padding: 3px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; }
-  .badge-fail    { color: var(--red);    background: #FF444415; padding: 3px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; }
+/* TABLE */
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;padding:10px 12px;color:var(--muted);font-size:11px;font-weight:700;letter-spacing:1px;border-bottom:1px solid var(--border)}
+td{padding:12px;border-bottom:1px solid var(--border);color:var(--text)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--glass)}
 
-  /* ── PTI score color ── */
-  .score-excellent { color: var(--cyan);  font-weight: 700; }
-  .score-good      { color: var(--green); font-weight: 700; }
-  .score-mild      { color: var(--orange);font-weight: 700; }
-  .score-bad       { color: var(--red);   font-weight: 700; }
+/* BADGES */
+.b-online{color:var(--green);background:#00E09015;padding:3px 10px;border-radius:6px;font-size:11px;font-weight:700}
+.b-offline{color:var(--muted);background:#8AA8C015;padding:3px 10px;border-radius:6px;font-size:11px;font-weight:700}
+.b-pending{color:var(--orange);background:#FF9C3A15;padding:3px 10px;border-radius:6px;font-size:11px;font-weight:700}
+.b-exec{color:var(--green);background:#00E09015;padding:3px 10px;border-radius:6px;font-size:11px;font-weight:700}
+.b-fail{color:var(--red);background:#FF444415;padding:3px 10px;border-radius:6px;font-size:11px;font-weight:700}
 
-  /* ── Command form ── */
-  .cmd-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 12px;
-    margin-bottom: 16px;
-  }
-  select, input[type=number], input[type=text] {
-    width: 100%;
-    background: var(--glass);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    color: var(--text);
-    padding: 10px 12px;
-    font-size: 13px;
-  }
-  label { font-size: 11px; color: var(--muted); margin-bottom: 6px; display: block; font-weight: 700; letter-spacing: 1px; }
-  .btn {
-    background: linear-gradient(135deg, var(--cyan), var(--cyan2));
-    color: var(--bg);
-    border: none;
-    border-radius: 10px;
-    padding: 12px 24px;
-    font-size: 13px;
-    font-weight: 800;
-    cursor: pointer;
-    letter-spacing: 1px;
-    transition: opacity 0.2s;
-  }
-  .btn:hover   { opacity: 0.85; }
-  .btn-danger  { background: linear-gradient(135deg, var(--red), #CC0000); color: #fff; }
-  .btn-outline {
-    background: transparent;
-    border: 1px solid var(--cyan);
-    color: var(--cyan);
-    border-radius: 8px;
-    padding: 6px 14px;
-    font-size: 12px;
-    cursor: pointer;
-  }
+/* SCORE */
+.s-ex{color:var(--cyan);font-weight:700}
+.s-gd{color:var(--green);font-weight:700}
+.s-md{color:var(--orange);font-weight:700}
+.s-bd{color:var(--red);font-weight:700}
 
-  /* ── Chart ── */
-  .chart-wrap { height: 200px; position: relative; }
-  canvas { width: 100% !important; }
+/* SENSORS */
+.sensor-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px}
+.sensor-card{background:var(--glass);border:1px solid var(--border);border-radius:12px;padding:14px;text-align:center}
+.sensor-val{font-size:24px;font-weight:800;color:var(--cyan)}
+.sensor-unit{font-size:11px;color:var(--muted)}
+.sensor-name{font-size:11px;color:var(--muted);margin-top:6px}
 
-  /* ── Sensor live ── */
-  .sensor-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-    gap: 12px;
-  }
-  .sensor-card {
-    background: var(--glass);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 14px;
-    text-align: center;
-  }
-  .sensor-val  { font-size: 24px; font-weight: 800; color: var(--cyan); }
-  .sensor-unit { font-size: 11px; color: var(--muted); }
-  .sensor-name { font-size: 11px; color: var(--muted); margin-top: 6px; }
-
-  /* ── Device card ── */
-  .device-info {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 12px;
-    margin-bottom: 16px;
-  }
-  .info-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
-  .info-key  { color: var(--muted); }
-  .info-val  { color: var(--text); font-weight: 600; }
-
-  /* ── Login Screen ── */
-  #loginScreen {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    background: var(--bg);
-  }
-  .login-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 40px;
-    width: 100%;
-    max-width: 400px;
-    text-align: center;
-  }
-  .login-logo {
-    font-size: 32px;
-    font-weight: 800;
-    color: var(--cyan);
-    letter-spacing: 4px;
-    margin-bottom: 6px;
-  }
-  .login-sub {
-    color: var(--muted);
-    font-size: 13px;
-    margin-bottom: 32px;
-  }
-  .login-input {
-    width: 100%;
-    background: var(--glass);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    color: var(--text);
-    padding: 12px 16px;
-    font-size: 14px;
-    margin-bottom: 12px;
-    outline: none;
-    transition: border 0.2s;
-  }
-  .login-input:focus { border-color: var(--cyan); }
-  .login-btn {
-    width: 100%;
-    background: linear-gradient(135deg, var(--cyan), var(--cyan2));
-    color: var(--bg);
-    border: none;
-    border-radius: 10px;
-    padding: 14px;
-    font-size: 14px;
-    font-weight: 800;
-    cursor: pointer;
-    letter-spacing: 1px;
-    margin-top: 8px;
-    transition: opacity 0.2s;
-  }
-  .login-btn:hover    { opacity: 0.85; }
-  .login-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-  .login-error {
-    color: var(--red);
-    font-size: 13px;
-    margin-top: 12px;
-    min-height: 20px;
-  }
-  #dashboardWrap { display: none; }
-  .refresh-bar {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 20px;
-    font-size: 12px;
-    color: var(--muted);
-  }
-  .refresh-bar button { padding: 6px 14px; font-size: 12px; }
-
-  /* ── Empty state ── */
-  .empty { text-align: center; padding: 40px; color: var(--muted); }
-
-  /* ── Scrollable table ── */
-  .table-wrap { overflow-x: auto; }
-
-  /* ── Alert ── */
-  .alert {
-    padding: 12px 16px;
-    border-radius: 10px;
-    margin-bottom: 16px;
-    font-size: 13px;
-  }
-  .alert-success { background: #00E09015; border: 1px solid #00E09040; color: var(--green); }
-  .alert-error   { background: #FF444415; border: 1px solid #FF444440; color: var(--red); }
-  .alert-info    { background: #00BCD415; border: 1px solid #00BCD440; color: var(--cyan); }
+/* FORM */
+.cmd-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:16px}
+select,input[type=number],input[type=text]{width:100%;background:var(--glass);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:10px 12px;font-size:13px}
+label{font-size:11px;color:var(--muted);margin-bottom:6px;display:block;font-weight:700;letter-spacing:1px}
+.btn{background:linear-gradient(135deg,var(--cyan),var(--cyan2));color:var(--bg);border:none;border-radius:10px;padding:12px 24px;font-size:13px;font-weight:800;cursor:pointer;letter-spacing:1px}
+.btn-sm{background:transparent;border:1px solid var(--cyan);color:var(--cyan);border-radius:8px;padding:6px 14px;font-size:12px;cursor:pointer}
+.alert-ok{padding:12px 16px;border-radius:10px;margin-bottom:16px;font-size:13px;background:#00E09015;border:1px solid #00E09040;color:var(--green)}
+.alert-err{padding:12px 16px;border-radius:10px;margin-bottom:16px;font-size:13px;background:#FF444415;border:1px solid #FF444440;color:var(--red)}
+.refresh-bar{display:flex;align-items:center;gap:12px;margin-bottom:20px;font-size:12px;color:var(--muted)}
+.table-wrap{overflow-x:auto}
+.empty{text-align:center;padding:40px;color:var(--muted)}
 </style>
 </head>
 <body>
 
-<!-- ── Login Screen ── -->
+<!-- LOGIN -->
 <div id="loginScreen">
   <div class="login-card">
     <div class="login-logo">AliMind</div>
@@ -331,190 +108,93 @@
   </div>
 </div>
 
-<!-- ── Dashboard (hidden until login) ── -->
+<!-- DASHBOARD -->
 <div id="dashboardWrap">
+  <header>
+    <span class="logo">AliMind</span>
+    <span class="hbadge">ADMIN</span>
+    <span style="font-size:12px;color:var(--muted)" id="lastUpdate"></span>
+    <span style="font-size:12px;color:var(--cyan);margin-left:8px" id="headerUser"></span>
+    <div class="live-dot"></div>
+    <button class="btn-sm" onclick="doSignOut()" style="margin-left:12px">Sign Out</button>
+  </header>
 
-<!-- ── Header ── -->
-<header>
-  <span class="logo">AliMind</span>
-  <span class="badge">ADMIN</span>
-  <span class="header-info" id="lastUpdate">Loading...</span>
-  <span class="header-info" id="headerUser" style="margin-left:8px;color:var(--cyan)"></span>
-  <div class="live-dot"></div>
-  <button class="btn-outline" onclick="doSignOut()"
-          style="margin-left:12px;font-size:11px;padding:5px 12px">
-    Sign Out
-  </button>
-</header>
-
-<div class="container">
-
-  <!-- ── Tabs ── -->
-  <div class="tabs">
-    <div class="tab active" onclick="showTab('overview')">Overview</div>
-    <div class="tab" onclick="showTab('devices')">Devices</div>
-    <div class="tab" onclick="showTab('sensors')">Sensors</div>
-    <div class="tab" onclick="showTab('commands')">Commands</div>
-    <div class="tab" onclick="showTab('pti')">PTI Results</div>
-    <div class="tab" onclick="showTab('users')">Users</div>
-  </div>
-
-  <!-- ════════════════════════════════════════════
-       OVERVIEW
-  ════════════════════════════════════════════ -->
-  <div id="tab-overview" class="panel active">
-
-    <div class="refresh-bar">
-      <span>Auto-refresh: <b id="countdown">30</b>s</span>
-      <button class="btn-outline" onclick="loadAll()">↻ Refresh Now</button>
+  <div class="container">
+    <div class="tabs">
+      <div class="tab active" onclick="showTab('overview')">Overview</div>
+      <div class="tab" onclick="showTab('devices')">Devices</div>
+      <div class="tab" onclick="showTab('sensors')">Sensors</div>
+      <div class="tab" onclick="showTab('commands')">Commands</div>
+      <div class="tab" onclick="showTab('pti')">PTI Results</div>
+      <div class="tab" onclick="showTab('users')">Users</div>
     </div>
 
-    <div class="stats-grid" id="statsGrid">
-      <div class="stat-card"><div class="stat-val" id="st-users">—</div><div class="stat-label">TOTAL USERS</div></div>
-      <div class="stat-card"><div class="stat-val" id="st-sites">—</div><div class="stat-label">TOTAL SITES</div></div>
-      <div class="stat-card"><div class="stat-val" id="st-devices">—</div><div class="stat-label">TOTAL DEVICES</div></div>
-      <div class="stat-card"><div class="stat-val" id="st-online" style="color:var(--green)">—</div><div class="stat-label">ONLINE DEVICES</div></div>
-      <div class="stat-card"><div class="stat-val" id="st-readings">—</div><div class="stat-label">TOTAL READINGS</div></div>
-      <div class="stat-card"><div class="stat-val" id="st-commands">—</div><div class="stat-label">COMMANDS SENT</div></div>
-      <div class="stat-card"><div class="stat-val" id="st-pti">—</div><div class="stat-label">PTI CALCULATIONS</div></div>
-      <div class="stat-card"><div class="stat-val" id="st-avgpti">—</div><div class="stat-label">AVG PTI SCORE</div></div>
-    </div>
-
-    <!-- Live sensor -->
-    <div class="card">
-      <div class="card-title">LIVE SENSOR DATA — ESP32</div>
-      <div class="sensor-grid">
-        <div class="sensor-card">
-          <div class="sensor-val" id="sv-temp">—</div>
-          <div class="sensor-unit">°C</div>
-          <div class="sensor-name">Room Temp</div>
+    <!-- OVERVIEW -->
+    <div id="tab-overview" class="panel active">
+      <div class="refresh-bar">
+        <span>Auto-refresh: <b id="countdown">30</b>s</span>
+        <button class="btn-sm" onclick="loadAll()">↻ Refresh</button>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-val" id="st-users">—</div><div class="stat-label">USERS</div></div>
+        <div class="stat-card"><div class="stat-val" id="st-sites">—</div><div class="stat-label">SITES</div></div>
+        <div class="stat-card"><div class="stat-val" id="st-devices">—</div><div class="stat-label">DEVICES</div></div>
+        <div class="stat-card"><div class="stat-val" id="st-online" style="color:var(--green)">—</div><div class="stat-label">ONLINE</div></div>
+        <div class="stat-card"><div class="stat-val" id="st-readings">—</div><div class="stat-label">READINGS</div></div>
+        <div class="stat-card"><div class="stat-val" id="st-commands">—</div><div class="stat-label">COMMANDS</div></div>
+        <div class="stat-card"><div class="stat-val" id="st-pti">—</div><div class="stat-label">PTI CALCS</div></div>
+        <div class="stat-card"><div class="stat-val" id="st-avgpti">—</div><div class="stat-label">AVG PTI</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">LIVE SENSOR — ESP32</div>
+        <div class="sensor-grid">
+          <div class="sensor-card"><div class="sensor-val" id="sv-temp">—</div><div class="sensor-unit">°C</div><div class="sensor-name">Room Temp</div></div>
+          <div class="sensor-card"><div class="sensor-val" id="sv-hum">—</div><div class="sensor-unit">%</div><div class="sensor-name">Humidity</div></div>
+          <div class="sensor-card"><div class="sensor-val" id="sv-co2">—</div><div class="sensor-unit">ppm</div><div class="sensor-name">CO₂</div></div>
+          <div class="sensor-card"><div class="sensor-val" id="sv-hr">—</div><div class="sensor-unit">bpm</div><div class="sensor-name">Heart Rate</div></div>
+          <div class="sensor-card"><div class="sensor-val" id="sv-spo2">—</div><div class="sensor-unit">%</div><div class="sensor-name">SpO₂</div></div>
+          <div class="sensor-card"><div class="sensor-val" id="sv-pti">—</div><div class="sensor-unit">/100</div><div class="sensor-name">PTI Score</div></div>
         </div>
-        <div class="sensor-card">
-          <div class="sensor-val" id="sv-hum">—</div>
-          <div class="sensor-unit">%</div>
-          <div class="sensor-name">Humidity</div>
-        </div>
-        <div class="sensor-card">
-          <div class="sensor-val" id="sv-co2">—</div>
-          <div class="sensor-unit">ppm</div>
-          <div class="sensor-name">CO₂</div>
-        </div>
-        <div class="sensor-card">
-          <div class="sensor-val" id="sv-hr">—</div>
-          <div class="sensor-unit">bpm</div>
-          <div class="sensor-name">Heart Rate</div>
-        </div>
-        <div class="sensor-card">
-          <div class="sensor-val" id="sv-spo2">—</div>
-          <div class="sensor-unit">%</div>
-          <div class="sensor-name">SpO₂</div>
-        </div>
-        <div class="sensor-card">
-          <div class="sensor-val" id="sv-pti">—</div>
-          <div class="sensor-unit">/100</div>
-          <div class="sensor-name">PTI Score</div>
-        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">RECENT COMMANDS</div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Time</th><th>Device</th><th>Action</th><th>Temp</th><th>Fan</th><th>Status</th></tr></thead>
+          <tbody id="recentCmds"><tr><td colspan="6" class="empty">Loading...</td></tr></tbody>
+        </table></div>
       </div>
     </div>
 
-    <!-- Recent commands -->
-    <div class="card">
-      <div class="card-title">RECENT COMMANDS</div>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Time</th>
-              <th>Device</th>
-              <th>Action</th>
-              <th>Temp</th>
-              <th>Fan</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody id="recentCmds">
-            <tr><td colspan="6" class="empty">Loading...</td></tr>
-          </tbody>
-        </table>
+    <!-- DEVICES -->
+    <div id="tab-devices" class="panel">
+      <div class="card">
+        <div class="card-title">ALL DEVICES</div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Device ID</th><th>Name</th><th>AC Brand</th><th>Protocol</th><th>Status</th><th>Last Seen</th><th>Temp</th><th>Humidity</th></tr></thead>
+          <tbody id="devicesTable"><tr><td colspan="8" class="empty">Loading...</td></tr></tbody>
+        </table></div>
       </div>
     </div>
 
-  </div>
-
-  <!-- ════════════════════════════════════════════
-       DEVICES
-  ════════════════════════════════════════════ -->
-  <div id="tab-devices" class="panel">
-    <div class="card">
-      <div class="card-title">ALL DEVICES</div>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Device ID</th>
-              <th>Name</th>
-              <th>AC Brand</th>
-              <th>Protocol</th>
-              <th>Status</th>
-              <th>Last Seen</th>
-              <th>Site</th>
-              <th>Temp</th>
-              <th>Humidity</th>
-            </tr>
-          </thead>
-          <tbody id="devicesTable">
-            <tr><td colspan="9" class="empty">Loading...</td></tr>
-          </tbody>
-        </table>
+    <!-- SENSORS -->
+    <div id="tab-sensors" class="panel">
+      <div class="card">
+        <div class="card-title">LATEST READINGS</div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Time</th><th>Device</th><th>Temp °C</th><th>Humidity %</th><th>CO₂ ppm</th><th>HR bpm</th><th>SpO₂ %</th><th>HRV ms</th></tr></thead>
+          <tbody id="sensorsTable"><tr><td colspan="8" class="empty">Loading...</td></tr></tbody>
+        </table></div>
       </div>
     </div>
-  </div>
 
-  <!-- ════════════════════════════════════════════
-       SENSORS
-  ════════════════════════════════════════════ -->
-  <div id="tab-sensors" class="panel">
-    <div class="card">
-      <div class="card-title">LATEST SENSOR READINGS</div>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Time</th>
-              <th>Device</th>
-              <th>Temp °C</th>
-              <th>Humidity %</th>
-              <th>CO₂ ppm</th>
-              <th>HR bpm</th>
-              <th>SpO₂ %</th>
-              <th>HRV ms</th>
-            </tr>
-          </thead>
-          <tbody id="sensorsTable">
-            <tr><td colspan="8" class="empty">Loading...</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <!-- ════════════════════════════════════════════
-       COMMANDS
-  ════════════════════════════════════════════ -->
-  <div id="tab-commands" class="panel">
-
-    <!-- Send command -->
-    <div class="card">
-      <div class="card-title">SEND MANUAL COMMAND</div>
-      <div id="cmdAlert"></div>
-      <div class="cmd-grid">
-        <div>
-          <label>DEVICE ID</label>
-          <input type="text" id="cmd-device" value="alimind-gateway-001">
-        </div>
-        <div>
-          <label>ACTION</label>
-          <select id="cmd-action">
+    <!-- COMMANDS -->
+    <div id="tab-commands" class="panel">
+      <div class="card">
+        <div class="card-title">SEND COMMAND</div>
+        <div id="cmdAlert"></div>
+        <div class="cmd-grid">
+          <div><label>DEVICE ID</label><input type="text" id="cmd-device" value="alimind-gateway-001"></div>
+          <div><label>ACTION</label><select id="cmd-action">
             <option value="coolDown">Cool Down</option>
             <option value="warmUp">Warm Up</option>
             <option value="maintain">Maintain</option>
@@ -522,165 +202,91 @@
             <option value="ventilate">Ventilate</option>
             <option value="dry">Dry</option>
             <option value="powerOff">Power Off</option>
-          </select>
+          </select></div>
+          <div><label>TEMPERATURE °C</label><input type="number" id="cmd-temp" value="23" min="16" max="30" step="0.5"></div>
+          <div><label>FAN (1-5)</label><input type="number" id="cmd-fan" value="2" min="1" max="5"></div>
+          <div><label>POWER</label><select id="cmd-power"><option value="true">ON</option><option value="false">OFF</option></select></div>
         </div>
-        <div>
-          <label>TEMPERATURE (°C)</label>
-          <input type="number" id="cmd-temp" value="23" min="16" max="30" step="0.5">
-        </div>
-        <div>
-          <label>FAN LEVEL (1-5)</label>
-          <input type="number" id="cmd-fan" value="2" min="1" max="5">
-        </div>
-        <div>
-          <label>POWER</label>
-          <select id="cmd-power">
-            <option value="true">ON</option>
-            <option value="false">OFF</option>
-          </select>
-        </div>
+        <button class="btn" onclick="sendCommand()">SEND COMMAND</button>
       </div>
-      <button class="btn" onclick="sendCommand()">SEND COMMAND</button>
-    </div>
-
-    <!-- Commands history -->
-    <div class="card">
-      <div class="card-title">COMMANDS HISTORY</div>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Time</th>
-              <th>Device</th>
-              <th>Action</th>
-              <th>Temp</th>
-              <th>Fan</th>
-              <th>Power</th>
-              <th>Status</th>
-              <th>Executed</th>
-            </tr>
-          </thead>
-          <tbody id="commandsTable">
-            <tr><td colspan="8" class="empty">Loading...</td></tr>
-          </tbody>
-        </table>
+      <div class="card">
+        <div class="card-title">COMMANDS HISTORY</div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Time</th><th>Device</th><th>Action</th><th>Temp</th><th>Fan</th><th>Power</th><th>Status</th><th>Executed</th></tr></thead>
+          <tbody id="commandsTable"><tr><td colspan="8" class="empty">Loading...</td></tr></tbody>
+        </table></div>
       </div>
     </div>
 
-  </div>
-
-  <!-- ════════════════════════════════════════════
-       PTI RESULTS
-  ════════════════════════════════════════════ -->
-  <div id="tab-pti" class="panel">
-    <div class="card">
-      <div class="card-title">PTI RESULTS — LAST 100</div>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Time</th>
-              <th>Score</th>
-              <th>Comfort</th>
-              <th>Action</th>
-              <th>Rec Temp</th>
-              <th>Context</th>
-              <th>Safe Mode</th>
-              <th>Engine</th>
-            </tr>
-          </thead>
-          <tbody id="ptiTable">
-            <tr><td colspan="8" class="empty">Loading...</td></tr>
-          </tbody>
-        </table>
+    <!-- PTI -->
+    <div id="tab-pti" class="panel">
+      <div class="card">
+        <div class="card-title">PTI RESULTS — LAST 100</div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Time</th><th>Score</th><th>Comfort</th><th>Action</th><th>Rec Temp</th><th>Context</th><th>Safe Mode</th><th>Engine</th></tr></thead>
+          <tbody id="ptiTable"><tr><td colspan="8" class="empty">Loading...</td></tr></tbody>
+        </table></div>
       </div>
     </div>
-  </div>
 
-  <!-- ════════════════════════════════════════════
-       USERS
-  ════════════════════════════════════════════ -->
-  <div id="tab-users" class="panel">
-    <div class="card">
-      <div class="card-title">REGISTERED USERS</div>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Role</th>
-              <th>Gender</th>
-              <th>Country</th>
-              <th>Joined</th>
-            </tr>
-          </thead>
-          <tbody id="usersTable">
-            <tr><td colspan="5" class="empty">Loading...</td></tr>
-          </tbody>
-        </table>
+    <!-- USERS -->
+    <div id="tab-users" class="panel">
+      <div class="card">
+        <div class="card-title">REGISTERED USERS</div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Name</th><th>Role</th><th>Gender</th><th>Country</th><th>Joined</th></tr></thead>
+          <tbody id="usersTable"><tr><td colspan="5" class="empty">Loading...</td></tr></tbody>
+        </table></div>
       </div>
     </div>
-  </div>
 
-</div><!-- /container -->
-
+  </div><!-- /container -->
 </div><!-- /dashboardWrap -->
 
 <script>
-// ── Auto refresh ──
-let countdownVal = 30;
 // ================================================================
-// CONFIG
+// ALL CONSTANTS FIRST — no forward references
 // ================================================================
-const SB_URL  = 'https://bzqupgbaelbahcdsxusq.supabase.co';
-const SB_KEY  = 'sb_publishable_gen23HpCRSO7gVV4cdw0PQ_MeB1QOvt';
-const SB_AUTH = SB_URL + '/auth/v1';
-const DEVICE  = 'alimind-gateway-001';
+var SB_URL   = 'https://bzqupgbaelbahcdsxusq.supabase.co';
+var SB_KEY   = 'sb_publishable_gen23HpCRSO7gVV4cdw0PQ_MeB1QOvt';
+var SB_AUTH  = SB_URL + '/auth/v1';
+var DEVICE   = 'alimind-gateway-001';
+var authToken= localStorage.getItem('sb_token') || '';
+var authEmail= localStorage.getItem('sb_email') || '';
+var countdownVal = 30;
 
 // ================================================================
 // AUTH
 // ================================================================
-let   authToken = localStorage.getItem('sb_token') || '';
-let   authEmail = localStorage.getItem('sb_email') || '';
-
 async function doLogin() {
-  const email = document.getElementById('loginEmail').value.trim();
-  const pass  = document.getElementById('loginPassword').value;
-  const btn   = document.getElementById('loginBtn');
-  const err   = document.getElementById('loginError');
-
+  var email = document.getElementById('loginEmail').value.trim();
+  var pass  = document.getElementById('loginPassword').value;
+  var btn   = document.getElementById('loginBtn');
+  var err   = document.getElementById('loginError');
   if (!email || !pass) { err.textContent = 'Enter email and password'; return; }
-
-  btn.disabled    = true;
-  btn.textContent = 'Signing in...';
-  err.textContent = '';
-
+  btn.disabled = true; btn.textContent = 'Signing in...'; err.textContent = '';
   try {
-    const res = await fetch(`${SB_AUTH}/token?grant_type=password`, {
-      method:  'POST',
+    var res = await fetch(SB_AUTH + '/token?grant_type=password', {
+      method: 'POST',
       headers: { 'Content-Type': 'application/json', apikey: SB_KEY },
-      body:    JSON.stringify({ email, password: pass }),
+      body: JSON.stringify({ email: email, password: pass }),
     });
-    const data = await res.json();
+    var data = await res.json();
     if (!res.ok) throw new Error(data.error_description || data.msg || 'Login failed');
-
     authToken = data.access_token;
     authEmail = email;
     localStorage.setItem('sb_token', authToken);
     localStorage.setItem('sb_email', authEmail);
     showDashboard();
-  } catch (e) {
+  } catch(e) {
     err.textContent = '✗ ' + e.message;
   }
-  btn.disabled    = false;
-  btn.textContent = 'SIGN IN';
+  btn.disabled = false; btn.textContent = 'SIGN IN';
 }
 
 function doSignOut() {
-  authToken = '';
-  authEmail = '';
-  localStorage.removeItem('sb_token');
-  localStorage.removeItem('sb_email');
+  authToken = ''; authEmail = '';
+  localStorage.removeItem('sb_token'); localStorage.removeItem('sb_email');
   document.getElementById('dashboardWrap').style.display = 'none';
   document.getElementById('loginScreen').style.display   = 'flex';
   document.getElementById('loginEmail').value    = '';
@@ -689,49 +295,59 @@ function doSignOut() {
 }
 
 function showDashboard() {
-  document.getElementById('loginScreen').style.display    = 'none';
-  document.getElementById('dashboardWrap').style.display  = 'block';
-  document.getElementById('headerUser').textContent       = authEmail;
+  document.getElementById('loginScreen').style.display   = 'none';
+  document.getElementById('dashboardWrap').style.display = 'block';
+  document.getElementById('headerUser').textContent      = authEmail;
   loadAll();
 }
 
-// Check existing session on load
-window.addEventListener('DOMContentLoaded', async () => {
-  if (authToken) {
-    // Verify token still valid
-    try {
-      const res = await fetch(`${SB_AUTH}/user`, {
-        headers: { Authorization: `Bearer ${authToken}`, apikey: SB_KEY }
-      });
-      if (res.ok) { showDashboard(); return; }
-    } catch (_) {}
-    // Token expired
-    doSignOut();
-  }
+// Check existing session
+(async function checkSession() {
+  if (!authToken) return;
+  try {
+    var res = await fetch(SB_AUTH + '/user', {
+      headers: { Authorization: 'Bearer ' + authToken, apikey: SB_KEY }
+    });
+    if (res.ok) { showDashboard(); return; }
+  } catch(_) {}
+  doSignOut();
+})();
+
+// Enter key
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' &&
+      document.getElementById('loginScreen').style.display !== 'none') doLogin();
 });
 
-// Enter key on password
-document.addEventListener('keydown', e => {
-  if (e.key === 'Enter' &&
-      document.getElementById('loginScreen').style.display !== 'none') {
-    doLogin();
-  }
-});
+// ================================================================
+// SUPABASE FETCH
+// ================================================================
+async function sb(path, opts) {
+  opts = opts || {};
+  var headers = Object.assign({
+    apikey: SB_KEY,
+    Authorization: 'Bearer ' + (authToken || SB_KEY),
+    'Content-Type': 'application/json',
+  }, opts.headers || {});
+  var res = await fetch(SB_URL + '/rest/v1/' + path,
+    Object.assign({}, opts, { headers: headers }));
+  if (res.status === 401) { doSignOut(); throw new Error('Session expired'); }
+  if (!res.ok) throw new Error(res.status + ' ' + res.statusText);
+  return res.json();
+}
 
 // ================================================================
 // TABS
 // ================================================================
 function showTab(name) {
-  document.querySelectorAll('.tab').forEach((t, i) => {
-    const tabs = ['overview','devices','sensors','commands','pti','users'];
+  var tabs  = ['overview','devices','sensors','commands','pti','users'];
+  document.querySelectorAll('.tab').forEach(function(t, i) {
     t.classList.toggle('active', tabs[i] === name);
   });
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(function(p) {
+    p.classList.remove('active');
+  });
   document.getElementById('tab-' + name).classList.add('active');
-  loadTab(name);
-}
-
-function loadTab(name) {
   if      (name === 'overview') loadAll();
   else if (name === 'devices')  loadDevices();
   else if (name === 'sensors')  loadSensors();
@@ -741,105 +357,72 @@ function loadTab(name) {
 }
 
 // ================================================================
-// SUPABASE FETCH
-// ================================================================
-async function sb(path, opts = {}) {
-  const res = await fetch(`${SB_URL}/rest/v1/${path}`, {
-    headers: {
-      apikey:        SB_KEY,
-      Authorization: `Bearer ${authToken || SB_KEY}`,
-      'Content-Type': 'application/json',
-      ...opts.headers,
-    },
-    ...opts,
-  });
-  if (res.status === 401) { doSignOut(); throw new Error('Session expired'); }
-  if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
-  return res.json();
-}
-
-// ================================================================
 // LOAD ALL
 // ================================================================
 async function loadAll() {
-  updateTime();
-  await Promise.all([
-    loadStats(),
-    loadLiveSensor(),
-    loadRecentCommands(),
-  ]);
+  document.getElementById('lastUpdate').textContent =
+    'Updated: ' + new Date().toLocaleTimeString('en-US', { hour12: false });
+  await Promise.all([loadStats(), loadLiveSensor(), loadRecentCommands()]);
 }
 
 async function loadStats() {
   try {
-    const [users, sites, devices, online, readings, commands, ptiRes] =
-      await Promise.all([
-        sb('profiles?select=id'),
-        sb('sites?select=id'),
-        sb('devices?select=id'),
-        sb('devices?select=id&status=eq.online'),
-        sb('sensor_readings?select=id'),
-        sb('hvac_commands?select=id'),
-        sb('pti_results?select=id,score'),
-      ]);
-
-    set('st-users',    users.length);
-    set('st-sites',    sites.length);
-    set('st-devices',  devices.length);
-    set('st-online',   online.length);
-    set('st-readings', readings.length);
-    set('st-commands', commands.length);
-    set('st-pti',      ptiRes.length);
-
-    const avg = ptiRes.length
-      ? (ptiRes.reduce((s, r) => s + (r.score || 0), 0) / ptiRes.length).toFixed(1)
+    var r = await Promise.all([
+      sb('profiles?select=id'),
+      sb('sites?select=id'),
+      sb('devices?select=id'),
+      sb('devices?select=id&status=eq.online'),
+      sb('sensor_readings?select=id'),
+      sb('hvac_commands?select=id'),
+      sb('pti_results?select=id,score'),
+    ]);
+    set('st-users',    r[0].length);
+    set('st-sites',    r[1].length);
+    set('st-devices',  r[2].length);
+    set('st-online',   r[3].length);
+    set('st-readings', r[4].length);
+    set('st-commands', r[5].length);
+    set('st-pti',      r[6].length);
+    var avg = r[6].length
+      ? (r[6].reduce(function(s,x){return s+(x.score||0)},0)/r[6].length).toFixed(1)
       : '—';
     set('st-avgpti', avg);
-  } catch (e) { console.error('stats:', e); }
+  } catch(e) { console.error(e); }
 }
 
 async function loadLiveSensor() {
   try {
-    const rows = await sb(
-      `sensor_readings?device_id=eq.${DEVICE}&order=created_at.desc&limit=1`);
+    var rows = await sb('sensor_readings?device_id=eq.'+DEVICE+'&order=created_at.desc&limit=1');
     if (!rows.length) return;
-    const r = rows[0];
-    set('sv-temp', r.room_temp_c?.toFixed(1) ?? '—');
-    set('sv-hum',  r.humidity?.toFixed(0)    ?? '—');
-    set('sv-co2',  r.co2_ppm?.toFixed(0)     ?? '—');
-    set('sv-hr',   r.heart_rate?.toFixed(0)  ?? '—');
-    set('sv-spo2', r.spo2?.toFixed(0)        ?? '—');
-
-    // Latest PTI
-    const pti = await sb('pti_results?order=created_at.desc&limit=1');
+    var r = rows[0];
+    set('sv-temp', r.room_temp_c  != null ? r.room_temp_c.toFixed(1)  : '—');
+    set('sv-hum',  r.humidity     != null ? r.humidity.toFixed(0)     : '—');
+    set('sv-co2',  r.co2_ppm      != null ? r.co2_ppm.toFixed(0)      : '—');
+    set('sv-hr',   r.heart_rate   != null ? r.heart_rate.toFixed(0)   : '—');
+    set('sv-spo2', r.spo2         != null ? r.spo2.toFixed(0)         : '—');
+    var pti = await sb('pti_results?order=created_at.desc&limit=1');
     if (pti.length) {
-      const s = pti[0].score;
-      const el = document.getElementById('sv-pti');
-      el.textContent = s?.toFixed(1) ?? '—';
-      el.className = 'sensor-val ' + scoreClass(s);
+      var el = document.getElementById('sv-pti');
+      el.textContent = pti[0].score != null ? pti[0].score.toFixed(1) : '—';
+      el.className   = 'sensor-val ' + sClass(pti[0].score);
     }
-  } catch (e) { console.error('live sensor:', e); }
+  } catch(e) { console.error(e); }
 }
 
 async function loadRecentCommands() {
   try {
-    const rows = await sb(
-      'hvac_commands?order=created_at.desc&limit=10');
-    const tbody = document.getElementById('recentCmds');
-    if (!rows.length) {
-      tbody.innerHTML = '<tr><td colspan="6" class="empty">No commands yet</td></tr>';
-      return;
-    }
-    tbody.innerHTML = rows.map(r => `
-      <tr>
-        <td>${fmtTime(r.created_at)}</td>
-        <td style="color:var(--cyan)">${r.device_id ?? '—'}</td>
-        <td>${r.action_type}</td>
-        <td>${r.setpoint_c?.toFixed(1) ?? '—'}°C</td>
-        <td>${r.fan_level ?? '—'}</td>
-        <td>${statusBadge(r.status)}</td>
-      </tr>`).join('');
-  } catch (e) { console.error('recent cmds:', e); }
+    var rows  = await sb('hvac_commands?order=created_at.desc&limit=10');
+    var tbody = document.getElementById('recentCmds');
+    if (!rows.length) { tbody.innerHTML='<tr><td colspan="6" class="empty">No commands yet</td></tr>'; return; }
+    tbody.innerHTML = rows.map(function(r){ return '<tr>'+
+      '<td style="font-size:11px;color:var(--muted)">'+fmtTime(r.created_at)+'</td>'+
+      '<td style="color:var(--cyan);font-size:11px">'+(r.device_id||'—')+'</td>'+
+      '<td>'+r.action_type+'</td>'+
+      '<td>'+(r.setpoint_c!=null?r.setpoint_c.toFixed(1):'—')+'°C</td>'+
+      '<td>'+(r.fan_level||'—')+'</td>'+
+      '<td>'+sBadge(r.status)+'</td>'+
+    '</tr>'; }).join('');
+  } catch(e) { console.error(e); }
 }
 
 // ================================================================
@@ -847,25 +430,20 @@ async function loadRecentCommands() {
 // ================================================================
 async function loadDevices() {
   try {
-    const rows = await sb('v_device_overview?order=status.asc');
-    const tbody = document.getElementById('devicesTable');
-    if (!rows.length) {
-      tbody.innerHTML = '<tr><td colspan="9" class="empty">No devices</td></tr>';
-      return;
-    }
-    tbody.innerHTML = rows.map(r => `
-      <tr>
-        <td style="color:var(--cyan);font-size:11px">${r.device_id}</td>
-        <td>${r.name}</td>
-        <td>${r.ac_brand ?? '—'}</td>
-        <td style="font-size:11px;color:var(--muted)">${r.ac_protocol ?? '—'}</td>
-        <td>${statusBadge(r.status)}</td>
-        <td style="font-size:11px;color:var(--muted)">${r.last_seen ? fmtTime(r.last_seen) : '—'}</td>
-        <td>${r.site_name ?? '—'}</td>
-        <td>${r.room_temp_c?.toFixed(1) ?? '—'}${r.room_temp_c ? '°C' : ''}</td>
-        <td>${r.humidity?.toFixed(0) ?? '—'}${r.humidity ? '%' : ''}</td>
-      </tr>`).join('');
-  } catch (e) { console.error('devices:', e); }
+    var rows  = await sb('devices?order=status.asc');
+    var tbody = document.getElementById('devicesTable');
+    if (!rows.length) { tbody.innerHTML='<tr><td colspan="8" class="empty">No devices</td></tr>'; return; }
+    tbody.innerHTML = rows.map(function(r){ return '<tr>'+
+      '<td style="color:var(--cyan);font-size:11px">'+(r.device_id||r.id)+'</td>'+
+      '<td>'+(r.name||'—')+'</td>'+
+      '<td>'+(r.ac_brand||'—')+'</td>'+
+      '<td style="font-size:11px;color:var(--muted)">'+(r.ac_protocol||'—')+'</td>'+
+      '<td>'+sBadge(r.status)+'</td>'+
+      '<td style="font-size:11px;color:var(--muted)">'+(r.last_seen?fmtTime(r.last_seen):'—')+'</td>'+
+      '<td>'+(r.room_temp_c!=null?r.room_temp_c.toFixed(1)+'°C':'—')+'</td>'+
+      '<td>'+(r.humidity!=null?r.humidity.toFixed(0)+'%':'—')+'</td>'+
+    '</tr>'; }).join('');
+  } catch(e) { console.error(e); }
 }
 
 // ================================================================
@@ -873,34 +451,30 @@ async function loadDevices() {
 // ================================================================
 async function loadSensors() {
   try {
-    const rows = await sb('sensor_readings?order=created_at.desc&limit=100');
-    const tbody = document.getElementById('sensorsTable');
-    if (!rows.length) {
-      tbody.innerHTML = '<tr><td colspan="8" class="empty">No readings</td></tr>';
-      return;
-    }
-    tbody.innerHTML = rows.map(r => `
-      <tr>
-        <td style="font-size:11px;color:var(--muted)">${fmtTime(r.created_at)}</td>
-        <td style="color:var(--cyan);font-size:11px">${r.device_id ?? '—'}</td>
-        <td>${r.room_temp_c?.toFixed(1) ?? '—'}</td>
-        <td>${r.humidity?.toFixed(0) ?? '—'}</td>
-        <td>${r.co2_ppm?.toFixed(0) ?? '—'}</td>
-        <td>${r.heart_rate?.toFixed(0) ?? '—'}</td>
-        <td>${r.spo2?.toFixed(0) ?? '—'}</td>
-        <td>${r.hrv?.toFixed(0) ?? '—'}</td>
-      </tr>`).join('');
-  } catch (e) { console.error('sensors:', e); }
+    var rows  = await sb('sensor_readings?order=created_at.desc&limit=100');
+    var tbody = document.getElementById('sensorsTable');
+    if (!rows.length) { tbody.innerHTML='<tr><td colspan="8" class="empty">No readings</td></tr>'; return; }
+    tbody.innerHTML = rows.map(function(r){ return '<tr>'+
+      '<td style="font-size:11px;color:var(--muted)">'+fmtTime(r.created_at)+'</td>'+
+      '<td style="color:var(--cyan);font-size:11px">'+(r.device_id||'—')+'</td>'+
+      '<td>'+(r.room_temp_c!=null?r.room_temp_c.toFixed(1):'—')+'</td>'+
+      '<td>'+(r.humidity!=null?r.humidity.toFixed(0):'—')+'</td>'+
+      '<td>'+(r.co2_ppm!=null?r.co2_ppm.toFixed(0):'—')+'</td>'+
+      '<td>'+(r.heart_rate!=null?r.heart_rate.toFixed(0):'—')+'</td>'+
+      '<td>'+(r.spo2!=null?r.spo2.toFixed(0):'—')+'</td>'+
+      '<td>'+(r.hrv!=null?r.hrv.toFixed(0):'—')+'</td>'+
+    '</tr>'; }).join('');
+  } catch(e) { console.error(e); }
 }
 
 // ================================================================
 // COMMANDS
 // ================================================================
 async function sendCommand() {
-  const alertEl = document.getElementById('cmdAlert');
+  var alertEl = document.getElementById('cmdAlert');
   alertEl.innerHTML = '';
   try {
-    const body = {
+    var body = {
       device_id:   document.getElementById('cmd-device').value.trim(),
       action_type: document.getElementById('cmd-action').value,
       setpoint_c:  parseFloat(document.getElementById('cmd-temp').value),
@@ -910,37 +484,33 @@ async function sendCommand() {
       source:      'admin',
     };
     await sb('hvac_commands', {
-      method:  'POST',
+      method: 'POST',
       headers: { Prefer: 'return=minimal' },
-      body:    JSON.stringify(body),
+      body: JSON.stringify(body),
     });
-    alertEl.innerHTML = `<div class="alert alert-success">✓ Command sent: ${body.action_type} → ${body.setpoint_c}°C</div>`;
+    alertEl.innerHTML = '<div class="alert-ok">✓ Command sent: '+body.action_type+' → '+body.setpoint_c+'°C</div>';
     loadCommands();
-  } catch (e) {
-    alertEl.innerHTML = `<div class="alert alert-error">✗ Error: ${e.message}</div>`;
+  } catch(e) {
+    alertEl.innerHTML = '<div class="alert-err">✗ Error: '+e.message+'</div>';
   }
 }
 
 async function loadCommands() {
   try {
-    const rows = await sb('hvac_commands?order=created_at.desc&limit=50');
-    const tbody = document.getElementById('commandsTable');
-    if (!rows.length) {
-      tbody.innerHTML = '<tr><td colspan="8" class="empty">No commands</td></tr>';
-      return;
-    }
-    tbody.innerHTML = rows.map(r => `
-      <tr>
-        <td style="font-size:11px;color:var(--muted)">${fmtTime(r.created_at)}</td>
-        <td style="color:var(--cyan);font-size:11px">${r.device_id ?? '—'}</td>
-        <td>${r.action_type}</td>
-        <td>${r.setpoint_c?.toFixed(1) ?? '—'}°C</td>
-        <td>${r.fan_level ?? '—'}</td>
-        <td>${r.power ? '✓ ON' : '✗ OFF'}</td>
-        <td>${statusBadge(r.status)}</td>
-        <td style="font-size:11px;color:var(--muted)">${r.executed_at ? fmtTime(r.executed_at) : '—'}</td>
-      </tr>`).join('');
-  } catch (e) { console.error('commands:', e); }
+    var rows  = await sb('hvac_commands?order=created_at.desc&limit=50');
+    var tbody = document.getElementById('commandsTable');
+    if (!rows.length) { tbody.innerHTML='<tr><td colspan="8" class="empty">No commands</td></tr>'; return; }
+    tbody.innerHTML = rows.map(function(r){ return '<tr>'+
+      '<td style="font-size:11px;color:var(--muted)">'+fmtTime(r.created_at)+'</td>'+
+      '<td style="color:var(--cyan);font-size:11px">'+(r.device_id||'—')+'</td>'+
+      '<td>'+r.action_type+'</td>'+
+      '<td>'+(r.setpoint_c!=null?r.setpoint_c.toFixed(1):'—')+'°C</td>'+
+      '<td>'+(r.fan_level||'—')+'</td>'+
+      '<td>'+(r.power?'ON':'OFF')+'</td>'+
+      '<td>'+sBadge(r.status)+'</td>'+
+      '<td style="font-size:11px;color:var(--muted)">'+(r.executed_at?fmtTime(r.executed_at):'—')+'</td>'+
+    '</tr>'; }).join('');
+  } catch(e) { console.error(e); }
 }
 
 // ================================================================
@@ -948,24 +518,20 @@ async function loadCommands() {
 // ================================================================
 async function loadPTI() {
   try {
-    const rows = await sb('pti_results?order=created_at.desc&limit=100');
-    const tbody = document.getElementById('ptiTable');
-    if (!rows.length) {
-      tbody.innerHTML = '<tr><td colspan="8" class="empty">No PTI results</td></tr>';
-      return;
-    }
-    tbody.innerHTML = rows.map(r => `
-      <tr>
-        <td style="font-size:11px;color:var(--muted)">${fmtTime(r.created_at)}</td>
-        <td class="${scoreClass(r.score)}">${r.score?.toFixed(1) ?? '—'}</td>
-        <td>${r.comfort_level ?? '—'}</td>
-        <td>${r.action_type ?? '—'}</td>
-        <td>${r.recommended_temp_c?.toFixed(1) ?? '—'}°C</td>
-        <td style="font-size:11px">${r.detected_context ?? '—'}</td>
-        <td>${r.safe_mode ? '<span style="color:var(--red)">⚠ YES</span>' : '—'}</td>
-        <td style="font-size:10px;color:var(--muted)">${r.engine_version ?? 'PTI-V9'}</td>
-      </tr>`).join('');
-  } catch (e) { console.error('pti:', e); }
+    var rows  = await sb('pti_results?order=created_at.desc&limit=100');
+    var tbody = document.getElementById('ptiTable');
+    if (!rows.length) { tbody.innerHTML='<tr><td colspan="8" class="empty">No PTI results</td></tr>'; return; }
+    tbody.innerHTML = rows.map(function(r){ return '<tr>'+
+      '<td style="font-size:11px;color:var(--muted)">'+fmtTime(r.created_at)+'</td>'+
+      '<td class="'+sClass(r.score)+'">'+(r.score!=null?r.score.toFixed(1):'—')+'</td>'+
+      '<td>'+(r.comfort_level||'—')+'</td>'+
+      '<td>'+(r.action_type||'—')+'</td>'+
+      '<td>'+(r.recommended_temp_c!=null?r.recommended_temp_c.toFixed(1):'—')+'°C</td>'+
+      '<td style="font-size:11px">'+(r.detected_context||'—')+'</td>'+
+      '<td>'+(r.safe_mode?'<span style="color:var(--red)">⚠ YES</span>':'—')+'</td>'+
+      '<td style="font-size:10px;color:var(--muted)">'+(r.engine_version||'PTI-V9')+'</td>'+
+    '</tr>'; }).join('');
+  } catch(e) { console.error(e); }
 }
 
 // ================================================================
@@ -973,78 +539,66 @@ async function loadPTI() {
 // ================================================================
 async function loadUsers() {
   try {
-    const rows = await sb('profiles?order=created_at.desc');
-    const tbody = document.getElementById('usersTable');
-    if (!rows.length) {
-      tbody.innerHTML = '<tr><td colspan="5" class="empty">No users</td></tr>';
-      return;
-    }
-    tbody.innerHTML = rows.map(r => `
-      <tr>
-        <td>${r.full_name ?? '—'}</td>
-        <td><span class="${r.role === 'admin' ? 'badge-online' : 'badge-offline'}">${r.role}</span></td>
-        <td>${r.gender ?? '—'}</td>
-        <td>${r.country ?? '—'}</td>
-        <td style="font-size:11px;color:var(--muted)">${fmtDate(r.created_at)}</td>
-      </tr>`).join('');
-  } catch (e) { console.error('users:', e); }
+    var rows  = await sb('profiles?order=created_at.desc');
+    var tbody = document.getElementById('usersTable');
+    if (!rows.length) { tbody.innerHTML='<tr><td colspan="5" class="empty">No users</td></tr>'; return; }
+    tbody.innerHTML = rows.map(function(r){ return '<tr>'+
+      '<td>'+(r.full_name||'—')+'</td>'+
+      '<td><span class="'+(r.role==='admin'?'b-online':'b-offline')+'">'+r.role+'</span></td>'+
+      '<td>'+(r.gender||'—')+'</td>'+
+      '<td>'+(r.country||'—')+'</td>'+
+      '<td style="font-size:11px;color:var(--muted)">'+fmtDate(r.created_at)+'</td>'+
+    '</tr>'; }).join('');
+  } catch(e) { console.error(e); }
 }
 
 // ================================================================
 // HELPERS
 // ================================================================
 function set(id, val) {
-  const el = document.getElementById(id);
+  var el = document.getElementById(id);
   if (el) el.textContent = val;
 }
 
 function fmtTime(iso) {
   if (!iso) return '—';
-  const d = new Date(iso);
-  return d.toLocaleTimeString('en-US', { hour12: false }) +
-         ' ' + d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  var d = new Date(iso);
+  return d.toLocaleTimeString('en-US',{hour12:false}) + ' ' +
+         d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
 }
 
 function fmtDate(iso) {
   if (!iso) return '—';
   return new Date(iso).toLocaleDateString('en-US',
-    { year: 'numeric', month: 'short', day: 'numeric' });
+    {year:'numeric',month:'short',day:'numeric'});
 }
 
-function statusBadge(s) {
-  if (s === 'online')   return `<span class="badge-online">online</span>`;
-  if (s === 'offline')  return `<span class="badge-offline">offline</span>`;
-  if (s === 'pending')  return `<span class="badge-pending">pending</span>`;
-  if (s === 'executed') return `<span class="badge-exec">executed</span>`;
-  if (s === 'failed')   return `<span class="badge-fail">failed</span>`;
-  return `<span class="badge-offline">${s ?? '—'}</span>`;
+function sBadge(s) {
+  if (s==='online')   return '<span class="b-online">online</span>';
+  if (s==='offline')  return '<span class="b-offline">offline</span>';
+  if (s==='pending')  return '<span class="b-pending">pending</span>';
+  if (s==='executed') return '<span class="b-exec">executed</span>';
+  if (s==='failed')   return '<span class="b-fail">failed</span>';
+  return '<span class="b-offline">'+(s||'—')+'</span>';
 }
 
-function scoreClass(s) {
+function sClass(s) {
   if (!s) return '';
-  if (s >= 80) return 'score-excellent';
-  if (s >= 65) return 'score-good';
-  if (s >= 48) return 'score-mild';
-  return 'score-bad';
-}
-
-function updateTime() {
-  document.getElementById('lastUpdate').textContent =
-    'Last update: ' + new Date().toLocaleTimeString('en-US', { hour12: false });
+  if (s>=80) return 's-ex';
+  if (s>=65) return 's-gd';
+  if (s>=48) return 's-md';
+  return 's-bd';
 }
 
 // ================================================================
-// AUTO REFRESH — 30 seconds
+// AUTO REFRESH
 // ================================================================
-setInterval(() => {
+setInterval(function() {
   if (document.getElementById('dashboardWrap').style.display === 'none') return;
   countdownVal--;
-  const el = document.getElementById('countdown');
+  var el = document.getElementById('countdown');
   if (el) el.textContent = countdownVal;
-  if (countdownVal <= 0) {
-    countdownVal = 30;
-    loadAll();
-  }
+  if (countdownVal <= 0) { countdownVal = 30; loadAll(); }
 }, 1000);
 </script>
 </body>
