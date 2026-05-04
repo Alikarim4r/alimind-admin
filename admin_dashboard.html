@@ -289,15 +289,75 @@ label{font-size:11px;color:var(--muted);margin-bottom:6px;display:block;font-wei
     <!-- USERS -->
     <div id="tab-users" class="panel">
       <div class="card">
-        <div class="card-title">REGISTERED USERS</div>
+        <div class="card-title" style="display:flex;align-items:center;justify-content:space-between">
+          <span>REGISTERED USERS</span>
+          <button class="btn" onclick="openAddUserModal()" style="padding:8px 18px;font-size:12px">+ ADD USER</button>
+        </div>
         <div id="usersAlert"></div>
         <div class="table-wrap"><table>
           <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Gender</th><th>Birth Date</th><th>Phone</th><th>Country</th><th>Joined</th><th>Actions</th></tr></thead>
-          <tbody id="usersTable"><tr><td colspan="8" class="empty">Loading...</td></tr></tbody>
+          <tbody id="usersTable"><tr><td colspan="9" class="empty">Loading...</td></tr></tbody>
         </table></div>
       </div>
     </div>
 
+  </div>
+</div>
+
+<!-- ADD USER MODAL -->
+<div class="modal-overlay" id="addUserModal">
+  <div class="modal">
+    <div class="modal-title">+ Add New User</div>
+    <div class="modal-sub">سيتم إنشاء الحساب وإرسال بريد التأكيد تلقائياً</div>
+    <div id="addUserAlert"></div>
+
+    <div class="modal-grid">
+      <div class="field-group">
+        <span class="field-label">FULL NAME *</span>
+        <input class="modal-input" type="text" id="add-name" placeholder="Ali Abdulkarim">
+      </div>
+      <div class="field-group">
+        <span class="field-label">EMAIL *</span>
+        <input class="modal-input" type="email" id="add-email" placeholder="user@example.com">
+      </div>
+      <div class="field-group">
+        <span class="field-label">PASSWORD *</span>
+        <input class="modal-input" type="password" id="add-pass" placeholder="Min 6 characters">
+      </div>
+      <div class="field-group">
+        <span class="field-label">PHONE</span>
+        <input class="modal-input" type="text" id="add-phone" placeholder="+974...">
+      </div>
+      <div class="field-group">
+        <span class="field-label">COUNTRY</span>
+        <input class="modal-input" type="text" id="add-country" placeholder="Qatar">
+      </div>
+      <div class="field-group">
+        <span class="field-label">DATE OF BIRTH</span>
+        <input class="modal-input" type="date" id="add-birth">
+      </div>
+      <div class="field-group">
+        <span class="field-label">GENDER</span>
+        <select class="modal-select" id="add-gender">
+          <option value="">— Select —</option>
+          <option value="male">Male</option>
+          <option value="female">Female</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+      <div class="field-group">
+        <span class="field-label">ROLE</span>
+        <select class="modal-select" id="add-role">
+          <option value="user">User</option>
+          <option value="admin">Admin</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-sm" onclick="closeAddUserModal()">Cancel</button>
+      <button class="btn" id="addUserSaveBtn" onclick="saveNewUser()">CREATE ACCOUNT</button>
+    </div>
   </div>
 </div>
 
@@ -726,7 +786,99 @@ async function saveUserEdit() {
   }
 }
 
-// ── HELPERS ───────────────────────────────────────────────────────
+// ================================================================
+// ADD USER
+// ================================================================
+function openAddUserModal() {
+  document.getElementById('add-name').value    = '';
+  document.getElementById('add-email').value   = '';
+  document.getElementById('add-pass').value    = '';
+  document.getElementById('add-phone').value   = '';
+  document.getElementById('add-country').value = '';
+  document.getElementById('add-birth').value   = '';
+  document.getElementById('add-gender').value  = '';
+  document.getElementById('add-role').value    = 'user';
+  document.getElementById('addUserAlert').innerHTML = '';
+  document.getElementById('addUserSaveBtn').disabled = false;
+  document.getElementById('addUserSaveBtn').textContent = 'CREATE ACCOUNT';
+  document.getElementById('addUserModal').classList.add('open');
+}
+
+function closeAddUserModal() {
+  document.getElementById('addUserModal').classList.remove('open');
+}
+
+document.getElementById('addUserModal').addEventListener('click', function(e) {
+  if (e.target === this) closeAddUserModal();
+});
+
+async function saveNewUser() {
+  var alertEl = document.getElementById('addUserAlert');
+  var saveBtn = document.getElementById('addUserSaveBtn');
+  alertEl.innerHTML = '';
+
+  var name    = document.getElementById('add-name').value.trim();
+  var email   = document.getElementById('add-email').value.trim();
+  var pass    = document.getElementById('add-pass').value.trim();
+  var phone   = document.getElementById('add-phone').value.trim();
+  var country = document.getElementById('add-country').value.trim();
+  var birth   = document.getElementById('add-birth').value || null;
+  var gender  = document.getElementById('add-gender').value || null;
+  var role    = document.getElementById('add-role').value;
+
+  // Validation
+  if (!name)  { alertEl.innerHTML='<div class="alert-err">✗ Full name is required</div>'; return; }
+  if (!email) { alertEl.innerHTML='<div class="alert-err">✗ Email is required</div>'; return; }
+  if (!pass || pass.length < 6) { alertEl.innerHTML='<div class="alert-err">✗ Password must be at least 6 characters</div>'; return; }
+
+  saveBtn.disabled = true;
+  saveBtn.textContent = 'Creating...';
+
+  try {
+    // Step 1 — Sign up via Supabase Auth
+    var signupRes = await fetch(SB_AUTH + '/signup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': SB_KEY },
+      body: JSON.stringify({ email: email, password: pass }),
+    });
+    var signupData = await signupRes.json();
+    if (!signupRes.ok) throw new Error(signupData.error_description || signupData.msg || 'Signup failed');
+
+    var newUid = signupData.user?.id || signupData.id;
+    if (!newUid) throw new Error('Could not get user ID');
+
+    // Step 2 — Insert profile data
+    await sb('profiles', {
+      method: 'POST',
+      headers: { Prefer: 'return=minimal' },
+      body: JSON.stringify({
+        id:         newUid,
+        full_name:  name,
+        phone:      phone || null,
+        country:    country || null,
+        birth_date: birth,
+        gender:     gender,
+        role:       role,
+      }),
+    });
+
+    alertEl.innerHTML = '<div class="alert-ok">✅ Account created for <b>' + email + '</b><br><small>A confirmation email has been sent</small></div>';
+    saveBtn.textContent = '✓ Created';
+
+    // Refresh users table
+    loadUsers();
+
+    // Auto close after 2s
+    setTimeout(function() { closeAddUserModal(); }, 2000);
+
+  } catch(e) {
+    alertEl.innerHTML = '<div class="alert-err">✗ ' + e.message + '</div>';
+    saveBtn.disabled = false;
+    saveBtn.textContent = 'CREATE ACCOUNT';
+  }
+}
+
+
 function set(id, val) { var el = document.getElementById(id); if (el) el.textContent = val; }
 
 function fmtTime(iso) {
