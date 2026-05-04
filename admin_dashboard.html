@@ -247,7 +247,7 @@ label{font-size:11px;color:var(--muted);margin-bottom:6px;display:block;font-wei
 // ALL CONSTANTS FIRST — no forward references
 // ================================================================
 var SB_URL   = 'https://bzqupgbaelbahcdsxusq.supabase.co';
-var SB_KEY   = 'sb_publishable_gen23HpCRSO7gVV4cdw0PQ_MeB1QOvt';
+var SB_KEY   = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ6cXVwZ2JhZWxiYWhjZHN4dXNxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcxMjc5NzYsImV4cCI6MjA5MjcwMzk3Nn0.XzjkSsop-rJ1VsVPqRdA8E3Q91TgmguFDh3h7WMa4gk';
 var SB_AUTH  = SB_URL + '/auth/v1';
 var DEVICE   = 'alimind-gateway-001';
 var authToken= localStorage.getItem('sb_token') || '';
@@ -267,7 +267,7 @@ async function doLogin() {
   try {
     var res = await fetch(SB_AUTH + '/token?grant_type=password', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', apikey: SB_KEY },
+      headers: { 'Content-Type': 'application/json', 'apikey': SB_KEY },
       body: JSON.stringify({ email: email, password: pass }),
     });
     var data = await res.json();
@@ -306,7 +306,7 @@ function showDashboard() {
   if (!authToken) return;
   try {
     var res = await fetch(SB_AUTH + '/user', {
-      headers: { Authorization: 'Bearer ' + authToken, apikey: SB_KEY }
+      headers: { 'Authorization': 'Bearer ' + authToken, 'apikey': SB_KEY }
     });
     if (res.ok) { showDashboard(); return; }
   } catch(_) {}
@@ -325,14 +325,18 @@ document.addEventListener('keydown', function(e) {
 async function sb(path, opts) {
   opts = opts || {};
   var headers = Object.assign({
-    apikey: SB_KEY,
-    Authorization: 'Bearer ' + (authToken || SB_KEY),
-    'Content-Type': 'application/json',
+    'apikey':        SB_KEY,
+    'Authorization': 'Bearer ' + (authToken || SB_KEY),
+    'Content-Type':  'application/json',
   }, opts.headers || {});
   var res = await fetch(SB_URL + '/rest/v1/' + path,
     Object.assign({}, opts, { headers: headers }));
   if (res.status === 401) { doSignOut(); throw new Error('Session expired'); }
-  if (!res.ok) throw new Error(res.status + ' ' + res.statusText);
+  if (!res.ok) {
+    var errText = await res.text().catch(function(){return res.statusText;});
+    throw new Error(res.status + ': ' + errText);
+  }
+  if (res.status === 204 || opts.method === 'POST') return {};
   return res.json();
 }
 
