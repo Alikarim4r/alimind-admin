@@ -201,11 +201,10 @@ label{font-size:11px;color:var(--muted);margin-bottom:6px;display:block;font-wei
             <option value="fanOnly">Fan Only</option>
             <option value="ventilate">Ventilate</option>
             <option value="dry">Dry</option>
-            <option value="powerOff">Power Off</option>
           </select></div>
-          <div><label>TEMPERATURE °C</label><input type="number" id="cmd-temp" value="23" min="16" max="30" step="0.5"></div>
-          <div><label>FAN (1-5)</label><input type="number" id="cmd-fan" value="2" min="1" max="5"></div>
-          <div><label>POWER</label><select id="cmd-power"><option value="true">ON</option><option value="false">OFF</option></select></div>
+          <div id="wrap-temp"><label>TEMPERATURE °C</label><input type="number" id="cmd-temp" value="23" min="16" max="30" step="0.5"></div>
+          <div id="wrap-fan"><label>FAN (1-5)</label><input type="number" id="cmd-fan" value="2" min="1" max="5"></div>
+          <div><label>POWER</label><select id="cmd-power" onchange="onPowerChange()"><option value="true">ON</option><option value="false">OFF</option></select></div>
         </div>
         <button class="btn" onclick="sendCommand()">SEND COMMAND</button>
       </div>
@@ -470,18 +469,28 @@ async function loadSensors() {
 // ================================================================
 // COMMANDS
 // ================================================================
+function onPowerChange() {
+  var isPowerOff = document.getElementById('cmd-power').value === 'false';
+  document.getElementById('wrap-temp').style.opacity = isPowerOff ? '0.35' : '1';
+  document.getElementById('wrap-fan').style.opacity  = isPowerOff ? '0.35' : '1';
+  document.getElementById('cmd-temp').disabled = isPowerOff;
+  document.getElementById('cmd-fan').disabled  = isPowerOff;
+  document.getElementById('cmd-action').disabled = isPowerOff;
+}
+
 async function sendCommand() {
   var alertEl = document.getElementById('cmdAlert');
   alertEl.innerHTML = '';
   try {
+    var isPowerOff = document.getElementById('cmd-power').value === 'false';
     var body = {
       device_id:   document.getElementById('cmd-device').value.trim(),
-      action_type: document.getElementById('cmd-action').value,
-      setpoint_c:  parseFloat(document.getElementById('cmd-temp').value),
-      fan_level:   parseInt(document.getElementById('cmd-fan').value),
-      power:       document.getElementById('cmd-power').value === 'true',
+      action_type: isPowerOff ? 'powerOff' : document.getElementById('cmd-action').value,
+      setpoint_c:  isPowerOff ? null : parseFloat(document.getElementById('cmd-temp').value),
+      fan_level:   isPowerOff ? null : parseInt(document.getElementById('cmd-fan').value),
+      power:       !isPowerOff,
       status:      'pending',
-      source:      'admin',
+      source:      'manual',
     };
     await sb('hvac_commands', {
       method: 'POST',
