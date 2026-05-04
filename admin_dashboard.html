@@ -224,7 +224,71 @@
   .info-key  { color: var(--muted); }
   .info-val  { color: var(--text); font-weight: 600; }
 
-  /* ── Refresh bar ── */
+  /* ── Login Screen ── */
+  #loginScreen {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: var(--bg);
+  }
+  .login-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 40px;
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+  }
+  .login-logo {
+    font-size: 32px;
+    font-weight: 800;
+    color: var(--cyan);
+    letter-spacing: 4px;
+    margin-bottom: 6px;
+  }
+  .login-sub {
+    color: var(--muted);
+    font-size: 13px;
+    margin-bottom: 32px;
+  }
+  .login-input {
+    width: 100%;
+    background: var(--glass);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    padding: 12px 16px;
+    font-size: 14px;
+    margin-bottom: 12px;
+    outline: none;
+    transition: border 0.2s;
+  }
+  .login-input:focus { border-color: var(--cyan); }
+  .login-btn {
+    width: 100%;
+    background: linear-gradient(135deg, var(--cyan), var(--cyan2));
+    color: var(--bg);
+    border: none;
+    border-radius: 10px;
+    padding: 14px;
+    font-size: 14px;
+    font-weight: 800;
+    cursor: pointer;
+    letter-spacing: 1px;
+    margin-top: 8px;
+    transition: opacity 0.2s;
+  }
+  .login-btn:hover    { opacity: 0.85; }
+  .login-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .login-error {
+    color: var(--red);
+    font-size: 13px;
+    margin-top: 12px;
+    min-height: 20px;
+  }
+  #dashboardWrap { display: none; }
   .refresh-bar {
     display: flex;
     align-items: center;
@@ -255,12 +319,32 @@
 </head>
 <body>
 
+<!-- ── Login Screen ── -->
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="login-logo">AliMind</div>
+    <div class="login-sub">Admin Dashboard — Sign In Required</div>
+    <input class="login-input" type="email"    id="loginEmail"    placeholder="Email" />
+    <input class="login-input" type="password" id="loginPassword" placeholder="Password" />
+    <button class="login-btn" id="loginBtn" onclick="doLogin()">SIGN IN</button>
+    <div class="login-error" id="loginError"></div>
+  </div>
+</div>
+
+<!-- ── Dashboard (hidden until login) ── -->
+<div id="dashboardWrap">
+
 <!-- ── Header ── -->
 <header>
   <span class="logo">AliMind</span>
   <span class="badge">ADMIN</span>
   <span class="header-info" id="lastUpdate">Loading...</span>
+  <span class="header-info" id="headerUser" style="margin-left:8px;color:var(--cyan)"></span>
   <div class="live-dot"></div>
+  <button class="btn-outline" onclick="doSignOut()"
+          style="margin-left:12px;font-size:11px;padding:5px 12px">
+    Sign Out
+  </button>
 </header>
 
 <div class="container">
@@ -540,9 +624,95 @@
 
 </div><!-- /container -->
 
+</div><!-- /dashboardWrap -->
+
 <script>
+// ── Auto refresh ──
+let countdownVal = 30;
 // ================================================================
-// CONFIG
+// AUTH
+// ================================================================
+const SB_AUTH = SB_URL + '/auth/v1';
+let   authToken = localStorage.getItem('sb_token') || '';
+let   authEmail = localStorage.getItem('sb_email') || '';
+
+async function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const pass  = document.getElementById('loginPassword').value;
+  const btn   = document.getElementById('loginBtn');
+  const err   = document.getElementById('loginError');
+
+  if (!email || !pass) { err.textContent = 'Enter email and password'; return; }
+
+  btn.disabled    = true;
+  btn.textContent = 'Signing in...';
+  err.textContent = '';
+
+  try {
+    const res = await fetch(`${SB_AUTH}/token?grant_type=password`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json', apikey: SB_KEY },
+      body:    JSON.stringify({ email, password: pass }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error_description || data.msg || 'Login failed');
+
+    authToken = data.access_token;
+    authEmail = email;
+    localStorage.setItem('sb_token', authToken);
+    localStorage.setItem('sb_email', authEmail);
+    showDashboard();
+  } catch (e) {
+    err.textContent = '✗ ' + e.message;
+  }
+  btn.disabled    = false;
+  btn.textContent = 'SIGN IN';
+}
+
+function doSignOut() {
+  authToken = '';
+  authEmail = '';
+  localStorage.removeItem('sb_token');
+  localStorage.removeItem('sb_email');
+  document.getElementById('dashboardWrap').style.display = 'none';
+  document.getElementById('loginScreen').style.display   = 'flex';
+  document.getElementById('loginEmail').value    = '';
+  document.getElementById('loginPassword').value = '';
+  document.getElementById('loginError').textContent = '';
+}
+
+function showDashboard() {
+  document.getElementById('loginScreen').style.display    = 'none';
+  document.getElementById('dashboardWrap').style.display  = 'block';
+  document.getElementById('headerUser').textContent       = authEmail;
+  loadAll();
+}
+
+// Check existing session on load
+window.addEventListener('DOMContentLoaded', async () => {
+  if (authToken) {
+    // Verify token still valid
+    try {
+      const res = await fetch(`${SB_AUTH}/user`, {
+        headers: { Authorization: `Bearer ${authToken}`, apikey: SB_KEY }
+      });
+      if (res.ok) { showDashboard(); return; }
+    } catch (_) {}
+    // Token expired
+    doSignOut();
+  }
+});
+
+// Enter key on password
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' &&
+      document.getElementById('loginScreen').style.display !== 'none') {
+    doLogin();
+  }
+});
+
+// ================================================================
+// TABS
 // ================================================================
 const SB_URL = 'https://bzqupgbaelbahcdsxusq.supabase.co';
 const SB_KEY = 'sb_publishable_gen23HpCRSO7gVV4cdw0PQ_MeB1QOvt';
@@ -576,13 +746,14 @@ function loadTab(name) {
 async function sb(path, opts = {}) {
   const res = await fetch(`${SB_URL}/rest/v1/${path}`, {
     headers: {
-      apikey: SB_KEY,
-      Authorization: `Bearer ${SB_KEY}`,
+      apikey:        SB_KEY,
+      Authorization: `Bearer ${authToken || SB_KEY}`,
       'Content-Type': 'application/json',
       ...opts.headers,
     },
     ...opts,
   });
+  if (res.status === 401) { doSignOut(); throw new Error('Session expired'); }
   if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
   return res.json();
 }
@@ -865,8 +1036,8 @@ function updateTime() {
 // ================================================================
 // AUTO REFRESH — 30 seconds
 // ================================================================
-let countdownVal = 30;
 setInterval(() => {
+  if (document.getElementById('dashboardWrap').style.display === 'none') return;
   countdownVal--;
   const el = document.getElementById('countdown');
   if (el) el.textContent = countdownVal;
@@ -875,9 +1046,6 @@ setInterval(() => {
     loadAll();
   }
 }, 1000);
-
-// ── Initial load ──
-loadAll();
 </script>
 </body>
 </html>
