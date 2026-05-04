@@ -194,7 +194,7 @@ label{font-size:11px;color:var(--muted);margin-bottom:6px;display:block;font-wei
         <div id="cmdAlert"></div>
         <div class="cmd-grid">
           <div><label>DEVICE ID</label><input type="text" id="cmd-device" value="alimind-gateway-001"></div>
-          <div><label>ACTION</label><select id="cmd-action">
+          <div><label>ACTION</label><select id="cmd-action" onchange="onActionChange()">
             <option value="coolDown">Cool Down</option>
             <option value="warmUp">Warm Up</option>
             <option value="maintain">Maintain</option>
@@ -297,6 +297,7 @@ function showDashboard() {
   document.getElementById('loginScreen').style.display   = 'none';
   document.getElementById('dashboardWrap').style.display = 'block';
   document.getElementById('headerUser').textContent      = authEmail;
+  onActionChange(); // apply default temp/fan for initial action
   loadAll();
 }
 
@@ -469,22 +470,49 @@ async function loadSensors() {
 // ================================================================
 // COMMANDS
 // ================================================================
+
+// Default temp & fan per action
+var ACTION_DEFAULTS = {
+  coolDown:  { temp: 19, fan: 3 },
+  warmUp:    { temp: 26, fan: 2 },
+  maintain:  { temp: 22, fan: 2 },
+  fanOnly:   { temp: 22, fan: 4 },
+  ventilate: { temp: 22, fan: 3 },
+  dry:       { temp: 24, fan: 2 },
+};
+
+function onActionChange() {
+  var action  = document.getElementById('cmd-action').value;
+  var def     = ACTION_DEFAULTS[action];
+  if (!def) return;
+  var tempEl  = document.getElementById('cmd-temp');
+  var fanEl   = document.getElementById('cmd-fan');
+  // Only update if user hasn't manually changed the value from last default
+  tempEl.value = def.temp;
+  fanEl.value  = def.fan;
+}
+
 function onPowerChange() {
   var isPowerOff = document.getElementById('cmd-power').value === 'false';
-  document.getElementById('wrap-temp').style.opacity = isPowerOff ? '0.35' : '1';
-  document.getElementById('wrap-fan').style.opacity  = isPowerOff ? '0.35' : '1';
-  document.getElementById('cmd-temp').disabled = isPowerOff;
-  document.getElementById('cmd-fan').disabled  = isPowerOff;
-  document.getElementById('cmd-action').disabled = isPowerOff;
+  document.getElementById('wrap-temp').style.opacity   = isPowerOff ? '0.35' : '1';
+  document.getElementById('wrap-fan').style.opacity    = isPowerOff ? '0.35' : '1';
+  document.getElementById('cmd-temp').disabled         = isPowerOff;
+  document.getElementById('cmd-fan').disabled          = isPowerOff;
+  document.getElementById('cmd-action').disabled       = isPowerOff;
 }
 
 async function sendCommand() {
   var alertEl = document.getElementById('cmdAlert');
   alertEl.innerHTML = '';
+  var deviceId = document.getElementById('cmd-device').value.trim();
+  if (!deviceId) {
+    alertEl.innerHTML = '<div class="alert-err">✗ Device ID is required</div>';
+    return;
+  }
   try {
     var isPowerOff = document.getElementById('cmd-power').value === 'false';
     var body = {
-      device_id:   document.getElementById('cmd-device').value.trim(),
+      device_id:   deviceId,
       action_type: isPowerOff ? 'powerOff' : document.getElementById('cmd-action').value,
       setpoint_c:  isPowerOff ? null : parseFloat(document.getElementById('cmd-temp').value),
       fan_level:   isPowerOff ? null : parseInt(document.getElementById('cmd-fan').value),
@@ -492,15 +520,24 @@ async function sendCommand() {
       status:      'pending',
       source:      'manual',
     };
-    await sb('hvac_commands', {
+    var res = await fetch(SB_URL + '/rest/v1/hvac_commands', {
       method: 'POST',
-      headers: { Prefer: 'return=minimal' },
+      headers: {
+        'apikey':        SB_KEY,
+        'Authorization': 'Bearer ' + (authToken || SB_KEY),
+        'Content-Type':  'application/json',
+        'Prefer':        'return=minimal',
+      },
       body: JSON.stringify(body),
     });
-    alertEl.innerHTML = '<div class="alert-ok">✓ Command sent: '+body.action_type+' → '+body.setpoint_c+'°C</div>';
+    if (!res.ok) {
+      var errText = await res.text();
+      throw new Error('HTTP ' + res.status + ' — ' + errText);
+    }
+    alertEl.innerHTML = '<div class="alert-ok">✓ Command sent: <b>'+body.action_type+'</b>'+(body.setpoint_c?' → '+body.setpoint_c+'°C':'')+'</div>';
     loadCommands();
   } catch(e) {
-    alertEl.innerHTML = '<div class="alert-err">✗ Error: '+e.message+'</div>';
+    alertEl.innerHTML = '<div class="alert-err">✗ ' + e.message + '</div>';
   }
 }
 
