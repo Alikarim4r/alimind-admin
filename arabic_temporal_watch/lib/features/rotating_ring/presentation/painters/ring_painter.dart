@@ -151,7 +151,6 @@ class RingPainter extends CustomPainter {
     double innerR,
     double halfW,
   ) {
-    final ringRect = Rect.fromCircle(center: Offset(cx, cy), radius: outerR);
     final ringPaint = Paint()
       ..color = AppColors.backgroundMid.withOpacity(0.88)
       ..style = PaintingStyle.stroke
@@ -186,8 +185,6 @@ class RingPainter extends CustomPainter {
         stops: const [0.78, 1.0],
       ).createShader(Rect.fromCircle(center: Offset(cx, cy), radius: outerR));
     canvas.drawCircle(Offset(cx, cy), outerR, shadowPaint);
-    // Suppress the unused variable warning — ringRect is used via the context.
-    _ = ringRect;
   }
 
   void _drawSegmentFills(
@@ -503,8 +500,3 @@ class RingPainter extends CustomPainter {
   }
 }
 
-// ── Private extension ──────────────────────────────────────────────────────────
-
-// Suppress unused variable lint on the `_` discard.
-// ignore: unused_element
-Never get _ => throw UnimplementedError();

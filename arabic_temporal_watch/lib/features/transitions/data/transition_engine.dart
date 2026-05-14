@@ -405,8 +405,3 @@ class TransitionEngine {
   }
 }
 
-// ── AppColors aliases ──────────────────────────────────────────────────────────
-// Re-used below; pulled from the central palette for clarity.
-extension on AppColors {
-  static const Color backgroundSurface = Color(0xFF0A0E2A);
-}
