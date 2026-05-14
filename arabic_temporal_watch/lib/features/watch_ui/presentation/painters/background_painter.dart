@@ -427,7 +427,7 @@ class BackgroundPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(BackgroundPainter oldDelegate) =>
-      oldDelegate.transitionState != oldDelegate.transitionState ||
+      oldDelegate.transitionState != transitionState ||
       oldDelegate.transitionState.skyColorTop !=
           transitionState.skyColorTop ||
       oldDelegate.transitionState.skyColorBottom !=
