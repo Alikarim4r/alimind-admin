@@ -383,3 +383,112 @@ String _secondsLabel(int count) {
   if (count <= 10) return 'ثوانٍ';
   return 'ثانية';
 }
+
+// ── TimeUtils class ───────────────────────────────────────────────────────────
+
+/// Static facade over all time utility functions.
+///
+/// Every method delegates to the corresponding top-level function defined
+/// above, so callers may use either the class style (`TimeUtils.toDecimalHours`)
+/// or the function style (`decimalHours`) — both are equivalent.
+///
+/// The class interface is the contract described in the design specification;
+/// the top-level functions are the canonical implementation.
+abstract final class TimeUtils {
+  TimeUtils._();
+
+  // ── Decimal hours ─────────────────────────────────────────────────────────
+
+  /// Convert [dt] to decimal hours since midnight (e.g. 14:30 → 14.5).
+  ///
+  /// See top-level [decimalHours].
+  static double toDecimalHours(DateTime dt) => decimalHours(dt);
+
+  // ── Duration formatting ───────────────────────────────────────────────────
+
+  /// Format [d] as a natural Arabic string (e.g. "٤٥ دقيقة").
+  ///
+  /// Mirrors the top-level [formatDurationArabic] function.
+  static String formatDurationArabic(Duration d) {
+    final totalSeconds = d.inSeconds.abs();
+    final h = totalSeconds ~/ 3600;
+    final m = (totalSeconds % 3600) ~/ 60;
+    final s = totalSeconds % 60;
+
+    final parts = <String>[];
+    if (h > 0) parts.add('${toArabicNumerals(h)} ${_hoursLabel(h)}');
+    if (m > 0) parts.add('${toArabicNumerals(m)} ${_minutesLabel(m)}');
+    if (s > 0 && h == 0) parts.add('${toArabicNumerals(s)} ${_secondsLabel(s)}');
+    if (parts.isEmpty) return 'الآن';
+    return parts.join(' و');
+  }
+
+  // ── Time formatting ───────────────────────────────────────────────────────
+
+  /// Format [dt] as "H:MM ص/م" in Arabic-Indic numerals.
+  ///
+  /// Uses a 12-hour clock with Arabic AM/PM suffix (ص = am, م = pm).
+  ///
+  /// Example: DateTime(2025, 1, 1, 13, 30) → "١:٣٠ م"
+  static String formatTimeArabic(DateTime dt) {
+    final hour24 = dt.hour;
+    final minute = dt.minute;
+    final hour12 = hour24 % 12 == 0 ? 12 : hour24 % 12;
+    final amPm = hour24 < 12 ? 'ص' : 'م';
+    final mStr = toArabicNumerals(minute).padLeft(2, '٠');
+    return '${toArabicNumerals(hour12)}:$mStr $amPm';
+  }
+
+  // ── Numeral conversion ────────────────────────────────────────────────────
+
+  /// Convert [n] to Eastern Arabic-Indic numeral string (e.g. 45 → "٤٥").
+  ///
+  /// Mirrors the top-level [toArabicNumerals] function.
+  static String toArabicNumerals(int n) {
+    if (n < 0) return '−${toArabicNumerals(-n)}';
+    return n.toString().split('').map((c) {
+      final d = int.tryParse(c);
+      return d != null ? _arabicDigits[d] : c;
+    }).join();
+  }
+
+  // ── Days until ────────────────────────────────────────────────────────────
+
+  /// Number of whole days from today (local) until [target].
+  ///
+  /// Returns 0 if [target] is today or in the past.
+  ///
+  /// Example:
+  /// ```dart
+  /// TimeUtils.daysUntil(DateTime.now().add(const Duration(days: 3))); // 3
+  /// ```
+  static int daysUntil(DateTime target) {
+    final now = DateTime.now();
+    final todayMidnight = DateTime(now.year, now.month, now.day);
+    final targetMidnight =
+        DateTime(target.year, target.month, target.day);
+    final diff = targetMidnight.difference(todayMidnight).inDays;
+    return diff < 0 ? 0 : diff;
+  }
+
+  // ── Daytime check ─────────────────────────────────────────────────────────
+
+  /// Returns `true` when [now] falls between [sunrise] and [sunset].
+  ///
+  /// Only the time-of-day component is considered; the date parts are ignored.
+  ///
+  /// Example:
+  /// ```dart
+  /// TimeUtils.isDaytime(
+  ///   DateTime(2025, 6, 1, 14, 0),   // 14:00
+  ///   DateTime(2025, 6, 1,  5, 30),  // sunrise 05:30
+  ///   DateTime(2025, 6, 1, 19, 45),  // sunset  19:45
+  /// ); // true
+  /// ```
+  static bool isDaytime(DateTime now, DateTime sunrise, DateTime sunset) {
+    final nowH = decimalHours(now);
+    final riseH = decimalHours(sunrise);
+    final setH = decimalHours(sunset);
+    return nowH >= riseH && nowH < setH;
+  }
+}
