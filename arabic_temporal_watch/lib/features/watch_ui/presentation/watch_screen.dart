@@ -470,21 +470,38 @@ class _WatchScreenState extends ConsumerState<WatchScreen>
                   painter: const _ReaderLinePainter(),
                 ),
 
-                // ── Layer 8: 12 o'clock indicator tick — hairline gold ────
+                // ── Layer 8: 12 o'clock reader indicator — tapered gold baton ──
                 Positioned(
-                  top: watchDiameter * 0.012,
-                  left: watchDiameter / 2 - 1.0,
+                  top: watchDiameter * 0.010,
+                  left: watchDiameter / 2 - 1.5,
                   child: Container(
-                    width: 2.0,
-                    height: watchDiameter * 0.036,
+                    width: 3.0,
+                    height: watchDiameter * 0.042,
                     decoration: BoxDecoration(
-                      color: AppColors.goldPrimary,
-                      borderRadius: BorderRadius.circular(1),
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          AppColors.goldPale,
+                          AppColors.goldPrimary,
+                          AppColors.goldPrimary.withAlpha(80),
+                        ],
+                        stops: const [0.0, 0.55, 1.0],
+                      ),
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(1.5),
+                        topRight: Radius.circular(1.5),
+                      ),
                       boxShadow: [
                         BoxShadow(
-                          color: AppColors.goldPrimary.withOpacity(0.6),
-                          blurRadius: 4,
+                          color: AppColors.goldPrimary.withOpacity(0.85),
+                          blurRadius: 6,
                           spreadRadius: 1,
+                        ),
+                        BoxShadow(
+                          color: AppColors.goldLight.withOpacity(0.45),
+                          blurRadius: 14,
+                          spreadRadius: 2,
                         ),
                       ],
                     ),

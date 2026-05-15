@@ -220,6 +220,21 @@ class RingPainter extends CustomPainter {
       fillPaint.color = seg.segmentColor.withOpacity(sectorOpacity * 0.72);
       canvas.drawPath(path, fillPaint);
 
+      // Subtle top-light sheen: RadialGradient from above gives each sector a
+      // slight luminous highlight that separates it from a flat painted look.
+      final shineRect = Rect.fromCircle(center: Offset(cx, cy), radius: halfW);
+      final shinePaint = Paint()
+        ..style = PaintingStyle.fill
+        ..shader = RadialGradient(
+          center: const Alignment(0.0, -0.85),
+          radius: 0.8,
+          colors: [
+            Colors.white.withOpacity(0.10 * sectorOpacity),
+            Colors.transparent,
+          ],
+        ).createShader(shineRect);
+      canvas.drawPath(path, shinePaint);
+
       // Gold border on the current-period sector.
       if (offset == 0) {
         borderPaint.color = AppColors.goldPrimary.withOpacity(sectorOpacity * 0.75 * glowIntensity);

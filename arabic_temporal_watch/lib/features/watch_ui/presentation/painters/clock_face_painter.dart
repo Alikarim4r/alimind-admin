@@ -4,12 +4,11 @@
 //
 // Layers (bottom to top):
 //   1. Outer bezel ring     — dark navy fill with gold border stroke.
-//   2. Guilloche texture    — subtle crosshatch/engine-turned pattern in the dial.
-//   3. Inner decorative ring — etched ring at 80 % of face radius.
-//   4. Minute markers       — 60 silver ticks / dots at 1-minute intervals.
-//   5. Hour markers         — 12 gold tick marks; variable weight by position.
-//   6. Hour numerals        — optional gold Arabic or Roman hour labels.
-//   7. Center cap           — small gold boss where hands pivot.
+//   2. Guilloche texture    — engine-turned radial lines + concentric rings.
+//   3. Minute markers       — 48 silver ticks at 1-minute intervals (non-5).
+//   4. Hour markers         — 12 luxury filled baton markers; variable weight.
+//   5. Hour numerals        — optional Eastern Arabic-Indic or Roman labels.
+//   6. Center cap           — multi-layer jeweled boss where hands pivot.
 
 import 'dart:math' as math;
 
@@ -113,26 +112,34 @@ class ClockFacePainter extends CustomPainter {
   void _drawGuillocheTexture(Canvas canvas, Size size) {
     final center = _center(size);
     final radius = _radius(size) * scaleFactor;
+    final outerR = radius * 0.82;
 
-    // Minimal engine-turned pattern: just a few concentric rings for depth.
-    // Very subtle — not distracting.
+    // Radial engine-turned lines: 72 lines every 5°, very thin and low-opacity
+    final linePaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 0.3
+      ..color = const Color(0x09D4AF37);
+    const int lineCount = 72;
+    for (int i = 0; i < lineCount; i++) {
+      final angle = (i / lineCount) * math.pi * 2.0;
+      final cosA = math.cos(angle);
+      final sinA = math.sin(angle);
+      canvas.drawLine(
+        Offset(center.dx + cosA * radius * 0.06, center.dy + sinA * radius * 0.06),
+        Offset(center.dx + cosA * outerR, center.dy + sinA * outerR),
+        linePaint,
+      );
+    }
+
+    // Concentric rings that cross the radial lines to create a basket-weave texture
     final ringPaint = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 0.2
+      ..strokeWidth = 0.25
       ..color = const Color(0x08D4AF37);
-
-    const int rings = 6;
-    for (int r = 1; r <= rings; r++) {
-      final frac = r / (rings + 1);
-      canvas.drawCircle(center, radius * 0.87 * frac, ringPaint);
+    const int ringCount = 9;
+    for (int r = 1; r <= ringCount; r++) {
+      canvas.drawCircle(center, outerR * r / ringCount, ringPaint);
     }
-  }
-
-  // ── Layer 3: Inner decorative ring — removed (see _drawBezel) ─────────────
-
-  void _drawInnerRing(Canvas canvas, Size size) {
-    // Intentionally left empty — bezel now handles the two ring borders.
-    // Keeping method signature for paint() call compatibility.
   }
 
   // ── Layer 4: Minute markers ────────────────────────────────────────────────
@@ -141,28 +148,23 @@ class ClockFacePainter extends CustomPainter {
     final center = _center(size);
     final radius = _radius(size) * scaleFactor;
 
-    // Fine silver minute tick marks — barely-visible precision instrument feel.
-    final tickPaint = Paint()
+    final onePaint = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 0.5
+      ..strokeWidth = 0.4
       ..strokeCap = StrokeCap.round
-      ..color = const Color(0x55B0B0C0); // very subtle silver
+      ..color = const Color(0x30B0B0C0);
 
     for (int m = 0; m < 60; m++) {
-      if (m % 5 == 0) continue; // skip hour positions
-
+      if (m % 5 == 0) continue; // hour positions handled by baton markers
       final angle = (m / 60.0) * math.pi * 2.0 - math.pi / 2.0;
       final cosA = math.cos(angle);
       final sinA = math.sin(angle);
-
-      // Tiny tick from 87% to 90% of radius
       final outerR = radius * 0.870;
-      final innerR = radius * 0.855;
-
+      final innerR = radius * 0.858;
       canvas.drawLine(
         Offset(center.dx + cosA * outerR, center.dy + sinA * outerR),
         Offset(center.dx + cosA * innerR, center.dy + sinA * innerR),
-        tickPaint,
+        onePaint,
       );
     }
   }
@@ -175,38 +177,55 @@ class ClockFacePainter extends CustomPainter {
 
     for (int h = 1; h <= 12; h++) {
       final angle = (h / 12.0) * math.pi * 2.0 - math.pi / 2.0;
+      final isCardinal = h == 3 || h == 6 || h == 9;
+      final isTwelve = h == 12;
+
+      final markerLen = isTwelve
+          ? radius * 0.095
+          : isCardinal
+              ? radius * 0.072
+              : radius * 0.052;
+      final markerW = isTwelve
+          ? radius * 0.024
+          : isCardinal
+              ? radius * 0.018
+              : radius * 0.013;
+
+      final outerEdge = radius * 0.868;
+      final midR = outerEdge - markerLen / 2.0;
       final cosA = math.cos(angle);
       final sinA = math.sin(angle);
 
-      // All hour markers are elegant thin lines — cardinal hours slightly longer.
-      final isCardinal = (h == 12 || h == 3 || h == 6 || h == 9);
+      canvas.save();
+      canvas.translate(center.dx + midR * cosA, center.dy + midR * sinA);
+      canvas.rotate(angle + math.pi / 2.0);
 
-      // Outer edge: just inside the inner dial ring.
-      final outerR = radius * (isCardinal ? 0.870 : 0.870);
-      // Cardinal markers go deeper; others are short.
-      final innerR = radius * (isCardinal ? 0.820 : 0.845);
-      // Weight: cardinal slightly heavier but still thin.
-      final strokeW = isCardinal ? 1.5 : 0.8;
+      final rect = RRect.fromRectAndRadius(
+        Rect.fromCenter(center: Offset.zero, width: markerW, height: markerLen),
+        Radius.circular(markerW / 2.5),
+      );
 
-      final ox = center.dx + cosA * outerR;
-      final oy = center.dy + sinA * outerR;
-      final ix = center.dx + cosA * innerR;
-      final iy = center.dy + sinA * innerR;
-
-      final paint = Paint()
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = strokeW
-        ..strokeCap = StrokeCap.round
-        ..color = AppColors.goldPrimary.withAlpha(isCardinal ? 230 : 180);
-
-      canvas.drawLine(Offset(ox, oy), Offset(ix, iy), paint);
+      final alpha = isTwelve ? 240 : (isCardinal ? 220 : 190);
+      final markerPaint = Paint()
+        ..style = PaintingStyle.fill
+        ..shader = LinearGradient(
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+          colors: [
+            AppColors.goldDark.withAlpha((alpha * 0.70).round()),
+            AppColors.goldLight.withAlpha(alpha),
+            AppColors.goldPale.withAlpha(alpha),
+            AppColors.goldPrimary.withAlpha(alpha),
+            AppColors.goldDark.withAlpha((alpha * 0.70).round()),
+          ],
+          stops: const [0.0, 0.20, 0.50, 0.80, 1.0],
+        ).createShader(
+          Rect.fromCenter(center: Offset.zero, width: markerW, height: markerLen),
+        );
+      canvas.drawRRect(rect, markerPaint);
+      canvas.restore();
     }
   }
-
-  // Keep these for binary compatibility — they are no longer called.
-  void _drawDoubleBar(Canvas canvas, Offset center, double radius, double cosA, double sinA) {}
-  void _drawThickBar(Canvas canvas, Offset center, double radius, double cosA, double sinA) {}
-  void _drawThinLine(Canvas canvas, Offset center, double radius, double cosA, double sinA) {}
 
   // ── Layer 6: Hour numerals ─────────────────────────────────────────────────
 
@@ -226,9 +245,9 @@ class ClockFacePainter extends CustomPainter {
       final label = _labelFor(h);
       final textStyle = TextStyle(
         color: AppColors.goldPrimary,
-        fontSize: radius * 0.11,
+        fontSize: radius * 0.13,
         fontWeight: FontWeight.w600,
-        fontFamily: null,
+        fontFamily: 'ArabicDisplay',
         height: 1.0,
         shadows: const [
           Shadow(
@@ -254,15 +273,13 @@ class ClockFacePainter extends CustomPainter {
 
   String _labelFor(int hour) {
     if (mode == NumeralStyle.arabicIndic) {
-      // Standard Western Arabic numerals (1–12)
-      return hour.toString();
-    } else {
-      // Roman numerals.
-      const labels = [
-        '', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII',
-      ];
-      return labels[hour];
+      const indic = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+      return hour.toString().split('').map((d) => indic[int.parse(d)]).join();
     }
+    const labels = [
+      '', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'
+    ];
+    return labels[hour];
   }
 
   // ── Layer 7: Center cap ────────────────────────────────────────────────────
@@ -270,39 +287,54 @@ class ClockFacePainter extends CustomPainter {
   void _drawCenterCap(Canvas canvas, Size size) {
     final center = _center(size);
     final radius = _radius(size) * scaleFactor;
+    final capR = radius * 0.028;
 
-    // Small elegant center dot — like a premium Swiss jewel.
-    // Keep it tiny: 1.5% of radius.
-    final capR = radius * 0.015;
-
-    // Very soft glow — barely perceptible.
+    // Warm outer glow
     final glowPaint = Paint()
-      ..color = AppColors.glowGold.withAlpha(100)
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3.0);
-    canvas.drawCircle(center, capR * 2.2, glowPaint);
+      ..color = AppColors.glowGold.withAlpha(65)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 5.0);
+    canvas.drawCircle(center, capR * 2.8, glowPaint);
 
-    // Gold dot with radial gradient for slight 3-D depth.
+    // Dark outer bezel ring (like a watch stem bearing)
+    canvas.drawCircle(
+      center,
+      capR * 1.15,
+      Paint()..color = const Color(0xFF120D00),
+    );
+
+    // Main jewel cap — multi-stop radial gradient for gemstone depth
     final capPaint = Paint()
       ..style = PaintingStyle.fill
       ..shader = RadialGradient(
-        center: const Alignment(-0.3, -0.3),
+        center: const Alignment(-0.35, -0.35),
+        radius: 1.0,
         colors: const [
-          AppColors.goldLight,
-          AppColors.goldPrimary,
-          AppColors.goldDark,
+          Color(0xFFFFFBE8),
+          Color(0xFFEDD458),
+          Color(0xFFD4AF37),
+          Color(0xFF9B7D1A),
+          Color(0xFF4A3000),
         ],
-        stops: const [0.0, 0.6, 1.0],
+        stops: const [0.0, 0.18, 0.45, 0.72, 1.0],
       ).createShader(Rect.fromCircle(center: center, radius: capR));
-
     canvas.drawCircle(center, capR, capPaint);
 
-    // Hairline rim.
-    final rimPaint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 0.4
-      ..color = AppColors.goldDark.withAlpha(160);
+    // Hairline rim
+    canvas.drawCircle(
+      center,
+      capR,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 0.5
+        ..color = AppColors.goldDark.withAlpha(200),
+    );
 
-    canvas.drawCircle(center, capR, rimPaint);
+    // Specular highlight — tiny bright spot simulating gem catching light
+    canvas.drawCircle(
+      Offset(center.dx - capR * 0.28, center.dy - capR * 0.28),
+      capR * 0.22,
+      Paint()..color = const Color(0xD8FFFFFF),
+    );
   }
 
   // ── paint ──────────────────────────────────────────────────────────────────
@@ -311,7 +343,6 @@ class ClockFacePainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     _drawBezel(canvas, size);
     _drawGuillocheTexture(canvas, size);
-    _drawInnerRing(canvas, size);
     _drawMinuteMarkers(canvas, size);
     _drawHourMarkers(canvas, size);
     _drawNumerals(canvas, size);

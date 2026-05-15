@@ -208,14 +208,17 @@ class TemporalProgressPainter extends CustomPainter {
     );
   }
 
-  /// Formats remaining time as MM:SS or HH:MM:SS.
+  /// Formats remaining time as MM:SS or HH:MM:SS using Eastern Arabic-Indic digits.
   String _formatRemainingMinutes(Duration d) {
-    if (d <= Duration.zero) return '00:00';
+    if (d <= Duration.zero) return '٠٠:٠٠';
+    const indic = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+    String toIndic(int n, int pad) =>
+        n.toString().padLeft(pad, '0').split('').map((c) => indic[int.parse(c)]).join();
     final h = d.inHours;
-    final m = d.inMinutes.remainder(60).toString().padLeft(2, '0');
-    final s = d.inSeconds.remainder(60).toString().padLeft(2, '0');
-    if (h > 0) return '${h.toString().padLeft(2, '0')}:$m:$s';
-    return '$m:$s';
+    final m = d.inMinutes.remainder(60);
+    final s = d.inSeconds.remainder(60);
+    if (h > 0) return '${toIndic(h, 2)}:${toIndic(m, 2)}:${toIndic(s, 2)}';
+    return '${toIndic(m, 2)}:${toIndic(s, 2)}';
   }
 
   // ── Decorative outer ring accent ──────────────────────────────────────────

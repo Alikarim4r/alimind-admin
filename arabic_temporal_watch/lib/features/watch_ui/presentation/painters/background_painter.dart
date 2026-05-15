@@ -473,13 +473,9 @@ class BackgroundPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(BackgroundPainter oldDelegate) =>
-      oldDelegate.transitionState != transitionState ||
-      oldDelegate.transitionState.skyColorTop !=
-          transitionState.skyColorTop ||
-      oldDelegate.transitionState.skyColorBottom !=
-          transitionState.skyColorBottom ||
-      oldDelegate.transitionState.starOpacity !=
-          transitionState.starOpacity ||
+      oldDelegate.transitionState.skyColorTop != transitionState.skyColorTop ||
+      oldDelegate.transitionState.skyColorBottom != transitionState.skyColorBottom ||
+      oldDelegate.transitionState.starOpacity != transitionState.starOpacity ||
       oldDelegate.transitionState.phase != transitionState.phase ||
       oldDelegate.solarAltitude != solarAltitude ||
       oldDelegate.moonPhase != moonPhase ||
