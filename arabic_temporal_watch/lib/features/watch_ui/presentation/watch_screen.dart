@@ -30,7 +30,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/dimensions.dart';
-import '../../astronomical_engine/presentation/astronomical_provider.dart';
+import '../../astronomical_engine/presentation/astronomical_provider.dart'
+    hide locationProvider;
+import '../../location/presentation/location_provider.dart'
+    show locationProvider;
 import '../../prayer_engine/presentation/prayer_provider.dart';
 import '../../rotating_ring/data/ring_calculator.dart';
 import '../../rotating_ring/presentation/painters/ring_painter.dart';

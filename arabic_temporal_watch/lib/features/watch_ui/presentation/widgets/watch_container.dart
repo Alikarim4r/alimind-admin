@@ -18,6 +18,8 @@
 //     can easily respond to theme changes and be touched/tapped for a
 //     long-press-to-info gesture.
 
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_colors.dart';
@@ -306,8 +308,6 @@ class _BezelTickPainter extends CustomPainter {
   double _sin(double a) => _cosSin(a, true);
 
   double _cosSin(double a, bool isSin) {
-    // Use dart:math via import.
-    import 'dart:math' as math;
     return isSin ? math.sin(a) : math.cos(a);
   }
 

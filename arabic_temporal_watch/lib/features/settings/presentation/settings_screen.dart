@@ -498,7 +498,7 @@ class _DisplaySection extends ConsumerWidget {
         _SwitchRow(
           arabicLabel: 'قوس الصلاة',
           englishLabel: 'Prayer Arc',
-          icon: Icons.arc_outlined_sharp,
+          icon: Icons.architecture,
           value: settings.showPrayerArc,
           onChanged: notifier.setShowPrayerArc,
         ),
@@ -640,12 +640,3 @@ class _AboutSection extends StatelessWidget {
   }
 }
 
-// ignore: unused_element
-extension on IconData {
-  // Alias so we can use Icons.arc_outlined_sharp cleanly (doesn't exist in all SDK versions)
-  static IconData get arc => Icons.architecture;
-}
-
-extension on Icons {
-  static IconData get arc_outlined_sharp => Icons.architecture;
-}
