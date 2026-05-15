@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/constants/app_colors.dart';
+import '../../adhan/domain/adhan_model.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../location/domain/location_model.dart';
 import '../../location/presentation/location_provider.dart';
@@ -56,6 +57,8 @@ class SettingsScreen extends ConsumerWidget {
           _PrayerSection(settings: settings),
           _SectionHeader(title: 'العرض', subtitle: 'Display'),
           _DisplaySection(settings: settings),
+          _SectionHeader(title: 'الأذان', subtitle: 'Adhan'),
+          _AdhanSection(settings: settings),
           _SectionHeader(title: 'إمكانية الوصول', subtitle: 'Accessibility'),
           _AccessibilitySection(settings: settings),
           _SectionHeader(title: 'حول التطبيق', subtitle: 'About'),
@@ -649,6 +652,86 @@ class _AccessibilitySection extends ConsumerWidget {
           onChanged: notifier.setEnableVibration,
         ),
       ],
+    );
+  }
+}
+
+// ── Adhan section ─────────────────────────────────────────────────────────────
+
+class _AdhanSection extends ConsumerWidget {
+  const _AdhanSection({required this.settings});
+  final AppSettings settings;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final notifier = ref.read(settingsProvider.notifier);
+
+    return _SettingsCard(
+      children: [
+        _SwitchRow(
+          arabicLabel: 'تشغيل الأذان تلقائياً',
+          englishLabel: 'Auto-play Adhan',
+          icon: Icons.volume_up_outlined,
+          value: settings.enableAdhan,
+          onChanged: notifier.setEnableAdhan,
+        ),
+        if (settings.enableAdhan) ...[
+          const _RowDivider(),
+          _TapRow(
+            arabicLabel: 'المؤذن',
+            englishLabel: 'Muezzin Voice',
+            icon: Icons.mic_none_outlined,
+            value: settings.muezzin.arabicName,
+            onTap: () => _showMuezzinPicker(context, notifier),
+          ),
+        ],
+      ],
+    );
+  }
+
+  void _showMuezzinPicker(BuildContext context, SettingsNotifier notifier) {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: AppColors.backgroundMid,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Text(
+              'اختر المؤذن',
+              style: const TextStyle(
+                color: AppColors.goldPrimary,
+                fontSize: 18,
+                fontFamily: 'ArabicDisplay',
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          Divider(color: AppColors.goldDark.withOpacity(0.3), height: 1),
+          ...Muezzin.values.map((m) => ListTile(
+                title: Text(
+                  m.arabicName,
+                  style: const TextStyle(
+                    color: AppColors.textPrimary,
+                    fontFamily: 'ArabicDisplay',
+                  ),
+                  textDirection: TextDirection.rtl,
+                ),
+                trailing: settings.muezzin == m
+                    ? const Icon(Icons.check, color: AppColors.goldPrimary)
+                    : null,
+                onTap: () {
+                  notifier.setMuezzin(m);
+                  Navigator.of(context).pop();
+                },
+              )),
+          const SizedBox(height: 16),
+        ],
+      ),
     );
   }
 }

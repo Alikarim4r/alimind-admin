@@ -1,13 +1,10 @@
 // prayer_info_widget.dart
 //
-// Ultra-minimal bottom area showing ONLY the current prayer name and time
-// remaining until the next prayer.
-//
-// Design: floating text, no cards, no borders, no boxes.
-// Just elegant Arabic typography on the dark background.
+// Bottom info area: current prayer (left) and next prayer + countdown (right),
+// or just next prayer + countdown centered when no current prayer is active.
 //
 // Providers consumed:
-//   • currentPrayerProvider          — Prayer? for the current period
+//   • currentPrayerProvider          — Prayer? for the current prayer window
 //   • nextPrayerProvider             — Prayer? for the next prayer
 //   • timeUntilNextPrayerProvider    — StreamProvider<Duration>, ticks every second
 
@@ -20,16 +17,16 @@ import '../../../prayer_engine/presentation/prayer_provider.dart';
 
 // ── PrayerInfoWidget ───────────────────────────────────────────────────────────
 
-/// Ultra-minimal prayer info — next prayer name and countdown only.
-/// No cards, no boxes. Elegant floating text.
 class PrayerInfoWidget extends ConsumerWidget {
   const PrayerInfoWidget({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final currentAsync = ref.watch(currentPrayerProvider);
     final nextAsync = ref.watch(nextPrayerProvider);
     final countdownAsync = ref.watch(timeUntilNextPrayerProvider);
 
+    final currentPrayer = currentAsync.valueOrNull;
     final nextPrayer = nextAsync.valueOrNull;
     final countdown = countdownAsync.valueOrNull ?? Duration.zero;
 
@@ -37,21 +34,24 @@ class PrayerInfoWidget extends ConsumerWidget {
       return const SizedBox.shrink();
     }
 
-    return _MinimalPrayerDisplay(
+    return _PrayerDisplay(
+      currentPrayer: currentPrayer,
       nextPrayer: nextPrayer,
       countdown: countdown,
     );
   }
 }
 
-// ── _MinimalPrayerDisplay ──────────────────────────────────────────────────────
+// ── _PrayerDisplay ─────────────────────────────────────────────────────────────
 
-class _MinimalPrayerDisplay extends StatelessWidget {
-  const _MinimalPrayerDisplay({
+class _PrayerDisplay extends StatelessWidget {
+  const _PrayerDisplay({
+    required this.currentPrayer,
     required this.nextPrayer,
     required this.countdown,
   });
 
+  final Prayer? currentPrayer;
   final Prayer nextPrayer;
   final Duration countdown;
 
@@ -59,6 +59,134 @@ class _MinimalPrayerDisplay extends StatelessWidget {
   Widget build(BuildContext context) {
     final countdownStr = _formatCountdown(countdown);
 
+    if (currentPrayer == null) {
+      return _NextPrayerCentered(
+        nextPrayer: nextPrayer,
+        countdownStr: countdownStr,
+      );
+    }
+
+    return SizedBox.expand(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 6),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Current prayer — left side (LTR layout)
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  currentPrayer!.arabicName,
+                  style: TextStyle(
+                    fontFamily: 'ArabicDisplay',
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: currentPrayer!.color,
+                    height: 1.2,
+                    shadows: [
+                      Shadow(
+                        color: currentPrayer!.color.withOpacity(0.55),
+                        blurRadius: 8,
+                      ),
+                    ],
+                  ),
+                  textDirection: TextDirection.rtl,
+                ),
+                const SizedBox(height: 1),
+                Text(
+                  'الآن',
+                  style: TextStyle(
+                    fontFamily: 'ArabicDisplay',
+                    fontSize: 9,
+                    color: AppColors.silverDim.withOpacity(0.7),
+                    letterSpacing: 0.5,
+                  ),
+                  textDirection: TextDirection.rtl,
+                ),
+              ],
+            ),
+
+            // Center divider dot
+            Container(
+              width: 4,
+              height: 4,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.silverDim.withOpacity(0.3),
+              ),
+            ),
+
+            // Next prayer + countdown — right side
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      nextPrayer.arabicName,
+                      style: const TextStyle(
+                        fontFamily: 'ArabicDisplay',
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.goldPrimary,
+                        height: 1.2,
+                      ),
+                      textDirection: TextDirection.rtl,
+                    ),
+                    const SizedBox(height: 1),
+                    Text(
+                      'القادمة',
+                      style: TextStyle(
+                        fontFamily: 'ArabicDisplay',
+                        fontSize: 9,
+                        color: AppColors.silverDim.withOpacity(0.7),
+                        letterSpacing: 0.5,
+                      ),
+                      textDirection: TextDirection.rtl,
+                    ),
+                  ],
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  countdownStr,
+                  style: const TextStyle(
+                    fontFamily: 'ArabicDisplay',
+                    fontSize: 18,
+                    fontWeight: FontWeight.w300,
+                    color: AppColors.goldPrimary,
+                    letterSpacing: 2.5,
+                    height: 1.0,
+                  ),
+                  textDirection: TextDirection.ltr,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ── _NextPrayerCentered ────────────────────────────────────────────────────────
+
+class _NextPrayerCentered extends StatelessWidget {
+  const _NextPrayerCentered({
+    required this.nextPrayer,
+    required this.countdownStr,
+  });
+
+  final Prayer nextPrayer;
+  final String countdownStr;
+
+  @override
+  Widget build(BuildContext context) {
     return SizedBox.expand(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 6),
@@ -67,7 +195,6 @@ class _MinimalPrayerDisplay extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // Next prayer Arabic name — right-aligned (RTL)
             Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.end,
@@ -96,8 +223,6 @@ class _MinimalPrayerDisplay extends StatelessWidget {
                 ),
               ],
             ),
-
-            // Countdown — left side (RTL layout)
             Text(
               countdownStr,
               style: const TextStyle(
@@ -119,7 +244,6 @@ class _MinimalPrayerDisplay extends StatelessWidget {
 
 // ── Utility helpers ────────────────────────────────────────────────────────────
 
-/// Formats a [Duration] as HH:MM:SS.
 String _formatCountdown(Duration d) {
   if (d == Duration.zero) return '--:--';
   final h = d.inHours;

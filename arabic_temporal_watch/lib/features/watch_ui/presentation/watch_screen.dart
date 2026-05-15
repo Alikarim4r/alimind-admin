@@ -26,6 +26,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/constants/app_colors.dart';
@@ -38,8 +39,10 @@ import '../../prayer_engine/presentation/prayer_provider.dart';
 import '../../rotating_ring/data/ring_calculator.dart';
 import '../../rotating_ring/presentation/painters/ring_painter.dart'
     show RingPainter, PrayerMarker;
+import '../../adhan/presentation/adhan_provider.dart';
 import '../../settings/presentation/settings_provider.dart';
 import '../../temporal_engine/domain/arabic_period.dart';
+import '../../../core/utils/shake_detector.dart';
 import '../../temporal_engine/presentation/temporal_provider.dart';
 import 'painters/background_painter.dart';
 import 'painters/clock_face_painter.dart'
@@ -67,6 +70,10 @@ class WatchScreen extends ConsumerStatefulWidget {
 
 class _WatchScreenState extends ConsumerState<WatchScreen>
     with TickerProviderStateMixin {
+  // ── Shake detector ────────────────────────────────────────────────────────
+
+  final _shakeDetector = ShakeDetector();
+
   // ── Animation controllers ─────────────────────────────────────────────────
 
   /// Continuous ring rotation animation — driven toward [_targetRingRotation]
@@ -133,10 +140,14 @@ class _WatchScreenState extends ConsumerState<WatchScreen>
 
     // When the tick fires, update the ring lerp.
     _tickController.addListener(_onTick);
+
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   }
 
   @override
   void dispose() {
+    _shakeDetector.stop();
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     _tickController.removeListener(_onTick);
     _tickController.dispose();
     _ringController.dispose();
@@ -260,37 +271,63 @@ class _WatchScreenState extends ConsumerState<WatchScreen>
     // React to phase changes to trigger sky animation.
     _checkSkyTransition(transitionPhase);
 
+    // Start/stop shake detector based on whether adhan is playing.
+    ref.listen<bool>(adhanNotifierProvider, (prev, isPlaying) {
+      if (isPlaying) {
+        _shakeDetector.start(() {
+          ref.read(adhanNotifierProvider.notifier).silenceAdhan();
+          if (settings.enableVibration) HapticFeedback.heavyImpact();
+        });
+      } else {
+        _shakeDetector.stop();
+      }
+    });
+
     return Scaffold(
       backgroundColor: AppColors.backgroundDeep,
-      body: SafeArea(
-        child: Column(
-          children: [
-            // ── Ultra-minimal top status bar ─────────────────────────────
-            _StatusBar(settings: settings),
-
-            // ── Watch face — 85% of remaining space ──────────────────────
-            Expanded(
-              flex: 85,
-              child: Center(
-                child: _buildWatchFace(
-                  context: context,
-                  settings: settings,
-                  temporalAsync: temporalAsync,
-                  prayerAsync: prayerAsync,
-                  transitionPhase: transitionPhase,
-                  solarAltitude: solarAltitude,
-                  moonPhase: moonData?.illumination ?? 0.5,
+      body: Stack(
+        children: [
+          // Watch face fills all available space
+          Center(
+            child: _buildWatchFace(
+              context: context,
+              settings: settings,
+              temporalAsync: temporalAsync,
+              prayerAsync: prayerAsync,
+              transitionPhase: transitionPhase,
+              solarAltitude: solarAltitude,
+              moonPhase: moonData?.illumination ?? 0.5,
+            ),
+          ),
+          // Status bar floats at top
+          Positioned(
+            top: 0, left: 0, right: 0,
+            child: Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Color(0xCC000000), Colors.transparent],
                 ),
               ),
+              child: SafeArea(bottom: false, child: _StatusBar(settings: settings)),
             ),
-
-            // ── Bottom prayer info — minimal floating text ────────────────
-            Expanded(
-              flex: 15,
-              child: const PrayerInfoWidget(),
+          ),
+          // Prayer info floats at bottom
+          Positioned(
+            bottom: 0, left: 0, right: 0,
+            child: Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.bottomCenter,
+                  end: Alignment.topCenter,
+                  colors: [Color(0xDD000000), Colors.transparent],
+                ),
+              ),
+              child: SafeArea(top: false, child: const PrayerInfoWidget()),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -307,6 +344,7 @@ class _WatchScreenState extends ConsumerState<WatchScreen>
     required double moonPhase,
   }) {
     return WatchContainer(
+      sizeFraction: 0.97,
       builder: (context, watchDiameter) {
         final size = Size(watchDiameter, watchDiameter);
 
