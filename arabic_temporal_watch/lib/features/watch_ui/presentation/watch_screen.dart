@@ -461,25 +461,32 @@ class _WatchScreenState extends ConsumerState<WatchScreen>
                   ),
                 ),
 
-                // ── Layer 7: Reader line — thin gold pointer at hour angle ─
-                Transform.rotate(
-                  angle: _hourAngle(now),
-                  child: CustomPaint(
-                    size: size,
-                    painter: const _ReaderLinePainter(),
-                  ),
+                // ── Layer 7: Reader line — fixed at 12 o'clock (current-moment pointer) ─
+                // Fixed (no rotation) so it stays aligned with the ring's reference
+                // position. The ring rotates to keep the current Arabic period under
+                // this pointer; rotating the pointer with the clock hour would cause drift.
+                CustomPaint(
+                  size: size,
+                  painter: const _ReaderLinePainter(),
                 ),
 
                 // ── Layer 8: 12 o'clock indicator tick — hairline gold ────
                 Positioned(
                   top: watchDiameter * 0.012,
-                  left: watchDiameter / 2 - 0.75,
+                  left: watchDiameter / 2 - 1.0,
                   child: Container(
-                    width: 1.5,
-                    height: watchDiameter * 0.030,
+                    width: 2.0,
+                    height: watchDiameter * 0.036,
                     decoration: BoxDecoration(
                       color: AppColors.goldPrimary,
                       borderRadius: BorderRadius.circular(1),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.goldPrimary.withOpacity(0.6),
+                          blurRadius: 4,
+                          spreadRadius: 1,
+                        ),
+                      ],
                     ),
                   ),
                 ),

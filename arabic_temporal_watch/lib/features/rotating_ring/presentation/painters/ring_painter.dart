@@ -110,11 +110,17 @@ class RingPainter extends CustomPainter {
 
   // ── Geometry constants ─────────────────────────────────────────────────────
 
+  /// Outer radius of the colored ring band as a fraction of half-canvas width.
+  static const double _ringOuterFraction = 0.94;
+
+  /// Inner radius of the colored ring band as a fraction of half-canvas width.
+  static const double _ringInnerFraction = 0.73;
+
   /// Radial position of arc tick marks as a fraction of half-canvas width.
-  static const double _tickRadiusFraction = 0.75;
+  static const double _tickRadiusFraction = 0.835;
 
   /// Radial position of floating labels as a fraction of half-canvas width.
-  static const double _labelRadiusFraction = 0.86;
+  static const double _labelRadiusFraction = 0.835;
 
   /// Flutter canvas offset so that 0 rad = 12 o'clock (−π/2).
   static const double _startOffset = -math.pi / 2.0;
@@ -136,6 +142,9 @@ class RingPainter extends CustomPainter {
 
     // ── Layer 0: Watch body fill — covers sky background between inner clock and ring ──
     _drawWatchBodyFill(canvas, cx, cy, halfW);
+
+    // ── Layer 0.5: Colored arc sectors for the sliding 12-period window ───────
+    _drawArcSectors(canvas, cx, cy, halfW);
 
     // ── Layer 1: Arc tick marks ───────────────────────────────────────────────
     _drawArcTicks(canvas, cx, cy, tickR, halfW);
@@ -168,6 +177,66 @@ class RingPainter extends CustomPainter {
   }
 
   // ── Layer implementations ──────────────────────────────────────────────────
+
+  void _drawArcSectors(Canvas canvas, double cx, double cy, double halfW) {
+    final segments = ringState.segments;
+    if (segments.isEmpty) return;
+
+    final currentIdx = segments.indexWhere((s) => s.isCurrent);
+    if (currentIdx < 0) return;
+
+    const segAngle = math.pi * 2.0 / 24.0;
+    final totalSegs = segments.length;
+    final outerR = halfW * _ringOuterFraction;
+    final innerR = halfW * _ringInnerFraction;
+
+    // Small radians gap between adjacent sectors so boundaries are visible.
+    const gap = 0.007;
+
+    final fillPaint = Paint()..style = PaintingStyle.fill;
+    final borderPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 0.9;
+
+    for (int offset = -_labelHalfRange; offset <= _labelHalfRange; offset++) {
+      final idx = ((currentIdx + offset) % totalSegs + totalSegs) % totalSegs;
+      final seg = segments[idx];
+
+      // Same fade curve used by ticks and labels for visual coherence.
+      final dist = (offset - progressFraction).abs();
+      final norm = math.max(0.0, 1.0 - dist / 6.5);
+      final sectorOpacity = math.pow(norm, 1.1).toDouble();
+      if (sectorOpacity < 0.02) continue;
+
+      final startAngle = _startOffset + idx * segAngle + gap / 2;
+      final sweepAngle = segAngle - gap;
+
+      final path = _annularSectorPath(cx, cy, innerR, outerR, startAngle, sweepAngle);
+
+      // Fill with segment color modulated by window opacity.
+      fillPaint.color = seg.segmentColor.withOpacity(sectorOpacity * 0.72);
+      canvas.drawPath(path, fillPaint);
+
+      // Gold border on the current-period sector.
+      if (offset == 0) {
+        borderPaint.color = AppColors.goldPrimary.withOpacity(sectorOpacity * 0.75 * glowIntensity);
+        canvas.drawPath(path, borderPaint);
+      }
+    }
+  }
+
+  Path _annularSectorPath(
+    double cx, double cy,
+    double innerR, double outerR,
+    double startAngle, double sweepAngle,
+  ) {
+    final outerRect = Rect.fromCircle(center: Offset(cx, cy), radius: outerR);
+    final innerRect = Rect.fromCircle(center: Offset(cx, cy), radius: innerR);
+    return Path()
+      ..arcTo(outerRect, startAngle, sweepAngle, true)
+      ..arcTo(innerRect, startAngle + sweepAngle, -sweepAngle, false)
+      ..close();
+  }
 
   void _drawArcTicks(
     Canvas canvas,

@@ -123,30 +123,22 @@ Future<LocationData?> _fetchLocation() async {
 ///
 /// Emits null when no location is available yet or when location is denied.
 final astronomicalDataProvider = StreamProvider<AstronomicalData?>((ref) async* {
-  // Watch the current location and re-execute the generator whenever it changes.
-  final locationAsync = ref.watch(locationProvider);
-  final location = locationAsync.valueOrNull;
+  // Capture location BEFORE any await. ref.watch here means Riverpod will
+  // cancel and restart this generator whenever locationProvider changes.
+  final location = ref.watch(locationProvider).valueOrNull;
 
   if (location == null) {
     yield null;
-    // Still set up the timer so we can recover when location becomes available.
-  }
-
-  if (location != null) {
-    // Emit immediately for the new location.
+  } else {
     yield _computeAstronomicalData(location);
   }
 
-  // Continue emitting on the 60-second ticker.
+  // Periodic refresh using only the pre-captured location.
+  // Do NOT call ref.read/ref.watch after any await.
   while (true) {
     await Future.delayed(_kAstroUpdateInterval);
-
-    // Re-read location at each tick (may have changed via locationProvider).
-    final currentLocationAsync = ref.read(locationProvider);
-    final currentLocation = currentLocationAsync.valueOrNull;
-
-    if (currentLocation != null) {
-      yield _computeAstronomicalData(currentLocation);
+    if (location != null) {
+      yield _computeAstronomicalData(location);
     } else {
       yield null;
     }
@@ -175,21 +167,19 @@ AstronomicalData _computeAstronomicalData(LocationData location) {
 /// can drive smooth animations without triggering a full [AstronomicalData]
 /// rebuild on every tick.
 final currentSolarAltitudeProvider = StreamProvider<double?>((ref) async* {
-  // Initial value.
-  final locationAsync = ref.read(locationProvider);
-  final initial = locationAsync.valueOrNull;
-  yield initial != null
-      ? _calc.currentSolarAltitude(initial.latitude, initial.longitude)
+  // Capture location BEFORE any await. ref.watch restarts this generator
+  // whenever locationProvider emits a new value.
+  final location = ref.watch(locationProvider).valueOrNull;
+
+  yield location != null
+      ? _calc.currentSolarAltitude(location.latitude, location.longitude)
       : null;
 
-  // 10-second refresh loop.
   while (true) {
     await Future.delayed(_kAltitudeUpdateInterval);
-
-    final locAsync = ref.read(locationProvider);
-    final loc = locAsync.valueOrNull;
-    if (loc != null) {
-      yield _calc.currentSolarAltitude(loc.latitude, loc.longitude);
+    // Use pre-captured location — do NOT call ref after any await.
+    if (location != null) {
+      yield _calc.currentSolarAltitude(location.latitude, location.longitude);
     } else {
       yield null;
     }

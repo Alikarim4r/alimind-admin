@@ -83,10 +83,6 @@ class RingCalculator {
     final allSlots = data.allPeriods;
     final currentGlobalIndex = data.currentPeriod.period.globalIndex;
 
-    // Decide whether to use proportional or equal segment angles.
-    final useProportional =
-        allSlots.length == 24 && _hasValidAngles(allSlots);
-
     final segments = <RingSegment>[];
 
     for (var i = 0; i < allSlots.length; i++) {
@@ -95,16 +91,11 @@ class RingCalculator {
       final isCurrent = period.globalIndex == currentGlobalIndex;
 
       // ── Geometry ──────────────────────────────────────────────────────────
-      final double startAngle;
-      final double sweepAngle;
-
-      if (useProportional) {
-        startAngle = slot.startAngle;
-        sweepAngle = slot.endAngle - slot.startAngle;
-      } else {
-        startAngle = i * _equalSegmentAngle;
-        sweepAngle = _equalSegmentAngle;
-      }
+      // Always equal visual widths: real duration is encoded in the rotation
+      // speed (progressFraction moves faster for shorter periods), not in the
+      // arc angle. This matches the rotation formula in watch_screen._onTick.
+      final startAngle = i * _equalSegmentAngle;
+      const sweepAngle = _equalSegmentAngle;
 
       // ── Colors ────────────────────────────────────────────────────────────
       final segmentColor = _blendSegmentColor(
