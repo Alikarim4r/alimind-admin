@@ -177,16 +177,21 @@ class RingCalculator {
     return current + delta;
   }
 
-  /// Compute the target ring rotation (radians, negative = CCW) needed to
-  /// place [segmentStartAngle] at the 12 o'clock position.
+  /// Compute the target ring rotation (radians) needed to align the current
+  /// period's start with the [hourAngle] (the clock hand direction).
   ///
-  /// On the ring the 12 o'clock position corresponds to angle 0 (top).  To
-  /// bring segment at [segmentStartAngle] to the top, we rotate the ring by
-  /// −segmentStartAngle.
-  double targetRotationForSegment(double segmentStartAngle) {
-    // We want the ring to rotate CCW so the segment's START angle aligns with
-    // 12 o'clock.  Negative rotation = CCW.
-    return -_normalise(segmentStartAngle);
+  /// The ring has 24 equal segments of [_equalSegmentAngle] = π/12 each.
+  /// Segment [globalIndex] starts at natural angle [globalIndex × π/12].
+  /// After rotation, that angle must equal [hourAngle] (adjusted for _startOffset):
+  ///
+  ///   rotation = hourAngle − (globalIndex + progressFraction) × π/12
+  double targetRotationForHourAlignment({
+    required double hourAngle,
+    required int globalIndex,
+    required double progressFraction,
+  }) {
+    return hourAngle -
+        (globalIndex + progressFraction.clamp(0.0, 1.0)) * _equalSegmentAngle;
   }
 
   /// Determine the glow pulse intensity for the current segment at [time]
@@ -242,15 +247,16 @@ class RingCalculator {
 
   /// Build a complete [RingState] from [TemporalData] and animation values.
   ///
-  /// [currentRotation] is the ring's current rendered rotation (radians),
-  /// driven by an external [AnimationController].
-  ///
-  /// [animationTime] is the elapsed wall-clock time in seconds, used to
-  /// animate the glow pulse.
+  /// [currentRotation] is the ring's current rendered rotation (radians).
+  /// [animationTime] is elapsed wall-clock time in seconds (glow pulse).
+  /// [hourAngle] is the current clock-hand angle in radians [0, 2π), used to
+  /// compute the target rotation so the current period aligns with the
+  /// hour hand rather than always snapping to 12 o'clock.
   RingState buildRingState({
     required TemporalData temporalData,
     required double currentRotation,
     required double animationTime,
+    required double hourAngle,
   }) {
     // ── Day/night blend ──────────────────────────────────────────────────────
     // During a day→night or night→day transition the blend eases between 0 and
@@ -270,9 +276,13 @@ class RingCalculator {
     final segments = buildSegments(temporalData, dayNightBlend: dayNightBlend);
 
     // ── Target rotation ───────────────────────────────────────────────────────
-    final currentSlotStartAngle =
-        temporalData.currentPeriod.startAngle;
-    final rawTarget = targetRotationForSegment(currentSlotStartAngle);
+    // Align the current period's position with the clock hour hand.
+    final globalIdx = temporalData.currentPeriod.period.globalIndex;
+    final rawTarget = targetRotationForHourAlignment(
+      hourAngle: hourAngle,
+      globalIndex: globalIdx,
+      progressFraction: temporalData.progressFraction,
+    );
     final targetAngle = smoothRotation(currentRotation, rawTarget);
 
     // ── Transition state ──────────────────────────────────────────────────────

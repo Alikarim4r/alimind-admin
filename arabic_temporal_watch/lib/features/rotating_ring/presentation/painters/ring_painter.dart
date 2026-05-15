@@ -33,6 +33,37 @@ import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../domain/ring_state.dart';
 
+// ── PrayerMarker ──────────────────────────────────────────────────────────────
+
+/// A single prayer-time marker that rides on the rotating ring.
+///
+/// [ringAngle] is the natural ring angle (radians, 0 = start of period 0,
+/// increases clockwise) where the dot should be rendered.
+/// Visibility fades in/out as the marker scrolls into or out of the
+/// ±[RingPainter._labelHalfRange] window.
+@immutable
+class PrayerMarker {
+  const PrayerMarker({
+    required this.ringAngle,
+    required this.color,
+    required this.arabicName,
+    this.isAm = true,
+  });
+
+  /// Natural ring angle in radians — computed from the prayer's real time
+  /// relative to the day/night temporal-hour grid.
+  final double ringAngle;
+
+  /// Prayer color (blue for Fajr, gold for Sunrise, yellow for Dhuhr, etc.).
+  final Color color;
+
+  /// Short Arabic prayer name shown beside the dot.
+  final String arabicName;
+
+  /// True for morning (AM/صباحاً) prayers, false for evening (PM/مساءً).
+  final bool isAm;
+}
+
 // ── RingPainter ───────────────────────────────────────────────────────────────
 
 /// [CustomPainter] that draws the floating-label 24-period Arabic ring.
@@ -55,6 +86,7 @@ class RingPainter extends CustomPainter {
     required this.ringState,
     required this.progressFraction,
     required this.glowIntensity,
+    this.prayerMarkers = const [],
   });
 
   /// The complete ring render state produced by [RingCalculator].
@@ -65,6 +97,9 @@ class RingPainter extends CustomPainter {
 
   /// Current glow pulse intensity — [0.55, 1.0].
   final double glowIntensity;
+
+  /// Prayer-time markers to draw on the ring.
+  final List<PrayerMarker> prayerMarkers;
 
   // ── Geometry constants ─────────────────────────────────────────────────────
 
@@ -96,6 +131,9 @@ class RingPainter extends CustomPainter {
 
     // ── Layer 1: Arc tick marks ───────────────────────────────────────────────
     _drawArcTicks(canvas, cx, cy, tickR, halfW);
+
+    // ── Layer 1.5: Prayer time markers ────────────────────────────────────────
+    _drawPrayerMarkers(canvas, cx, cy, tickR);
 
     // ── Layer 2: Floating Arabic labels ──────────────────────────────────────
     _drawFloatingLabels(canvas, cx, cy, labelR, size);
@@ -245,6 +283,111 @@ class RingPainter extends CustomPainter {
         Offset(-textPainter.width / 2.0, -textPainter.height / 2.0),
       );
       canvas.restore();
+    }
+  }
+
+  void _drawPrayerMarkers(
+    Canvas canvas,
+    double cx,
+    double cy,
+    double tickR,
+  ) {
+    if (prayerMarkers.isEmpty) return;
+
+    final segments = ringState.segments;
+    if (segments.isEmpty) return;
+
+    final currentIdx = segments.indexWhere((s) => s.isCurrent);
+    if (currentIdx < 0) return;
+
+    const segmentAngle = math.pi * 2.0 / 24.0;
+    final centerPos = currentIdx + progressFraction;
+
+    for (final marker in prayerMarkers) {
+      // Prayer position in fractional segment units (0–24).
+      final prayerPos = marker.ringAngle / segmentAngle;
+
+      // Signed offset from current center — wrap to [−12, 12].
+      double offset = prayerPos - centerPos;
+      if (offset > 12) offset -= 24;
+      if (offset < -12) offset += 24;
+
+      if (offset.abs() > _labelHalfRange + 1.5) continue;
+
+      final norm = math.max(0.0, 1.0 - offset.abs() / (_labelHalfRange + 1.2));
+      final opacity = math.pow(norm, 1.2).toDouble();
+      if (opacity < 0.04) continue;
+
+      final angle = _startOffset + marker.ringAngle;
+      final cosA = math.cos(angle);
+      final sinA = math.sin(angle);
+
+      // ── Glow halo ─────────────────────────────────────────────────────────
+      final glowPaint = Paint()
+        ..color = marker.color.withAlpha((opacity * 70).round())
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 5.0);
+      canvas.drawCircle(
+          Offset(cx + tickR * cosA, cy + tickR * sinA), 5.0, glowPaint);
+
+      // ── Colored dot ───────────────────────────────────────────────────────
+      final dotPaint = Paint()
+        ..color = marker.color.withAlpha((opacity * 230).round())
+        ..style = PaintingStyle.fill;
+      canvas.drawCircle(
+          Offset(cx + tickR * cosA, cy + tickR * sinA), 2.8, dotPaint);
+
+      // ── AM / PM badge ─────────────────────────────────────────────────────
+      if (opacity > 0.30) {
+        final badgeText = marker.isAm ? 'ص' : 'م'; // ص=صباح(AM) م=مساء(PM)
+        final badgeR = tickR - 9.0;
+        final badgeTp = TextPainter(
+          text: TextSpan(
+            text: badgeText,
+            style: TextStyle(
+              fontSize: 5.5,
+              color: marker.color.withAlpha((opacity * 180).round()),
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          textDirection: ui.TextDirection.ltr,
+          textAlign: TextAlign.center,
+          maxLines: 1,
+        )..layout();
+
+        canvas.save();
+        canvas.translate(cx + badgeR * cosA, cy + badgeR * sinA);
+        canvas.rotate(angle + math.pi / 2.0);
+        badgeTp.paint(canvas,
+            Offset(-badgeTp.width / 2.0, -badgeTp.height / 2.0));
+        canvas.restore();
+      }
+
+      // ── Arabic prayer name ────────────────────────────────────────────────
+      if (opacity > 0.18) {
+        final nameR = tickR + 9.0;
+        final nameTp = TextPainter(
+          text: TextSpan(
+            text: marker.arabicName,
+            style: TextStyle(
+              fontFamily: 'ArabicDisplay',
+              fontSize: 6.0,
+              color: marker.color.withAlpha((opacity * 200).round()),
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.2,
+            ),
+          ),
+          textDirection: ui.TextDirection.rtl,
+          textAlign: TextAlign.center,
+          maxLines: 1,
+        )..layout();
+
+        canvas.save();
+        canvas.translate(cx + nameR * cosA, cy + nameR * sinA);
+        canvas.rotate(angle + math.pi / 2.0);
+        nameTp.paint(
+            canvas, Offset(-nameTp.width / 2.0, -nameTp.height / 2.0));
+        canvas.restore();
+      }
     }
   }
 

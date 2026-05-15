@@ -36,7 +36,8 @@ import '../../location/presentation/location_provider.dart'
 import '../../prayer_engine/domain/prayer.dart';
 import '../../prayer_engine/presentation/prayer_provider.dart';
 import '../../rotating_ring/data/ring_calculator.dart';
-import '../../rotating_ring/presentation/painters/ring_painter.dart';
+import '../../rotating_ring/presentation/painters/ring_painter.dart'
+    show RingPainter, PrayerMarker;
 import '../../settings/presentation/settings_provider.dart';
 import '../../temporal_engine/domain/arabic_period.dart';
 import '../../temporal_engine/presentation/temporal_provider.dart';
@@ -147,16 +148,26 @@ class _WatchScreenState extends ConsumerState<WatchScreen>
   // ── Tick handler ──────────────────────────────────────────────────────────
 
   void _onTick() {
-    // Read the target rotation from the provider without subscribing — we only
-    // need it once per frame.
-    final ringAsync = ref.read(ringRotationProvider);
-    final rawTarget = ringAsync.valueOrNull ?? 0.0;
+    final temporalAsync = ref.read(temporalDataProvider);
+    final temporal = temporalAsync.valueOrNull;
+    if (temporal == null) return;
 
-    // Use the calculator's shortest-path smoothing.
+    final now = DateTime.now();
+    final hAngle = _hourAngle(now);
+
+    // Global period index (0–23): day=0–11, night=12–23.
+    final globalIdx = temporal.currentPeriod.period.globalIndex;
+
+    // Target rotation: align the current period's ring position with the
+    // clock hour hand.
+    //   rotation = hourAngle − (globalIdx + progress) × segmentAngle
+    final rawTarget =
+        hAngle - (globalIdx + temporal.progressFraction) * kSegmentAngle;
+
     _targetRingRotation =
         _ringCalculator.smoothRotation(_currentRingRotation, rawTarget);
 
-    // Exponential lerp toward the target (τ ≈ 0.05 → fast but smooth).
+    // Exponential lerp toward the target (τ ≈ 0.04 → fast but smooth).
     const lerpFactor = 0.04;
     final delta = _targetRingRotation - _currentRingRotation;
 
@@ -176,6 +187,53 @@ class _WatchScreenState extends ConsumerState<WatchScreen>
       // the BackgroundPainter's animationValue accordingly.
       _skyController.forward(from: 0.0);
     }
+  }
+
+  // ── Prayer marker helpers ──────────────────────────────────────────────────
+
+  /// Builds [PrayerMarker] entries for all 6 prayers using the current
+  /// temporal grid (day + night period slots) to map prayer wall-clock times
+  /// to ring natural angles.
+  List<PrayerMarker> _computePrayerMarkers(
+      PrayerTimes prayerTimes, TemporalData temporal) {
+    final markers = <PrayerMarker>[];
+    final allPeriods = [
+      ...temporal.allDayPeriods,
+      ...temporal.allNightPeriods,
+    ];
+
+    for (final prayer in prayerTimes.all) {
+      final angle = _prayerRingAngle(prayer.time, allPeriods);
+      if (angle == null) continue;
+
+      // AM: Fajr / Sunrise / Dhuhr    PM: Asr / Maghrib / Isha
+      final isAm = prayer.name == PrayerName.fajr ||
+          prayer.name == PrayerName.sunrise ||
+          prayer.name == PrayerName.dhuhr;
+
+      markers.add(PrayerMarker(
+        ringAngle: angle,
+        color: prayer.color,
+        arabicName: prayer.arabicName,
+        isAm: isAm,
+      ));
+    }
+    return markers;
+  }
+
+  /// Returns the natural ring angle (radians) for [prayerTime] by finding
+  /// which temporal-hour slot contains it and interpolating within that slot.
+  /// Returns null when the prayer time falls outside all known slots.
+  double? _prayerRingAngle(
+      DateTime prayerTime, List<ArabicPeriodSlot> allPeriods) {
+    for (final slot in allPeriods) {
+      if (!prayerTime.isBefore(slot.startTime) &&
+          prayerTime.isBefore(slot.endTime)) {
+        final p = slot.progressAt(prayerTime);
+        return slot.startAngle + p * (slot.endAngle - slot.startAngle);
+      }
+    }
+    return null;
   }
 
   // ── Angle helpers ─────────────────────────────────────────────────────────
@@ -300,12 +358,18 @@ class _WatchScreenState extends ConsumerState<WatchScreen>
                 // ── Layer 3: Rotating Arabic ring ─────────────────────────
                 temporalAsync.when(
                   data: (temporal) {
+                    final hAngle = _hourAngle(now);
                     final ringState = _ringCalculator.buildRingState(
                       temporalData: temporal,
                       currentRotation: _currentRingRotation,
-                      animationTime:
-                          now.millisecondsSinceEpoch / 1000.0,
+                      animationTime: now.millisecondsSinceEpoch / 1000.0,
+                      hourAngle: hAngle,
                     );
+
+                    final markers = prayerAsync.valueOrNull != null
+                        ? _computePrayerMarkers(
+                            prayerAsync.valueOrNull!, temporal)
+                        : const <PrayerMarker>[];
 
                     return Transform.rotate(
                       angle: _currentRingRotation,
@@ -315,6 +379,7 @@ class _WatchScreenState extends ConsumerState<WatchScreen>
                           ringState: ringState,
                           progressFraction: temporal.progressFraction,
                           glowIntensity: glowIntensity,
+                          prayerMarkers: markers,
                         ),
                       ),
                     );
