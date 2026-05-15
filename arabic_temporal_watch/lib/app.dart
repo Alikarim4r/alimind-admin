@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/theme/app_theme.dart';
+import 'features/settings/presentation/settings_screen.dart';
+import 'features/watch_ui/presentation/watch_screen.dart';
 
 // ── Route name constants ──────────────────────────────────────────────────────
 
@@ -109,9 +111,9 @@ class ArabicTemporalWatchApp extends ConsumerWidget {
   /// development.  Placeholder widgets are replaced as real screens are built.
   static Map<String, WidgetBuilder> _buildRouteTable() {
     return {
-      AppRoutes.watch: (_) => const _WatchScreenPlaceholder(),
+      AppRoutes.watch: (_) => const WatchScreen(),
       AppRoutes.permissions: (_) => const _PermissionsScreenPlaceholder(),
-      AppRoutes.settings: (_) => const _SettingsScreenPlaceholder(),
+      AppRoutes.settings: (_) => const SettingsScreen(),
       AppRoutes.periodDetail: (_) => const _PeriodDetailScreenPlaceholder(),
     };
   }
