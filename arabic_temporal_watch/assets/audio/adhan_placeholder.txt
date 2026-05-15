@@ -1,0 +1,7 @@
+Place adhan MP3 files here:
+  adhan_makkah.mp3       - Makkah adhan
+  adhan_makkah_fajr.mp3  - Makkah Fajr adhan (with "Assalatu Khayrun Minan Nawm")
+  adhan_madinah.mp3      - Madinah adhan
+  adhan_madinah_fajr.mp3 - Madinah Fajr adhan
+  adhan_afasy.mp3        - Mishary Rashid Al-Afasy
+  adhan_afasy_fajr.mp3   - Mishary Rashid Al-Afasy Fajr

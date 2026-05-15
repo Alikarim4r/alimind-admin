@@ -15,6 +15,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 
+import '../../adhan/domain/adhan_model.dart';
 import '../../prayer_engine/domain/prayer.dart'
     show CalculationMethod, AsrMethod;
 
@@ -62,6 +63,8 @@ class AppSettings extends Equatable {
     this.showMinuteBeads = true,
     this.showPrayerArc = true,
     this.appLocale = const Locale('ar', 'SA'),
+    this.enableAdhan = true,
+    this.muezzin = Muezzin.makkah,
   });
 
   // ── Prayer calculation ──────────────────────────────────────────────────────
@@ -108,6 +111,14 @@ class AppSettings extends Equatable {
   /// The locale used for all in-app text.  Supported: ar-SA, en-US.
   final Locale appLocale;
 
+  // ── Adhan ────────────────────────────────────────────────────────────────────
+
+  /// Whether to automatically play the adhan at prayer times.
+  final bool enableAdhan;
+
+  /// The muezzin voice used when playing the adhan.
+  final Muezzin muezzin;
+
   // ── copyWith ────────────────────────────────────────────────────────────────
 
   AppSettings copyWith({
@@ -122,6 +133,8 @@ class AppSettings extends Equatable {
     bool? showMinuteBeads,
     bool? showPrayerArc,
     Locale? appLocale,
+    bool? enableAdhan,
+    Muezzin? muezzin,
   }) {
     return AppSettings(
       prayerMethod: prayerMethod ?? this.prayerMethod,
@@ -135,6 +148,8 @@ class AppSettings extends Equatable {
       showMinuteBeads: showMinuteBeads ?? this.showMinuteBeads,
       showPrayerArc: showPrayerArc ?? this.showPrayerArc,
       appLocale: appLocale ?? this.appLocale,
+      enableAdhan: enableAdhan ?? this.enableAdhan,
+      muezzin: muezzin ?? this.muezzin,
     );
   }
 
@@ -153,6 +168,8 @@ class AppSettings extends Equatable {
         showMinuteBeads,
         showPrayerArc,
         appLocale,
+        enableAdhan,
+        muezzin,
       ];
 
   @override

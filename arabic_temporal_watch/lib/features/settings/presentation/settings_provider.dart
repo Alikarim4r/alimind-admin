@@ -23,6 +23,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../main.dart' show sharedPreferencesProvider;
+import '../../adhan/domain/adhan_model.dart';
 import '../../prayer_engine/domain/prayer.dart'
     show CalculationMethod, AsrMethod;
 import '../data/settings_repository.dart';
@@ -116,6 +117,18 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
 
   Future<void> setKeepScreenOn(bool value) async {
     state = state.copyWith(keepScreenOn: value);
+    await _repository.save(state);
+  }
+
+  // ── Adhan ───────────────────────────────────────────────────────────────────
+
+  Future<void> setEnableAdhan(bool value) async {
+    state = state.copyWith(enableAdhan: value);
+    await _repository.save(state);
+  }
+
+  Future<void> setMuezzin(Muezzin muezzin) async {
+    state = state.copyWith(muezzin: muezzin);
     await _repository.save(state);
   }
 

@@ -16,6 +16,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../adhan/domain/adhan_model.dart';
 import '../../prayer_engine/domain/prayer.dart'
     show CalculationMethod, AsrMethod;
 import '../domain/settings_model.dart';
@@ -34,6 +35,8 @@ abstract final class _Keys {
   static const String showMinuteBeads   = 'settings_show_minute_beads';
   static const String showPrayerArc     = 'settings_show_prayer_arc';
   static const String appLocale         = 'settings_app_locale';
+  static const String enableAdhan       = 'settings_enable_adhan';
+  static const String muezzin           = 'settings_muezzin';
 }
 
 // ── SettingsRepository ────────────────────────────────────────────────────────
@@ -92,6 +95,12 @@ class SettingsRepository {
       appLocale: localeTag != null
           ? _parseLocale(localeTag)
           : d.appLocale,
+      enableAdhan: _prefs.getBool(_Keys.enableAdhan) ?? d.enableAdhan,
+      muezzin: _enumFromIndex(
+        Muezzin.values,
+        _prefs.getInt(_Keys.muezzin),
+        d.muezzin,
+      ),
     );
   }
 
@@ -121,6 +130,8 @@ class SettingsRepository {
       _prefs.setBool(_Keys.showMinuteBeads, settings.showMinuteBeads),
       _prefs.setBool(_Keys.showPrayerArc, settings.showPrayerArc),
       _prefs.setString(_Keys.appLocale, settings.appLocale.toLanguageTag()),
+      _prefs.setBool(_Keys.enableAdhan, settings.enableAdhan),
+      _prefs.setInt(_Keys.muezzin, Muezzin.values.indexOf(settings.muezzin)),
     ]);
   }
 
