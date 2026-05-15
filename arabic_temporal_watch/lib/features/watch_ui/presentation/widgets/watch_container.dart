@@ -151,21 +151,37 @@ class _BezelContainer extends StatelessWidget {
       child: Stack(
         alignment: Alignment.center,
         children: [
-          // ── Outer shadow halo ─────────────────────────────────────────
+          // ── Outer shadow halo + concentric ring bezel effect ─────────
           Container(
             width: outerDiameter,
             height: outerDiameter,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               boxShadow: [
+                // Concentric ring bezel shadows (outermost to innermost).
                 BoxShadow(
-                  color: AppColors.backgroundDeep.withOpacity(0.9),
-                  blurRadius: 24,
-                  spreadRadius: 4,
+                  color: AppColors.goldPrimary.withAlpha(33),
+                  blurRadius: 0,
+                  spreadRadius: 1,
                 ),
                 BoxShadow(
-                  color: AppColors.goldAntique.withOpacity(0.12),
-                  blurRadius: 12,
+                  color: AppColors.backgroundDeep.withAlpha(158),
+                  blurRadius: 0,
+                  spreadRadius: 8,
+                ),
+                BoxShadow(
+                  color: AppColors.goldPrimary.withAlpha(46),
+                  blurRadius: 0,
+                  spreadRadius: 9,
+                ),
+                BoxShadow(
+                  color: AppColors.backgroundDeep.withAlpha(224),
+                  blurRadius: 0,
+                  spreadRadius: 16,
+                ),
+                BoxShadow(
+                  color: Colors.black.withAlpha(184),
+                  blurRadius: 80,
                   spreadRadius: 0,
                 ),
               ],

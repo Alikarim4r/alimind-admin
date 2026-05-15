@@ -43,7 +43,7 @@ class ClockFacePainter extends CustomPainter {
     this.markerColor = AppColors.goldPrimary,
     this.showNumerals = true,
     this.mode = NumeralStyle.arabicIndic,
-    this.scaleFactor = 0.74,
+    this.scaleFactor = 0.46,
   });
 
   /// Background fill for the dial surface.

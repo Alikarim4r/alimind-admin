@@ -38,7 +38,7 @@ class HandsPainter extends CustomPainter {
     this.showSeconds = true,
     this.handColor = AppColors.goldPrimary,
     this.opacity = 1.0,
-    this.dialFraction = 0.74,
+    this.dialFraction = 0.46,
   });
 
   /// Hour-hand rotation angle in radians, measured clockwise from 12 o'clock.

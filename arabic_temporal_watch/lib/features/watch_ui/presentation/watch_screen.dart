@@ -364,7 +364,16 @@ class _WatchScreenState extends ConsumerState<WatchScreen>
                   ),
                 ),
 
-                // ── Layer 7: 12 o'clock indicator tick — hairline gold ────
+                // ── Layer 7: Reader line — thin gold pointer at hour angle ─
+                Transform.rotate(
+                  angle: _hourAngle(now),
+                  child: CustomPaint(
+                    size: size,
+                    painter: const _ReaderLinePainter(),
+                  ),
+                ),
+
+                // ── Layer 8: 12 o'clock indicator tick — hairline gold ────
                 Positioned(
                   top: watchDiameter * 0.012,
                   left: watchDiameter / 2 - 0.75,
@@ -456,6 +465,47 @@ class _WatchScreenState extends ConsumerState<WatchScreen>
         return NumeralStyle.arabicIndic;
     }
   }
+}
+
+// ── _ReaderLinePainter ─────────────────────────────────────────────────────────
+
+/// A thin gold radial line from the center pointing toward the current hour
+/// angle. The ring rotates so the current Arabic period is always aligned with
+/// this reader line. The painter is rotated by [_hourAngle] in the parent.
+class _ReaderLinePainter extends CustomPainter {
+  const _ReaderLinePainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = size.width / 2;
+
+    // Thin gold line from center to outer ring area (76% of radius).
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.5
+      ..strokeCap = StrokeCap.round
+      ..shader = LinearGradient(
+        begin: Alignment.bottomCenter,
+        end: Alignment.topCenter,
+        colors: [
+          Colors.transparent,
+          AppColors.goldPrimary.withAlpha(80),
+          AppColors.goldPrimary.withAlpha(200),
+        ],
+        stops: const [0.0, 0.35, 1.0],
+      ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
+
+    // Draw from center up to 76% of radius (inner edge of ring).
+    canvas.drawLine(
+      center,
+      Offset(center.dx, center.dy - radius * 0.76),
+      paint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_ReaderLinePainter old) => false;
 }
 
 // ── _StatusBar ─────────────────────────────────────────────────────────────────
