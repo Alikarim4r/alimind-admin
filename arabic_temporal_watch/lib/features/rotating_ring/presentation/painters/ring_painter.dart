@@ -84,7 +84,7 @@ class RingPainter extends CustomPainter {
   static const double _borderStrokeWidth = 1.0;
 
   /// Stroke width for the progress arc highlight.
-  static const double _progressStrokeWidth = 3.5;
+  static const double _progressStrokeWidth = 2.5;
 
   /// Radius of each minute bead dot (logical pixels).
   static const double _beadRadius = 1.8;
@@ -198,12 +198,48 @@ class RingPainter extends CustomPainter {
     final arcRect = Rect.fromCircle(center: Offset(cx, cy), radius: outerR);
     final ringWidth = outerR - innerR;
 
-    for (final seg in segments) {
+    // Determine total number of segments for distance-based opacity falloff.
+    final int totalSegs = segments.length; // 24
+    final currentIdx = segments.indexWhere((s) => s.isCurrent);
+
+    for (int i = 0; i < segments.length; i++) {
+      final seg = segments[i];
       if (seg.sweepAngle <= 0) continue;
 
+      // Distance from current segment — used for smooth opacity gradient.
+      // Wrap-around distance on a 24-segment ring.
+      final rawDist = (i - currentIdx).abs();
+      final dist = rawDist > totalSegs ~/ 2 ? totalSegs - rawDist : rawDist;
+
+      // Smooth opacity falloff: current=full, adjacent=60%, far=20%.
+      final double opacityMultiplier;
+      if (seg.isCurrent) {
+        opacityMultiplier = 1.0;
+      } else if (dist == 1) {
+        opacityMultiplier = 0.60;
+      } else if (dist == 2) {
+        opacityMultiplier = 0.38;
+      } else {
+        // Gradual falloff for farther segments.
+        opacityMultiplier = math.max(0.10, 0.38 - (dist - 2) * 0.04);
+      }
+
+      // Current segment: warm gold fill; others: period color.
+      final Color fillColor;
+      if (seg.isCurrent) {
+        // Warm gold blend — the active segment glows gold.
+        fillColor = Color.lerp(
+          seg.segmentColor,
+          AppColors.goldPrimary,
+          0.45,
+        )!;
+      } else {
+        fillColor = seg.segmentColor;
+      }
+
       final segPaint = Paint()
-        ..color = seg.segmentColor.withOpacity(
-            seg.opacity * (seg.isCurrent ? 0.30 : 0.18))
+        ..color = fillColor.withOpacity(
+            (seg.opacity * opacityMultiplier * (seg.isCurrent ? 0.42 : 0.22)).clamp(0.0, 1.0))
         ..style = PaintingStyle.stroke
         ..strokeWidth = ringWidth;
 
@@ -219,10 +255,11 @@ class RingPainter extends CustomPainter {
     double innerR,
     double outerR,
   ) {
+    // Hairline gold dividers — 0.5px, very refined.
     final dividerPaint = Paint()
-      ..color = AppColors.goldAntique.withOpacity(0.55)
+      ..color = AppColors.goldPrimary.withOpacity(0.30)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = _dividerStrokeWidth
+      ..strokeWidth = 0.5 // hairline
       ..strokeCap = StrokeCap.butt;
 
     for (final seg in ringState.segments) {
@@ -351,14 +388,39 @@ class RingPainter extends CustomPainter {
     double innerR,
     Size size,
   ) {
-    // Label radius — place Arabic text at 78% of the way from inner to outer.
-    final labelR = innerR + (outerR - innerR) * 0.62;
+    // Label radius — center of the ring band.
+    final labelR = (outerR + innerR) / 2.0;
 
-    for (final seg in ringState.segments) {
+    final int totalSegs = ringState.segments.length;
+    final currentIdx = ringState.segments.indexWhere((s) => s.isCurrent);
+
+    for (int i = 0; i < ringState.segments.length; i++) {
+      final seg = ringState.segments[i];
       if (seg.sweepAngle <= 0) continue;
+
+      // Distance-based opacity for labels too.
+      final rawDist = (i - currentIdx).abs();
+      final dist = rawDist > totalSegs ~/ 2 ? totalSegs - rawDist : rawDist;
+      final double labelOpacity;
+      if (seg.isCurrent) {
+        labelOpacity = 1.0;
+      } else if (dist == 1) {
+        labelOpacity = 0.65;
+      } else if (dist == 2) {
+        labelOpacity = 0.40;
+      } else {
+        labelOpacity = math.max(0.08, 0.35 - dist * 0.05);
+      }
 
       // Mid-angle of this segment in Flutter canvas coords.
       final midAngleFlutter = _toFlutter(seg.midAngle);
+
+      // Current segment gets larger, bolder text with gold color.
+      final fontSize = seg.isCurrent ? _labelFontSize * 1.35 : _labelFontSize;
+      final fontWeight = seg.isCurrent ? FontWeight.w700 : FontWeight.w400;
+      final textColor = seg.isCurrent
+          ? AppColors.goldPrimary.withOpacity(labelOpacity)
+          : seg.labelColor.withOpacity(labelOpacity * seg.opacity);
 
       // ── Arabic label ──────────────────────────────────────────────────────
       final arabicPainter = TextPainter(
@@ -366,10 +428,10 @@ class RingPainter extends CustomPainter {
           text: seg.arabicName,
           style: TextStyle(
             fontFamily: 'ArabicDisplay',
-            fontSize: _labelFontSize,
-            color: seg.labelColor.withOpacity(seg.opacity),
-            fontWeight: seg.isCurrent ? FontWeight.w700 : FontWeight.w400,
-            letterSpacing: 0.2,
+            fontSize: fontSize,
+            color: textColor,
+            fontWeight: fontWeight,
+            letterSpacing: 0.3,
           ),
         ),
         textDirection: ui.TextDirection.rtl,
@@ -377,15 +439,11 @@ class RingPainter extends CustomPainter {
         maxLines: 1,
       )..layout();
 
-      // Save → translate to label radius → rotate so the text is tangent to
-      // the arc (pointing radially outward at the segment mid-angle).
       canvas.save();
       canvas.translate(
         cx + labelR * math.cos(midAngleFlutter),
         cy + labelR * math.sin(midAngleFlutter),
       );
-      // Rotate so text baseline faces outward.  Add π/2 because the text is
-      // drawn horizontally and we want it oriented radially.
       canvas.rotate(midAngleFlutter + math.pi / 2.0);
 
       arabicPainter.paint(
@@ -393,38 +451,6 @@ class RingPainter extends CustomPainter {
         Offset(-arabicPainter.width / 2.0, -arabicPainter.height / 2.0),
       );
       canvas.restore();
-
-      // ── Transliteration label (only for the active segment) ───────────────
-      if (seg.isCurrent) {
-        final subR = innerR + (outerR - innerR) * 0.32;
-        final subPainter = TextPainter(
-          text: TextSpan(
-            text: seg.transliteration,
-            style: TextStyle(
-              fontFamily: 'ArabicDisplay',
-              fontSize: _subLabelFontSize,
-              color: AppColors.textSecondary.withOpacity(0.80),
-              fontWeight: FontWeight.w400,
-              letterSpacing: 0.5,
-            ),
-          ),
-          textDirection: ui.TextDirection.ltr,
-          textAlign: TextAlign.center,
-          maxLines: 1,
-        )..layout();
-
-        canvas.save();
-        canvas.translate(
-          cx + subR * math.cos(midAngleFlutter),
-          cy + subR * math.sin(midAngleFlutter),
-        );
-        canvas.rotate(midAngleFlutter + math.pi / 2.0);
-        subPainter.paint(
-          canvas,
-          Offset(-subPainter.width / 2.0, -subPainter.height / 2.0),
-        );
-        canvas.restore();
-      }
     }
   }
 
@@ -447,38 +473,39 @@ class RingPainter extends CustomPainter {
     final arcRect = Rect.fromCircle(center: Offset(cx, cy), radius: midR);
     final startFlutter = _toFlutter(currentSeg.startAngle);
 
-    // Outer bloom — wide, low-opacity halo.
+    // Outer bloom — wide, soft halo giving the "alive" feel.
     final outerGlowPaint = Paint()
-      ..color = currentSeg.glowColor.withOpacity(0.22 * glowIntensity)
+      ..color = AppColors.goldPrimary.withOpacity(0.18 * glowIntensity)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = ringWidth * 2.2
-      ..maskFilter = MaskFilter.blur(
-          BlurStyle.normal, 10.0 + 4.0 * glowIntensity);
-    canvas.drawArc(
-        arcRect, startFlutter, currentSeg.sweepAngle, false, outerGlowPaint);
+      ..strokeWidth = ringWidth * 2.5
+      ..maskFilter = MaskFilter.blur(BlurStyle.normal, 12.0 + 5.0 * glowIntensity);
+    canvas.drawArc(arcRect, startFlutter, currentSeg.sweepAngle, false, outerGlowPaint);
 
-    // Inner bloom — tighter, higher-opacity halo.
+    // Inner warm gold bloom — tighter, more intense.
     final innerGlowPaint = Paint()
-      ..color = currentSeg.glowColor.withOpacity(0.45 * glowIntensity)
+      ..color = AppColors.goldPrimary.withOpacity(0.38 * glowIntensity)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = ringWidth * 0.8
-      ..maskFilter = MaskFilter.blur(BlurStyle.normal, 5.0 * glowIntensity);
-    canvas.drawArc(
-        arcRect, startFlutter, currentSeg.sweepAngle, false, innerGlowPaint);
+      ..strokeWidth = ringWidth * 0.7
+      ..maskFilter = MaskFilter.blur(BlurStyle.normal, 4.0 * glowIntensity);
+    canvas.drawArc(arcRect, startFlutter, currentSeg.sweepAngle, false, innerGlowPaint);
 
-    // Bright leading edge — thin arc on the outer radius.
+    // Bright outer edge — hairline gold arc for precision.
     final edgePaint = Paint()
-      ..color = (ringState.dayNightBlend < 0.5
-              ? AppColors.goldBright
-              : AppColors.silverLight)
-          .withOpacity(0.7 * glowIntensity)
+      ..color = AppColors.goldLight.withOpacity(0.75 * glowIntensity)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.2
-      ..strokeCap = StrokeCap.round;
-    final outerEdgeRect =
-        Rect.fromCircle(center: Offset(cx, cy), radius: outerR - 1.0);
-    canvas.drawArc(
-        outerEdgeRect, startFlutter, currentSeg.sweepAngle, false, edgePaint);
+      ..strokeWidth = 0.8
+      ..strokeCap = StrokeCap.butt;
+    final outerEdgeRect = Rect.fromCircle(center: Offset(cx, cy), radius: outerR - 0.4);
+    canvas.drawArc(outerEdgeRect, startFlutter, currentSeg.sweepAngle, false, edgePaint);
+
+    // Inner edge hairline.
+    final innerEdgePaint = Paint()
+      ..color = AppColors.goldPrimary.withOpacity(0.50 * glowIntensity)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 0.5
+      ..strokeCap = StrokeCap.butt;
+    final innerEdgeRect = Rect.fromCircle(center: Offset(cx, cy), radius: innerR + 0.4);
+    canvas.drawArc(innerEdgeRect, startFlutter, currentSeg.sweepAngle, false, innerEdgePaint);
   }
 
   // ── Helpers ────────────────────────────────────────────────────────────────

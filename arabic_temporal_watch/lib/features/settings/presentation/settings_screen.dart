@@ -22,20 +22,29 @@ class SettingsScreen extends ConsumerWidget {
         backgroundColor: AppColors.backgroundDeep,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: AppColors.goldPrimary),
+          icon: Icon(
+            Icons.arrow_back_ios,
+            color: AppColors.goldPrimary.withOpacity(0.75),
+            size: 18,
+          ),
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
           'الإعدادات',
-          style: AppTheme.darkTheme.textTheme.headlineSmall?.copyWith(
+          style: AppTheme.darkTheme.textTheme.titleMedium?.copyWith(
             color: AppColors.goldPrimary,
             fontFamily: 'ArabicDisplay',
+            fontWeight: FontWeight.w700,
+            letterSpacing: 1.0,
           ),
         ),
         centerTitle: true,
         bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1),
-          child: Container(height: 1, color: AppColors.goldDark.withOpacity(0.3)),
+          preferredSize: const Size.fromHeight(0.5),
+          child: Container(
+            height: 0.5,
+            color: AppColors.goldPrimary.withOpacity(0.18),
+          ),
         ),
       ),
       body: ListView(
@@ -69,32 +78,42 @@ class _SectionHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
-      child: Row(
+      padding: const EdgeInsets.fromLTRB(20, 28, 20, 10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Container(width: 3, height: 18, color: AppColors.goldPrimary),
-          const SizedBox(width: 10),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: const TextStyle(
-                  color: AppColors.goldPrimary,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: 'ArabicDisplay',
+          // Hairline gold divider above section header.
+          Container(
+            height: 0.5,
+            color: AppColors.goldPrimary.withOpacity(0.25),
+          ),
+          const SizedBox(height: 14),
+          Directionality(
+            textDirection: TextDirection.rtl,
+            child: Row(
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    color: AppColors.goldPrimary,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    fontFamily: 'ArabicDisplay',
+                    letterSpacing: 0.5,
+                  ),
                 ),
-              ),
-              Text(
-                subtitle,
-                style: TextStyle(
-                  color: AppColors.goldPrimary.withOpacity(0.6),
-                  fontSize: 11,
-                  letterSpacing: 1.2,
+                const SizedBox(width: 10),
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    color: AppColors.silverDim.withOpacity(0.5),
+                    fontSize: 10,
+                    letterSpacing: 1.5,
+                    fontFamily: 'ArabicDisplay',
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),
@@ -112,13 +131,19 @@ class _SettingsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
       decoration: BoxDecoration(
         color: AppColors.backgroundMid,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.goldDark.withOpacity(0.2)),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: AppColors.goldPrimary.withOpacity(0.08),
+          width: 0.5,
+        ),
       ),
-      child: Column(children: children),
+      child: Directionality(
+        textDirection: TextDirection.rtl,
+        child: Column(children: children),
+      ),
     );
   }
 }
@@ -143,26 +168,37 @@ class _SwitchRow extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return ListTile(
-      leading: Icon(icon, color: AppColors.goldPrimary, size: 22),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+      leading: Icon(icon, color: AppColors.goldPrimary.withOpacity(0.75), size: 20),
       title: Text(
         arabicLabel,
         style: const TextStyle(
-          color: Colors.white,
+          color: AppColors.textPrimary,
           fontFamily: 'ArabicDisplay',
-          fontSize: 15,
+          fontSize: 14,
+          letterSpacing: 0.3,
         ),
+        textDirection: TextDirection.rtl,
       ),
       subtitle: Text(
         englishLabel,
-        style: TextStyle(color: Colors.white.withOpacity(0.45), fontSize: 12),
+        style: TextStyle(
+          color: AppColors.silverDim.withOpacity(0.45),
+          fontSize: 11,
+          letterSpacing: 0.5,
+        ),
+        textDirection: TextDirection.ltr,
       ),
       trailing: Switch(
         value: value,
         onChanged: onChanged,
         activeColor: AppColors.goldPrimary,
-        activeTrackColor: AppColors.goldDark.withOpacity(0.4),
-        inactiveThumbColor: Colors.grey.shade600,
-        inactiveTrackColor: Colors.grey.shade800,
+        activeTrackColor: AppColors.goldDark.withOpacity(0.35),
+        inactiveThumbColor: AppColors.silverDeep,
+        inactiveTrackColor: AppColors.backgroundSurface,
+        trackOutlineColor: WidgetStateProperty.all(
+          AppColors.goldPrimary.withOpacity(0.12),
+        ),
       ),
     );
   }
@@ -186,28 +222,47 @@ class _TapRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      leading: Icon(icon, color: AppColors.goldPrimary, size: 22),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+      leading: Icon(icon, color: AppColors.goldPrimary.withOpacity(0.75), size: 20),
       title: Text(
         arabicLabel,
         style: const TextStyle(
-          color: Colors.white,
+          color: AppColors.textPrimary,
           fontFamily: 'ArabicDisplay',
-          fontSize: 15,
+          fontSize: 14,
+          letterSpacing: 0.3,
         ),
+        textDirection: TextDirection.rtl,
       ),
       subtitle: Text(
         englishLabel,
-        style: TextStyle(color: Colors.white.withOpacity(0.45), fontSize: 12),
+        style: TextStyle(
+          color: AppColors.silverDim.withOpacity(0.45),
+          fontSize: 11,
+          letterSpacing: 0.5,
+        ),
+        textDirection: TextDirection.ltr,
       ),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            value,
-            style: const TextStyle(color: AppColors.goldPrimary, fontSize: 13),
-          ),
+          if (value.isNotEmpty)
+            Text(
+              value,
+              style: const TextStyle(
+                color: AppColors.goldPrimary,
+                fontSize: 12,
+                fontFamily: 'ArabicDisplay',
+                letterSpacing: 0.3,
+              ),
+              textDirection: TextDirection.rtl,
+            ),
           const SizedBox(width: 4),
-          Icon(Icons.chevron_right, color: AppColors.goldDark.withOpacity(0.7)),
+          Icon(
+            Icons.chevron_right,
+            color: AppColors.silverDim.withOpacity(0.35),
+            size: 18,
+          ),
         ],
       ),
       onTap: onTap,
@@ -222,9 +277,12 @@ class _RowDivider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Divider(
-        height: 1,
+        height: 0.5,
         indent: 52,
-        color: AppColors.goldDark.withOpacity(0.15),
+        endIndent: 16,
+        // Hairline gold — premium, not distracting.
+        color: AppColors.goldPrimary.withOpacity(0.10),
+        thickness: 0.5,
       );
 }
 
@@ -308,13 +366,13 @@ class _LocationPickerSheet extends StatelessWidget {
                 title: Text(
                   p.nameArabic,
                   style: const TextStyle(
-                    color: Colors.white,
+                    color: AppColors.textPrimary,
                     fontFamily: 'ArabicDisplay',
                   ),
                 ),
                 subtitle: Text(
                   p.nameEnglish,
-                  style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 12),
+                  style: TextStyle(color: AppColors.silverDim.withOpacity(0.45), fontSize: 12),
                 ),
                 trailing: const Icon(Icons.chevron_right, color: AppColors.goldDark),
                 onTap: () {
@@ -408,11 +466,11 @@ class _PrayerSection extends ConsumerWidget {
           ...CalculationMethod.values.map((m) => ListTile(
                 title: Text(
                   _methodLabels[m] ?? m.name,
-                  style: const TextStyle(color: Colors.white, fontFamily: 'ArabicDisplay'),
+                  style: const TextStyle(color: AppColors.textPrimary, fontFamily: 'ArabicDisplay'),
                 ),
                 subtitle: Text(
                   _methodEnglish[m] ?? '',
-                  style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 12),
+                  style: TextStyle(color: AppColors.silverDim.withOpacity(0.45), fontSize: 12),
                 ),
                 trailing: settings.prayerMethod == m
                     ? const Icon(Icons.check, color: AppColors.goldPrimary)
@@ -533,11 +591,11 @@ class _DisplaySection extends ConsumerWidget {
                 leading: _modeIcon(m),
                 title: Text(
                   _modeLabels[m] ?? m.name,
-                  style: const TextStyle(color: Colors.white, fontFamily: 'ArabicDisplay'),
+                  style: const TextStyle(color: AppColors.textPrimary, fontFamily: 'ArabicDisplay'),
                 ),
                 subtitle: Text(
                   _modeEnglish[m] ?? '',
-                  style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 12),
+                  style: TextStyle(color: AppColors.silverDim.withOpacity(0.45), fontSize: 12),
                 ),
                 trailing: settings.watchMode == m
                     ? const Icon(Icons.check, color: AppColors.goldPrimary)
@@ -609,14 +667,14 @@ class _AboutSection extends StatelessWidget {
           title: const Text(
             'الساعة العربية الذكية',
             style: TextStyle(
-              color: Colors.white,
+              color: AppColors.textPrimary,
               fontFamily: 'ArabicDisplay',
               fontSize: 15,
             ),
           ),
           subtitle: Text(
             'Arabic Temporal Watch  •  v1.0.0',
-            style: TextStyle(color: Colors.white.withOpacity(0.45), fontSize: 12),
+            style: TextStyle(color: AppColors.silverDim.withOpacity(0.45), fontSize: 12),
           ),
         ),
         const _RowDivider(),
@@ -625,14 +683,14 @@ class _AboutSection extends StatelessWidget {
           title: const Text(
             'مستوحى من علم الفلك العربي الكلاسيكي',
             style: TextStyle(
-              color: Colors.white,
+              color: AppColors.textPrimary,
               fontFamily: 'ArabicDisplay',
               fontSize: 14,
             ),
           ),
           subtitle: Text(
             'Inspired by classical Arabic astronomical timekeeping',
-            style: TextStyle(color: Colors.white.withOpacity(0.45), fontSize: 11),
+            style: TextStyle(color: AppColors.silverDim.withOpacity(0.45), fontSize: 11),
           ),
         ),
       ],

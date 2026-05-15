@@ -76,13 +76,12 @@ class HandsPainter extends CustomPainter {
     final center = _center(size);
     final radius = _radius(size);
 
-    // Hand proportions relative to face radius.
-    final tipLength = radius * 0.55;
-    final tailLength = radius * 0.14; // counterweight
-    final baseHalfWidth = radius * 0.040;
-    final tipHalfWidth = radius * 0.008;
+    // Elegant taper — slightly shorter, well-proportioned.
+    final tipLength = radius * 0.52;
+    final tailLength = radius * 0.12;
+    final baseHalfWidth = radius * 0.032; // narrower than before
+    final tipHalfWidth = radius * 0.005;
 
-    // Build the tapered hand path in local coordinates (pointing up = 12 o'clock).
     final path = _buildTaperedHandPath(
       tipLength: tipLength,
       tailLength: tailLength,
@@ -90,8 +89,6 @@ class HandsPainter extends CustomPainter {
       tipHalfWidth: tipHalfWidth,
     );
 
-    // The angle offset converts from "12 o'clock = 0 radians going clockwise"
-    // to Flutter's canvas convention where 0 radians = 3 o'clock.
     final angle = hourAngle - math.pi / 2.0;
 
     _renderHand(
@@ -114,10 +111,11 @@ class HandsPainter extends CustomPainter {
     final center = _center(size);
     final radius = _radius(size);
 
-    final tipLength = radius * 0.80;
-    final tailLength = radius * 0.18;
-    final baseHalfWidth = radius * 0.028;
-    final tipHalfWidth = radius * 0.005;
+    // Thinner, slightly longer — reaches close to hour markers.
+    final tipLength = radius * 0.78;
+    final tailLength = radius * 0.15;
+    final baseHalfWidth = radius * 0.020; // thinner than hour hand
+    final tipHalfWidth = radius * 0.004;
 
     final path = _buildTaperedHandPath(
       tipLength: tipLength,
@@ -128,6 +126,9 @@ class HandsPainter extends CustomPainter {
 
     final angle = minuteAngle - math.pi / 2.0;
 
+    // Slightly lighter gold for the minute hand.
+    final minuteColor = Color.lerp(handColor, AppColors.goldLight, 0.25)!;
+
     _renderHand(
       canvas: canvas,
       center: center,
@@ -135,9 +136,9 @@ class HandsPainter extends CustomPainter {
       path: path,
       angle: angle,
       tipLength: tipLength,
-      color: handColor,
-      highlightColor: AppColors.goldLight,
-      shadowColor: const Color(0x70000000),
+      color: minuteColor,
+      highlightColor: AppColors.goldPale,
+      shadowColor: const Color(0x60000000),
       strokeWidth: baseHalfWidth * 2.0,
     );
   }
@@ -152,66 +153,61 @@ class HandsPainter extends CustomPainter {
 
     final angle = secondAngle - math.pi / 2.0;
 
-    final tipLength = radius * 0.90;
-    final tailLength = radius * 0.22;
-    final handHalfWidth = radius * 0.007;
+    // Ultra-thin rose/red accent line — precision instrument style.
+    final tipLength = radius * 0.85;
+    final tailLength = radius * 0.20;
+    final handHalfWidth = radius * 0.004; // very thin
 
     final cosA = math.cos(angle);
     final sinA = math.sin(angle);
-
-    // ── Shadow ──
-    _drawShadow(
-      canvas: canvas,
-      center: center,
-      angle: angle,
-      tipLength: tipLength,
-      tailLength: tailLength,
-      halfWidth: handHalfWidth,
-      shadowColor: const Color(0x60000000),
-    );
-
-    // ── Main stem (red-orange) ──
-    final stemPaint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = handHalfWidth * 2.0
-      ..strokeCap = StrokeCap.round
-      ..color = const Color(0xFFE84118).withAlpha((opacity * 255).round());
 
     final tipX = center.dx + cosA * tipLength;
     final tipY = center.dy + sinA * tipLength;
     final tailX = center.dx - cosA * tailLength;
     final tailY = center.dy - sinA * tailLength;
 
+    // ── Subtle drop shadow ──
+    _drawShadow(
+      canvas: canvas,
+      center: center,
+      angle: angle,
+      tipLength: tipLength,
+      tailLength: tailLength,
+      halfWidth: handHalfWidth * 1.5,
+      shadowColor: const Color(0x50000000),
+    );
+
+    // ── Main stem — rose-red, ultra-thin ──
+    // Slight gradient: brighter at tip, deeper at tail.
+    final stemPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = handHalfWidth * 2.0
+      ..strokeCap = StrokeCap.round
+      ..color = const Color(0xFFD4364A).withAlpha((opacity * 255).round()); // rose-red
+
     canvas.drawLine(Offset(tailX, tailY), Offset(tipX, tipY), stemPaint);
 
-    // ── Lollipop counterweight circle ──
-    final ballRadius = radius * 0.028;
-    final ballX = center.dx - cosA * (tailLength - ballRadius);
-    final ballY = center.dy - sinA * (tailLength - ballRadius);
-
-    final ballFill = Paint()
-      ..style = PaintingStyle.fill
-      ..color = const Color(0xFFE84118).withAlpha((opacity * 255).round());
-    canvas.drawCircle(Offset(ballX, ballY), ballRadius, ballFill);
-
-    // ── Highlight line ──
-    final highlightPaint = Paint()
+    // ── Small flat counterweight (no lollipop — more refined) ──
+    // Just a slightly wider section near the tail.
+    final counterPaint = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 0.6
+      ..strokeWidth = handHalfWidth * 4.0
       ..strokeCap = StrokeCap.round
-      ..color = const Color(0x80FFAA88).withAlpha((opacity * 80).round());
+      ..color = const Color(0xFFD4364A).withAlpha((opacity * 255).round());
 
     canvas.drawLine(
       Offset(tailX, tailY),
-      Offset(tipX, tipY),
-      highlightPaint,
+      Offset(center.dx - cosA * tailLength * 0.5, center.dy - sinA * tailLength * 0.5),
+      counterPaint,
     );
 
-    // ── Center collar dot (hides joint) ──
+    // ── Center cap — small, gold ──
     final collarPaint = Paint()
       ..style = PaintingStyle.fill
-      ..color = const Color(0xFFE84118).withAlpha((opacity * 255).round());
-    canvas.drawCircle(center, radius * 0.016, collarPaint);
+      ..shader = RadialGradient(
+        colors: const [AppColors.goldLight, AppColors.goldPrimary],
+      ).createShader(Rect.fromCircle(center: center, radius: radius * 0.012));
+    canvas.drawCircle(center, radius * 0.012, collarPaint);
   }
 
   // ── Shared helpers ─────────────────────────────────────────────────────────

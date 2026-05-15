@@ -29,7 +29,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/constants/app_colors.dart';
-import '../../../core/constants/dimensions.dart';
 import '../../astronomical_engine/presentation/astronomical_provider.dart'
     hide locationProvider;
 import '../../location/presentation/location_provider.dart'
@@ -212,11 +211,12 @@ class _WatchScreenState extends ConsumerState<WatchScreen>
       body: SafeArea(
         child: Column(
           children: [
-            // ── Top status bar ───────────────────────────────────────────
+            // ── Ultra-minimal top status bar ─────────────────────────────
             _StatusBar(settings: settings),
 
-            // ── Watch face — expands to fill remaining space ─────────────
+            // ── Watch face — 85% of remaining space ──────────────────────
             Expanded(
+              flex: 85,
               child: Center(
                 child: _buildWatchFace(
                   context: context,
@@ -230,8 +230,11 @@ class _WatchScreenState extends ConsumerState<WatchScreen>
               ),
             ),
 
-            // ── Bottom prayer info bar ────────────────────────────────────
-            const PrayerInfoWidget(),
+            // ── Bottom prayer info — minimal floating text ────────────────
+            Expanded(
+              flex: 15,
+              child: const PrayerInfoWidget(),
+            ),
           ],
         ),
       ),
@@ -361,23 +364,16 @@ class _WatchScreenState extends ConsumerState<WatchScreen>
                   ),
                 ),
 
-                // ── Layer 7: 12 o'clock indicator tick ────────────────────
+                // ── Layer 7: 12 o'clock indicator tick — hairline gold ────
                 Positioned(
-                  top: watchDiameter * 0.01,
-                  left: watchDiameter / 2 - 2.0,
+                  top: watchDiameter * 0.012,
+                  left: watchDiameter / 2 - 0.75,
                   child: Container(
-                    width: 4.0,
-                    height: watchDiameter * 0.04,
+                    width: 1.5,
+                    height: watchDiameter * 0.030,
                     decoration: BoxDecoration(
-                      color: AppColors.goldBright,
-                      borderRadius: BorderRadius.circular(2),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.glowGold,
-                          blurRadius: 6,
-                          spreadRadius: 1,
-                        ),
-                      ],
+                      color: AppColors.goldPrimary,
+                      borderRadius: BorderRadius.circular(1),
                     ),
                   ),
                 ),
@@ -464,7 +460,8 @@ class _WatchScreenState extends ConsumerState<WatchScreen>
 
 // ── _StatusBar ─────────────────────────────────────────────────────────────────
 
-/// Minimal top status bar: location name (or GPS indicator) + watch mode chip.
+/// Ultra-minimal top status bar: city name only + settings icon.
+/// No clutter — just location context and access to settings.
 class _StatusBar extends ConsumerWidget {
   const _StatusBar({required this.settings});
 
@@ -472,113 +469,36 @@ class _StatusBar extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final location = ref.watch(
-      // Use the location provider for the city name.
-      locationProvider,
-    );
-
+    final location = ref.watch(locationProvider);
     final cityName = location.city ?? location.country ?? 'GPS';
-    final isGps = location.source.toString().contains('gps');
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // Location indicator
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                isGps ? Icons.gps_fixed : Icons.location_on_outlined,
-                color: AppColors.goldPrimary,
-                size: 14,
-              ),
-              const SizedBox(width: 4),
-              Text(
-                cityName,
-                style: const TextStyle(
-                  fontFamily: 'ArabicDisplay',
-                  fontSize: 12,
-                  color: AppColors.textSecondary,
-                  letterSpacing: 0.5,
-                ),
-              ),
-            ],
+          // City name — elegant, understated
+          Text(
+            cityName,
+            style: const TextStyle(
+              fontFamily: 'ArabicDisplay',
+              fontSize: 11,
+              color: AppColors.silverDim,
+              letterSpacing: 1.5,
+            ),
           ),
 
-          // Watch mode chip
-          _WatchModeChip(mode: settings.watchMode),
-
-          // Settings button
+          // Settings — minimal icon only, no border box
           GestureDetector(
             onTap: () => Navigator.of(context).pushNamed('/settings'),
-            child: Container(
-              padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                color: AppColors.backgroundCard,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: AppColors.borderSubtle,
-                  width: 0.5,
-                ),
-              ),
-              child: const Icon(
-                Icons.tune_outlined,
-                color: AppColors.goldPrimary,
-                size: 16,
-              ),
+            child: const Icon(
+              Icons.tune_outlined,
+              color: AppColors.silverDim,
+              size: 16,
             ),
           ),
         ],
       ),
     );
-  }
-}
-
-// ── _WatchModeChip ─────────────────────────────────────────────────────────────
-
-class _WatchModeChip extends StatelessWidget {
-  const _WatchModeChip({required this.mode});
-
-  final dynamic mode; // WatchMode from settings_model
-
-  @override
-  Widget build(BuildContext context) {
-    final label = _labelFor(mode);
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-      decoration: BoxDecoration(
-        color: AppColors.backgroundCard,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: AppColors.borderNormal,
-          width: 0.5,
-        ),
-      ),
-      child: Text(
-        label,
-        style: const TextStyle(
-          fontFamily: 'ArabicDisplay',
-          fontSize: 10,
-          color: AppColors.goldPrimary,
-          letterSpacing: 0.8,
-        ),
-      ),
-    );
-  }
-
-  String _labelFor(dynamic mode) {
-    switch (mode.toString().split('.').last) {
-      case 'fullArabic':
-        return 'عربي';
-      case 'astronomical':
-        return 'فلكي';
-      case 'minimal':
-        return 'مبسّط';
-      case 'hybrid':
-      default:
-        return 'هجين';
-    }
   }
 }

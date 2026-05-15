@@ -32,8 +32,8 @@ class TemporalProgressPainter extends CustomPainter {
     required this.temporalData,
     this.animationValue = 0.0,
     this.progressRadiusFraction = 0.70,
-    this.trackStrokeWidth = 2.0,
-    this.progressStrokeWidth = 6.0,
+    this.trackStrokeWidth = 1.0,   // thinner — precision instrument feel
+    this.progressStrokeWidth = 3.5, // slimmer progress indicator
   });
 
   /// Full temporal state snapshot — supplies progress fraction, period colors,
@@ -146,22 +146,23 @@ class TemporalProgressPainter extends CustomPainter {
   // ── Layer 4: Period label ──────────────────────────────────────────────────
 
   void _drawLabel(Canvas canvas, Offset center, double radius, Size size) {
-    // Position: vertically centered between the arc and the hands area,
-    // roughly 60 % of the way from center to arc radius.
-    final labelY = center.dy - radius * 0.62;
+    // Subtle overlay: Arabic period name positioned inside the arc.
+    // Positioned at ~68% height from center toward the arc — upper zone.
+    final faceRadius = math.min(size.width, size.height) / 2.0;
+    final labelCenterY = center.dy - faceRadius * 0.38;
 
-    // ── Arabic period name ──
+    // ── Arabic period name — large, gold, cinematic ──
     final nameStyle = TextStyle(
-      color: AppColors.textPrimary,
-      fontSize: math.min(size.width, size.height) * 0.048,
+      color: AppColors.goldPrimary.withAlpha(210),
+      fontSize: math.min(size.width, size.height) * 0.052,
       fontFamily: 'ArabicDisplay',
-      fontWeight: FontWeight.w600,
-      letterSpacing: 0.5,
+      fontWeight: FontWeight.w700,
+      letterSpacing: 0.8,
       shadows: const [
         Shadow(
-          color: AppColors.backgroundDeep,
+          color: Color(0x70000000),
           offset: Offset(0, 1),
-          blurRadius: 3.0,
+          blurRadius: 6.0,
         ),
       ],
     );
@@ -170,56 +171,51 @@ class TemporalProgressPainter extends CustomPainter {
       text: TextSpan(text: temporalData.arabicName, style: nameStyle),
       textDirection: TextDirection.rtl,
       textAlign: TextAlign.center,
-    )..layout(maxWidth: radius * 1.4);
+    )..layout(maxWidth: radius * 1.6);
 
     namePainter.paint(
       canvas,
-      Offset(center.dx - namePainter.width / 2, labelY - namePainter.height),
+      Offset(
+        center.dx - namePainter.width / 2,
+        labelCenterY - namePainter.height / 2,
+      ),
     );
 
-    // ── Elapsed / total minutes label: e.g. "٣٢/٦٨ دقيقة" ──
-    final elapsed = temporalData.elapsed.inMinutes;
-    final total = temporalData.totalDuration.inMinutes;
-
-    final elapsedAr = _toArabicNumerals(elapsed);
-    final totalAr = _toArabicNumerals(total);
-    final minuteLabel = '$elapsedAr/$totalAr دقيقة';
+    // ── Remaining time — small, silver, below the name ──
+    final remaining = temporalData.remaining;
+    final remainStr = _formatRemainingMinutes(remaining);
 
     final subStyle = TextStyle(
-      color: AppColors.textSecondary,
-      fontSize: math.min(size.width, size.height) * 0.030,
+      color: AppColors.silverDim.withAlpha(160),
+      fontSize: math.min(size.width, size.height) * 0.026,
       fontFamily: 'ArabicDisplay',
-      fontWeight: FontWeight.w400,
-      letterSpacing: 0.3,
+      fontWeight: FontWeight.w300,
+      letterSpacing: 1.5,
     );
 
     final subPainter = TextPainter(
-      text: TextSpan(text: minuteLabel, style: subStyle),
-      textDirection: TextDirection.rtl,
+      text: TextSpan(text: remainStr, style: subStyle),
+      textDirection: TextDirection.ltr,
       textAlign: TextAlign.center,
-    )..layout(maxWidth: radius * 1.4);
+    )..layout(maxWidth: radius * 1.6);
 
     subPainter.paint(
       canvas,
       Offset(
         center.dx - subPainter.width / 2,
-        labelY + 2.0,
+        labelCenterY + namePainter.height / 2 + 3.0,
       ),
     );
   }
 
-  // ── Utility: Eastern Arabic-Indic numerals ─────────────────────────────────
-
-  static const _arabicDigits = [
-    '٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩',
-  ];
-
-  String _toArabicNumerals(int n) {
-    if (n < 0) return '−${_toArabicNumerals(-n)}';
-    return n.toString().split('').map((c) {
-      final d = int.tryParse(c);
-      return d != null ? _arabicDigits[d] : c;
-    }).join();
+  /// Formats remaining time as MM:SS or HH:MM:SS.
+  String _formatRemainingMinutes(Duration d) {
+    if (d <= Duration.zero) return '00:00';
+    final h = d.inHours;
+    final m = d.inMinutes.remainder(60).toString().padLeft(2, '0');
+    final s = d.inSeconds.remainder(60).toString().padLeft(2, '0');
+    if (h > 0) return '${h.toString().padLeft(2, '0')}:$m:$s';
+    return '$m:$s';
   }
 
   // ── Decorative outer ring accent ──────────────────────────────────────────

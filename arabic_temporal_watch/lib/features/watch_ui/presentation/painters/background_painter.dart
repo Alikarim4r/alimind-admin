@@ -51,21 +51,21 @@ class TransitionState {
 
   // ── Named presets ──────────────────────────────────────────────────────────
 
-  /// Default full-night preset.
+  /// Default full-night preset — deep space indigo/navy.
   static const TransitionState night = TransitionState(
-    skyColorTop: Color(0xFF02040F),
-    skyColorBottom: Color(0xFF05081A),
+    skyColorTop: Color(0xFF01020A),   // near-black deep space
+    skyColorBottom: Color(0xFF060920), // deep navy
     starOpacity: 1.0,
     atmosphericScatter: 0.0,
     phase: TransitionPhase.night,
   );
 
-  /// Default full-day preset.
+  /// Default full-day preset — warm blue sky.
   static const TransitionState day = TransitionState(
-    skyColorTop: Color(0xFF5BAAD0),
-    skyColorBottom: Color(0xFF87CEEB),
+    skyColorTop: Color(0xFF1A3A6C),   // deep blue at zenith
+    skyColorBottom: Color(0xFF3A7BC8), // brighter azure at horizon
     starOpacity: 0.0,
-    atmosphericScatter: 0.3,
+    atmosphericScatter: 0.2,
     phase: TransitionPhase.day,
   );
 }
@@ -109,16 +109,40 @@ class BackgroundPainter extends CustomPainter {
     final center = _center(size);
     final radius = _radius(size);
 
+    // Use a multi-stop radial gradient for dramatic cinematic depth.
+    // Zenith is darkest/richest, horizon is lighter/warmer.
     final paint = Paint()
       ..shader = RadialGradient(
+        center: const Alignment(0.0, -0.2),
+        radius: 1.1,
         colors: [
           transitionState.skyColorTop,
+          Color.lerp(
+            transitionState.skyColorTop,
+            transitionState.skyColorBottom,
+            0.55,
+          )!,
           transitionState.skyColorBottom,
         ],
-        stops: const [0.0, 1.0],
+        stops: const [0.0, 0.55, 1.0],
       ).createShader(Rect.fromCircle(center: center, radius: radius));
 
     canvas.drawCircle(center, radius, paint);
+
+    // Radial vignette: subtle darkening toward edges.
+    final vignettePaint = Paint()
+      ..shader = RadialGradient(
+        center: Alignment.center,
+        radius: 1.0,
+        colors: [
+          const Color(0x00000000),
+          const Color(0x00000000),
+          const Color(0x55000000),
+        ],
+        stops: const [0.0, 0.65, 1.0],
+      ).createShader(Rect.fromCircle(center: center, radius: radius));
+
+    canvas.drawCircle(center, radius, vignettePaint);
   }
 
   // ── Layer 2: Star field ────────────────────────────────────────────────────
@@ -126,20 +150,29 @@ class BackgroundPainter extends CustomPainter {
   /// Returns a pseudo-random but deterministic list of star positions seeded
   /// from trigonometric values so no external PRNG state is needed.
   List<_Star> _buildStars(double radius) {
-    const int count = 88;
+    const int count = 110;
     final stars = <_Star>[];
     for (int i = 0; i < count; i++) {
       // Seed from index using sin/cos to scatter across the circle.
       final angle = math.sin(i * 2.39996) * math.pi * 2.0;
       final r = math.cos(i * 1.61803) * 0.5 + 0.5; // [0, 1]
-      final dist = math.sqrt(r) * radius * 0.95; // uniform area distribution
+      final dist = math.sqrt(r) * radius * 0.93; // uniform area distribution
       final x = math.cos(angle) * dist;
       final y = math.sin(angle) * dist;
-      // Star size: mostly tiny, a few larger
-      final size = 0.6 + (math.sin(i * 7.3) * 0.5 + 0.5) * 1.4;
+      // Stars are tiny dots — 0.2 to 0.8 px max, no glowing blobs.
+      final sizeFactor = math.sin(i * 7.3) * 0.5 + 0.5; // [0, 1]
+      final size = 0.15 + sizeFactor * 0.65; // [0.15, 0.80] px
+      // Brightness varies: most stars are dim, a few brighter.
+      final brightness = math.pow(sizeFactor, 1.5).toDouble(); // favors dimmer
       // Twinkle phase offset per star so they don't all pulse together.
       final phaseOffset = (math.cos(i * 3.7) * 0.5 + 0.5);
-      stars.add(_Star(dx: x, dy: y, size: size, phaseOffset: phaseOffset));
+      stars.add(_Star(
+        dx: x,
+        dy: y,
+        size: size,
+        phaseOffset: phaseOffset,
+        brightness: brightness,
+      ));
     }
     return stars;
   }
@@ -155,15 +188,17 @@ class BackgroundPainter extends CustomPainter {
     final paint = Paint()..style = PaintingStyle.fill;
 
     for (final star in stars) {
-      // Twinkling: each star has its own phase so they don't sync.
+      // Subtle twinkle: gentle amplitude so stars feel calm, not distracting.
       final twinkle = math.sin(
                 (animationValue * math.pi * 2.0) + star.phaseOffset * math.pi * 2.0,
               ) *
-              0.3 +
-          0.7; // oscillates between 0.4 and 1.0
-      final alpha = (opacity * twinkle).clamp(0.0, 1.0);
+              0.15 +
+          0.85; // oscillates between 0.70 and 1.0 — very subtle
 
-      paint.color = Color.fromRGBO(240, 240, 255, alpha);
+      final alpha = (opacity * twinkle * star.brightness).clamp(0.0, 1.0);
+
+      // Stars are tiny — max size 0.9 logical pixels. No glow blobs.
+      paint.color = Color.fromRGBO(230, 235, 255, alpha);
       canvas.drawCircle(
         Offset(center.dx + star.dx, center.dy + star.dy),
         star.size,
@@ -175,47 +210,49 @@ class BackgroundPainter extends CustomPainter {
   // ── Layer 3: Milky Way band ────────────────────────────────────────────────
 
   void _drawMilkyWay(Canvas canvas, Size size) {
-    final opacity = transitionState.starOpacity * 0.35;
+    // Very subtle — just a faint glow band, not individual dots.
+    final opacity = transitionState.starOpacity * 0.18;
     if (opacity <= 0.0) return;
 
     final center = _center(size);
     final radius = _radius(size);
-    final rng = List.generate(120, (i) => i);
 
     // Diagonal band: roughly −30° tilt across the circle.
     const double bandAngle = -math.pi / 6.0; // −30 degrees
     final cosA = math.cos(bandAngle);
     final sinA = math.sin(bandAngle);
 
+    // Draw as a single soft gradient band, not many dots.
+    final path = Path();
+    final bandHalfWidth = radius * 0.12;
+
+    path.moveTo(
+      center.dx + (-radius * cosA) - bandHalfWidth * sinA,
+      center.dy + (-radius * sinA) + bandHalfWidth * cosA,
+    );
+    path.lineTo(
+      center.dx + (radius * cosA) - bandHalfWidth * sinA,
+      center.dy + (radius * sinA) + bandHalfWidth * cosA,
+    );
+    path.lineTo(
+      center.dx + (radius * cosA) + bandHalfWidth * sinA,
+      center.dy + (radius * sinA) - bandHalfWidth * cosA,
+    );
+    path.lineTo(
+      center.dx + (-radius * cosA) + bandHalfWidth * sinA,
+      center.dy + (-radius * sinA) - bandHalfWidth * cosA,
+    );
+    path.close();
+
+    canvas.save();
+    canvas.clipPath(Path()..addOval(Rect.fromCircle(center: center, radius: radius)));
+
     final paint = Paint()
-      ..style = PaintingStyle.fill
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 1.5);
+      ..color = Color.fromRGBO(200, 215, 255, opacity)
+      ..maskFilter = MaskFilter.blur(BlurStyle.normal, radius * 0.05);
 
-    for (final i in rng) {
-      // Parameterised along the band.
-      final t = (i / 120.0) * 2.0 - 1.0; // [-1, 1]
-      final along = t * radius * 1.1;
-      // Gaussian spread across the band width.
-      final spread = (math.sin(i * 2.17 + 1.3) * 0.5 + 0.5) * radius * 0.15;
-      final perp = math.cos(i * 3.91) * spread;
-
-      final bx = along * cosA - perp * sinA;
-      final by = along * sinA + perp * cosA;
-
-      // Skip points outside the circle.
-      if (bx * bx + by * by > radius * radius * 0.98) continue;
-
-      final brightness = math.sin(i * 5.29 + 0.7) * 0.5 + 0.5;
-      final dotSize = 0.3 + brightness * 0.8;
-      final alpha = opacity * (0.3 + brightness * 0.7);
-
-      paint.color = Color.fromRGBO(220, 230, 255, alpha.clamp(0.0, 1.0));
-      canvas.drawCircle(
-        Offset(center.dx + bx, center.dy + by),
-        dotSize,
-        paint,
-      );
-    }
+    canvas.drawPath(path, paint);
+    canvas.restore();
   }
 
   // ── Layer 4: Sun glow ──────────────────────────────────────────────────────
@@ -449,15 +486,19 @@ class _Star {
     required this.dy,
     required this.size,
     required this.phaseOffset,
+    required this.brightness,
   });
 
   /// Offset from the circle center in logical pixels.
   final double dx;
   final double dy;
 
-  /// Dot radius in logical pixels.
+  /// Dot radius in logical pixels (kept very small for realism).
   final double size;
 
   /// Per-star twinkle phase offset in [0, 1].
   final double phaseOffset;
+
+  /// Base brightness multiplier in [0, 1].
+  final double brightness;
 }

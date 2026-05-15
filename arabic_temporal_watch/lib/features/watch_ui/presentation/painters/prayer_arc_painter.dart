@@ -38,7 +38,7 @@ class PrayerArcPainter extends CustomPainter {
     required this.sunset,
     this.animationValue = 0.0,
     this.outerRadiusFraction = 0.97,
-    this.arcStrokeWidth = 5.0,
+    this.arcStrokeWidth = 2.5, // thinner — precision instrument
   });
 
   /// The six computed prayer times for today.
@@ -135,10 +135,11 @@ class PrayerArcPainter extends CustomPainter {
   // ── Layer 1: Background track ──────────────────────────────────────────────
 
   void _drawTrack(Canvas canvas, Offset center, double arcRadius) {
+    // Very subtle dark track — barely visible foundation.
     final trackPaint = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = arcStrokeWidth + 1.0
-      ..color = const Color(0x40000000);
+      ..strokeWidth = arcStrokeWidth + 0.5
+      ..color = const Color(0x25000000);
 
     canvas.drawCircle(center, arcRadius, trackPaint);
   }
@@ -157,37 +158,30 @@ class PrayerArcPainter extends CustomPainter {
     for (final seg in segments) {
       final isActive = seg.name == activeSegment;
 
-      // Segment color — active is brightened.
+      // Segment color — active is brightened slightly.
       final baseColor = isActive
-          ? Color.lerp(seg.color, Colors.white, 0.25)!
+          ? Color.lerp(seg.color, AppColors.goldLight, 0.20)!
           : seg.color;
 
-      // Pulse glow for active segment: opacity oscillates with animation.
-      final glowAlpha = isActive
-          ? (0.5 + 0.5 * math.sin(animationValue * math.pi * 2.0))
-          : 0.0;
-
-      // ── Glow behind active segment ──
-      if (glowAlpha > 0.0) {
+      // Subtle soft glow for active segment — not distracting.
+      if (isActive) {
+        final glowAlpha = 0.30 + 0.20 * math.sin(animationValue * math.pi * 2.0);
         final glowPaint = Paint()
           ..style = PaintingStyle.stroke
-          ..strokeWidth = arcStrokeWidth + 6.0
-          ..color = seg.color.withAlpha((glowAlpha * 120).round())
-          ..maskFilter = MaskFilter.blur(
-            BlurStyle.normal,
-            arcStrokeWidth * 1.2,
-          );
+          ..strokeWidth = arcStrokeWidth + 3.5
+          ..color = seg.color.withOpacity(glowAlpha)
+          ..maskFilter = MaskFilter.blur(BlurStyle.normal, arcStrokeWidth * 1.5);
 
         final sweepAngle = _normalizedSweep(seg.startAngle, seg.endAngle);
         canvas.drawArc(rect, seg.startAngle, sweepAngle, false, glowPaint);
       }
 
-      // ── Main segment arc ──
+      // ── Main segment arc — thin, precise ──
       final segmentPaint = Paint()
         ..style = PaintingStyle.stroke
         ..strokeWidth = arcStrokeWidth
         ..strokeCap = StrokeCap.butt
-        ..color = baseColor.withAlpha(isActive ? 255 : 200);
+        ..color = baseColor.withOpacity(isActive ? 0.92 : 0.55);
 
       final sweepAngle = _normalizedSweep(seg.startAngle, seg.endAngle);
       canvas.drawArc(rect, seg.startAngle, sweepAngle, false, segmentPaint);
@@ -202,16 +196,26 @@ class PrayerArcPainter extends CustomPainter {
     double arcRadius,
     List<_ArcSegment> segments,
   ) {
-    final jointPaint = Paint()
-      ..style = PaintingStyle.fill
-      ..color = AppColors.backgroundDeep;
+    // Hairline gold tick at each boundary — precision instrument style.
+    final tickPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 0.5
+      ..color = AppColors.goldPrimary.withOpacity(0.35)
+      ..strokeCap = StrokeCap.butt;
 
-    const double jointHalfWidth = 0.8; // radians
     for (final seg in segments) {
-      // Draw a hairline gap dot at each segment boundary.
       final x = center.dx + math.cos(seg.startAngle) * arcRadius;
       final y = center.dy + math.sin(seg.startAngle) * arcRadius;
-      canvas.drawCircle(Offset(x, y), arcStrokeWidth / 2.0 + 0.3, jointPaint);
+
+      // Short radial tick at the boundary.
+      final tickLen = arcStrokeWidth * 1.2;
+      final dirX = math.cos(seg.startAngle);
+      final dirY = math.sin(seg.startAngle);
+      canvas.drawLine(
+        Offset(x - dirX * tickLen * 0.5, y - dirY * tickLen * 0.5),
+        Offset(x + dirX * tickLen * 0.5, y + dirY * tickLen * 0.5),
+        tickPaint,
+      );
     }
   }
 
@@ -223,32 +227,22 @@ class PrayerArcPainter extends CustomPainter {
     final y = center.dy + math.sin(angle) * arcRadius;
     final dotPos = Offset(x, y);
 
-    // Glow halo.
+    // Subtle gold glow.
     final glowPaint = Paint()
       ..style = PaintingStyle.fill
-      ..color = AppColors.glowGold
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4.0);
-    canvas.drawCircle(dotPos, arcStrokeWidth * 0.9, glowPaint);
+      ..color = AppColors.glowGold.withOpacity(0.55)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3.0);
+    canvas.drawCircle(dotPos, arcStrokeWidth * 0.85, glowPaint);
 
-    // Gold dot.
+    // Gold dot — small and precise.
     final dotPaint = Paint()
       ..style = PaintingStyle.fill
       ..shader = RadialGradient(
         colors: const [AppColors.goldLight, AppColors.goldPrimary],
       ).createShader(
-        Rect.fromCircle(center: dotPos, radius: arcStrokeWidth * 0.7),
+        Rect.fromCircle(center: dotPos, radius: arcStrokeWidth * 0.65),
       );
-    canvas.drawCircle(dotPos, arcStrokeWidth * 0.7, dotPaint);
-
-    // White specular.
-    final specPaint = Paint()
-      ..style = PaintingStyle.fill
-      ..color = const Color(0x80FFFFFF);
-    canvas.drawCircle(
-      Offset(dotPos.dx - 0.5, dotPos.dy - 0.5),
-      arcStrokeWidth * 0.2,
-      specPaint,
-    );
+    canvas.drawCircle(dotPos, arcStrokeWidth * 0.65, dotPaint);
   }
 
   // ── Utilities ──────────────────────────────────────────────────────────────
