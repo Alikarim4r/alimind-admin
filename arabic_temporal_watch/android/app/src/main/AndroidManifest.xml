@@ -39,7 +39,6 @@
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:label="Arabic Temporal Watch"
-        android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/LaunchTheme"
         android:hardwareAccelerated="true"
