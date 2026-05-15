@@ -72,13 +72,13 @@ class RingPainter extends CustomPainter {
   static const double _tickRadiusFraction = 0.75;
 
   /// Radial position of floating labels as a fraction of half-canvas width.
-  static const double _labelRadiusFraction = 0.69;
+  static const double _labelRadiusFraction = 0.86;
 
   /// Flutter canvas offset so that 0 rad = 12 o'clock (−π/2).
   static const double _startOffset = -math.pi / 2.0;
 
   /// Number of visible label offsets on each side of the current period.
-  static const int _labelHalfRange = 6;
+  static const int _labelHalfRange = 4;
 
   // ── paint ──────────────────────────────────────────────────────────────────
 
@@ -91,11 +91,34 @@ class RingPainter extends CustomPainter {
     final tickR = halfW * _tickRadiusFraction;
     final labelR = halfW * _labelRadiusFraction;
 
+    // ── Layer 0: Watch body fill — covers sky background between inner clock and ring ──
+    _drawWatchBodyFill(canvas, cx, cy, halfW);
+
     // ── Layer 1: Arc tick marks ───────────────────────────────────────────────
     _drawArcTicks(canvas, cx, cy, tickR, halfW);
 
     // ── Layer 2: Floating Arabic labels ──────────────────────────────────────
     _drawFloatingLabels(canvas, cx, cy, labelR, size);
+  }
+
+  void _drawWatchBodyFill(Canvas canvas, double cx, double cy, double halfW) {
+    // Fill the entire watch face area with a dark gradient so the sky background
+    // painter does not show through between the inner clock (46%) and the ring.
+    final fillPaint = Paint()
+      ..style = PaintingStyle.fill
+      ..shader = RadialGradient(
+        center: const Alignment(0, -0.2),
+        radius: 1.0,
+        colors: const [
+          Color(0xFF0C1230),
+          Color(0xFF071126),
+          Color(0xFF030712),
+        ],
+        stops: const [0.0, 0.55, 1.0],
+      ).createShader(
+        Rect.fromCircle(center: Offset(cx, cy), radius: halfW * 0.97),
+      );
+    canvas.drawCircle(Offset(cx, cy), halfW * 0.97, fillPaint);
   }
 
   // ── Layer implementations ──────────────────────────────────────────────────
@@ -171,7 +194,7 @@ class RingPainter extends CustomPainter {
 
       if (opacity < 0.02) continue; // skip nearly invisible labels
 
-      final fontSize = 12.0 + norm * 10.0; // 12 to 22 px
+      final fontSize = 8.5 + norm * 7.5; // 8.5 to 16 px
 
       // Color: current (offset == 0, closest) = white; night = moonlight/silver; other = gold.
       final Color textColor;
