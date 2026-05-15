@@ -227,16 +227,12 @@ const List<PresetLocation> kPresetLocations = [
 ];
 
 /// The fallback location used when GPS is unavailable and no saved location exists.
-const LocationData kDefaultMakkahLocation = LocationData(
+final LocationData kDefaultMakkahLocation = LocationData(
   latitude: 21.3891,
   longitude: 39.8579,
   city: 'Makkah',
   country: 'Saudi Arabia',
   timezoneName: 'Asia/Riyadh',
-  // ignore: prefer_const_constructors — DateTime.utc is not const
-  timestamp: _kEpoch,
+  timestamp: DateTime.utc(2000),
   source: LocationSource.defaultMakkah,
 );
-
-// Compile-time constant epoch used as placeholder timestamp for the default location.
-final DateTime _kEpoch = DateTime.utc(2000);
