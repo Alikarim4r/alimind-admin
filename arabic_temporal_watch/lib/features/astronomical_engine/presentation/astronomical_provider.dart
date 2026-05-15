@@ -99,10 +99,8 @@ Future<LocationData?> _fetchLocation() async {
     }
 
     final position = await Geolocator.getCurrentPosition(
-      locationSettings: const LocationSettings(
-        accuracy: LocationAccuracy.medium,
-        timeLimit: Duration(seconds: 15),
-      ),
+      desiredAccuracy: LocationAccuracy.medium,
+      timeLimit: const Duration(seconds: 15),
     );
 
     return LocationData(

@@ -178,10 +178,8 @@ Future<Position> _getPosition(LocationPermission permission) async {
 
   try {
     return await Geolocator.getCurrentPosition(
-      locationSettings: const LocationSettings(
-        accuracy: LocationAccuracy.reduced,
-        timeLimit: Duration(seconds: 10),
-      ),
+      desiredAccuracy: LocationAccuracy.low,
+      timeLimit: const Duration(seconds: 10),
     );
   } catch (_) {
     return Position(

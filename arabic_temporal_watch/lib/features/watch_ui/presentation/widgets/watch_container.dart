@@ -97,7 +97,7 @@ class WatchContainer extends StatelessWidget {
         final available = constraints.biggest;
         final side = available.shortestSide.isFinite
             ? available.shortestSide * sizeFraction
-            : available.maxWidth * sizeFraction;
+            : available.width * sizeFraction;
 
         return WatchDiameterScope(
           diameter: side,

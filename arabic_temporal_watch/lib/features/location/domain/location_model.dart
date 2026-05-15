@@ -239,4 +239,4 @@ const LocationData kDefaultMakkahLocation = LocationData(
 );
 
 // Compile-time constant epoch used as placeholder timestamp for the default location.
-const DateTime _kEpoch = DateTime.utc(2000);
+final DateTime _kEpoch = DateTime.utc(2000);
