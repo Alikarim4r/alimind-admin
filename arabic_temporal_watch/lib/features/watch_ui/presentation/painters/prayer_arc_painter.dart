@@ -37,7 +37,7 @@ class PrayerArcPainter extends CustomPainter {
     required this.sunrise,
     required this.sunset,
     this.animationValue = 0.0,
-    this.outerRadiusFraction = 0.97,
+    this.outerRadiusFraction = 0.99,
     this.arcStrokeWidth = 2.5, // thinner — precision instrument
   });
 

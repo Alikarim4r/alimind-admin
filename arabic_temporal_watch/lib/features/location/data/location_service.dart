@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:geolocator/geolocator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -170,19 +171,40 @@ class LocationService {
     Position position,
     LocationSource source,
   ) {
+    final nearest = _nearestPreset(position.latitude, position.longitude);
     return LocationData(
       latitude: position.latitude,
       longitude: position.longitude,
       altitude: position.altitude,
       accuracy: position.accuracy,
-      // Reverse-geocoding is out of scope here; city/country left null and can
-      // be resolved by an upstream provider if needed.
-      city: null,
+      city: nearest?.nameEnglish,
       country: null,
-      timezoneName: DateTime.now().timeZoneName,
+      timezoneName: nearest?.timezoneName ?? DateTime.now().timeZoneName,
       timestamp: position.timestamp ?? DateTime.now(),
       source: source,
     );
+  }
+
+  /// Finds the nearest preset location to [lat]/[lon] using the Haversine
+  /// formula.  Returns null if no preset is within 300 km.
+  PresetLocation? _nearestPreset(double lat, double lon) {
+    PresetLocation? nearest;
+    double minDist = double.infinity;
+    for (final preset in kPresetLocations) {
+      final dlat = (preset.latitude - lat) * math.pi / 180.0;
+      final dlon = (preset.longitude - lon) * math.pi / 180.0;
+      final a = math.sin(dlat / 2) * math.sin(dlat / 2) +
+          math.cos(lat * math.pi / 180.0) *
+              math.cos(preset.latitude * math.pi / 180.0) *
+              math.sin(dlon / 2) *
+              math.sin(dlon / 2);
+      final dist = 6371.0 * 2.0 * math.atan2(math.sqrt(a), math.sqrt(1 - a));
+      if (dist < minDist) {
+        minDist = dist;
+        nearest = preset;
+      }
+    }
+    return minDist < 300.0 ? nearest : null;
   }
 
   /// Releases all resources held by this service.

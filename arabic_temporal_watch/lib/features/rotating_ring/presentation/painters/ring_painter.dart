@@ -69,10 +69,10 @@ class RingPainter extends CustomPainter {
   // ── Geometry constants ─────────────────────────────────────────────────────
 
   /// Outer radius of the ring arc as a fraction of half the canvas width.
-  static const double _outerFraction = 0.48;
+  static const double _outerFraction = 0.97;
 
   /// Inner radius of the ring arc as a fraction of half the canvas width.
-  static const double _innerFraction = 0.34;
+  static const double _innerFraction = 0.78;
 
   /// Extra radius used for the outer decorative border stroke.
   static const double _borderExtraFraction = 0.005;
@@ -93,7 +93,7 @@ class RingPainter extends CustomPainter {
   static const double _beadRadialFraction = 0.72;
 
   /// Font size for Arabic period labels (logical pixels).
-  static const double _labelFontSize = 9.0;
+  static const double _labelFontSize = 12.0;
 
   /// Font size for small transliteration labels below the Arabic (optional).
   static const double _subLabelFontSize = 6.5;

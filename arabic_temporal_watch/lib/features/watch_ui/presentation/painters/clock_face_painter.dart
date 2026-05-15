@@ -43,6 +43,7 @@ class ClockFacePainter extends CustomPainter {
     this.markerColor = AppColors.goldPrimary,
     this.showNumerals = true,
     this.mode = NumeralStyle.arabicIndic,
+    this.scaleFactor = 0.74,
   });
 
   /// Background fill for the dial surface.
@@ -57,6 +58,10 @@ class ClockFacePainter extends CustomPainter {
   /// Numeral style when [showNumerals] is true.
   final NumeralStyle mode;
 
+  /// Fraction of the canvas half-size at which the dial face is drawn.
+  /// 0.74 keeps the dial inside the Arabic temporal ring (78%–97% band).
+  final double scaleFactor;
+
   // ── Geometry helpers ───────────────────────────────────────────────────────
 
   Offset _center(Size size) => Offset(size.width / 2, size.height / 2);
@@ -67,7 +72,7 @@ class ClockFacePainter extends CustomPainter {
 
   void _drawBezel(Canvas canvas, Size size) {
     final center = _center(size);
-    final radius = _radius(size);
+    final radius = _radius(size) * scaleFactor;
 
     // Dial background fill — deep navy with subtle radial gradient.
     // Rich, precise — like polished onyx.
@@ -107,7 +112,7 @@ class ClockFacePainter extends CustomPainter {
 
   void _drawGuillocheTexture(Canvas canvas, Size size) {
     final center = _center(size);
-    final radius = _radius(size);
+    final radius = _radius(size) * scaleFactor;
 
     // Minimal engine-turned pattern: just a few concentric rings for depth.
     // Very subtle — not distracting.
@@ -134,7 +139,7 @@ class ClockFacePainter extends CustomPainter {
 
   void _drawMinuteMarkers(Canvas canvas, Size size) {
     final center = _center(size);
-    final radius = _radius(size);
+    final radius = _radius(size) * scaleFactor;
 
     // Fine silver minute tick marks — barely-visible precision instrument feel.
     final tickPaint = Paint()
@@ -166,7 +171,7 @@ class ClockFacePainter extends CustomPainter {
 
   void _drawHourMarkers(Canvas canvas, Size size) {
     final center = _center(size);
-    final radius = _radius(size);
+    final radius = _radius(size) * scaleFactor;
 
     for (int h = 1; h <= 12; h++) {
       final angle = (h / 12.0) * math.pi * 2.0 - math.pi / 2.0;
@@ -209,7 +214,7 @@ class ClockFacePainter extends CustomPainter {
     if (!showNumerals || mode == NumeralStyle.minimal) return;
 
     final center = _center(size);
-    final radius = _radius(size);
+    final radius = _radius(size) * scaleFactor;
     // Place numerals just inside the hour markers.
     final numRadius = radius * 0.63;
 
@@ -221,9 +226,9 @@ class ClockFacePainter extends CustomPainter {
       final label = _labelFor(h);
       final textStyle = TextStyle(
         color: AppColors.goldPrimary,
-        fontSize: radius * 0.095,
+        fontSize: radius * 0.11,
         fontWeight: FontWeight.w600,
-        fontFamily: mode == NumeralStyle.arabicIndic ? 'ArabicDisplay' : null,
+        fontFamily: null,
         height: 1.0,
         shadows: const [
           Shadow(
@@ -249,10 +254,8 @@ class ClockFacePainter extends CustomPainter {
 
   String _labelFor(int hour) {
     if (mode == NumeralStyle.arabicIndic) {
-      const labels = [
-        '', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩', '١٠', '١١', '١٢',
-      ];
-      return labels[hour];
+      // Standard Western Arabic numerals (1–12)
+      return hour.toString();
     } else {
       // Roman numerals.
       const labels = [
@@ -266,7 +269,7 @@ class ClockFacePainter extends CustomPainter {
 
   void _drawCenterCap(Canvas canvas, Size size) {
     final center = _center(size);
-    final radius = _radius(size);
+    final radius = _radius(size) * scaleFactor;
 
     // Small elegant center dot — like a premium Swiss jewel.
     // Keep it tiny: 1.5% of radius.
@@ -320,5 +323,6 @@ class ClockFacePainter extends CustomPainter {
       oldDelegate.dialColor != dialColor ||
       oldDelegate.markerColor != markerColor ||
       oldDelegate.showNumerals != showNumerals ||
-      oldDelegate.mode != mode;
+      oldDelegate.mode != mode ||
+      oldDelegate.scaleFactor != scaleFactor;
 }

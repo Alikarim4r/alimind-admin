@@ -38,6 +38,7 @@ class HandsPainter extends CustomPainter {
     this.showSeconds = true,
     this.handColor = AppColors.goldPrimary,
     this.opacity = 1.0,
+    this.dialFraction = 0.74,
   });
 
   /// Hour-hand rotation angle in radians, measured clockwise from 12 o'clock.
@@ -64,6 +65,10 @@ class HandsPainter extends CustomPainter {
   /// Overall opacity applied to all hands.  Used for fade-in/out transitions.
   final double opacity;
 
+  /// Fraction of the canvas half-size within which the hands are drawn.
+  /// Must match [ClockFacePainter.scaleFactor] so hands stay within the dial.
+  final double dialFraction;
+
   // ── Geometry helpers ───────────────────────────────────────────────────────
 
   Offset _center(Size size) => Offset(size.width / 2, size.height / 2);
@@ -74,7 +79,7 @@ class HandsPainter extends CustomPainter {
 
   void _drawHourHand(Canvas canvas, Size size) {
     final center = _center(size);
-    final radius = _radius(size);
+    final radius = _radius(size) * dialFraction;
 
     // Elegant taper — slightly shorter, well-proportioned.
     final tipLength = radius * 0.52;
@@ -109,7 +114,7 @@ class HandsPainter extends CustomPainter {
 
   void _drawMinuteHand(Canvas canvas, Size size) {
     final center = _center(size);
-    final radius = _radius(size);
+    final radius = _radius(size) * dialFraction;
 
     // Thinner, slightly longer — reaches close to hour markers.
     final tipLength = radius * 0.78;
@@ -149,7 +154,7 @@ class HandsPainter extends CustomPainter {
     if (!showSeconds) return;
 
     final center = _center(size);
-    final radius = _radius(size);
+    final radius = _radius(size) * dialFraction;
 
     final angle = secondAngle - math.pi / 2.0;
 
@@ -347,5 +352,6 @@ class HandsPainter extends CustomPainter {
       oldDelegate.secondAngle != secondAngle ||
       oldDelegate.showSeconds != showSeconds ||
       oldDelegate.handColor != handColor ||
-      oldDelegate.opacity != opacity;
+      oldDelegate.opacity != opacity ||
+      oldDelegate.dialFraction != dialFraction;
 }
