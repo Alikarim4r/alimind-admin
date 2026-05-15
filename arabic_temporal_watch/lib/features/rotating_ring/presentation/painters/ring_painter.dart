@@ -38,6 +38,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_colors.dart';
+import '../../../temporal_engine/domain/arabic_period.dart' show kSegmentAngle;
 import '../../domain/ring_state.dart';
 
 // ── PrayerMarker ──────────────────────────────────────────────────────────────
@@ -187,7 +188,7 @@ class RingPainter extends CustomPainter {
     final currentIdx = segments.indexWhere((s) => s.isCurrent);
     if (currentIdx < 0) return;
 
-    const segAngle = math.pi * 2.0 / 24.0;
+    const segAngle = kSegmentAngle;
     final totalSegs = segments.length;
     final outerR = halfW * _ringOuterFraction;
     final innerR = halfW * _ringInnerFraction;
@@ -256,7 +257,7 @@ class RingPainter extends CustomPainter {
     final currentIdx = segments.indexWhere((s) => s.isCurrent);
     if (currentIdx < 0) return;
 
-    const segmentAngle = math.pi * 2.0 / 24.0;
+    const segmentAngle = kSegmentAngle;
     final totalSegs = segments.length;
 
     final tickPaint = Paint()
@@ -309,7 +310,7 @@ class RingPainter extends CustomPainter {
     final currentIdx = segments.indexWhere((s) => s.isCurrent);
     if (currentIdx < 0) return;
 
-    const segmentAngle = math.pi * 2.0 / 24.0;
+    const segmentAngle = kSegmentAngle;
 
     // Draw labels for offsets -6 to +6 from current period.
     for (int offset = -_labelHalfRange; offset <= _labelHalfRange; offset++) {
@@ -400,7 +401,7 @@ class RingPainter extends CustomPainter {
     final currentIdx = segments.indexWhere((s) => s.isCurrent);
     if (currentIdx < 0) return;
 
-    const segmentAngle = math.pi * 2.0 / 24.0;
+    const segmentAngle = kSegmentAngle;
     final centerPos = currentIdx + progressFraction;
 
     for (final marker in prayerMarkers) {

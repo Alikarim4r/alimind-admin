@@ -75,17 +75,27 @@ class HandsPainter extends CustomPainter {
 
   double _radius(Size size) => math.min(size.width, size.height) / 2.0;
 
-  // ── Hour hand ──────────────────────────────────────────────────────────────
+  // ── Shared tapered-hand builder ────────────────────────────────────────────
 
-  void _drawHourHand(Canvas canvas, Size size) {
+  void _drawTaperedHand(
+    Canvas canvas,
+    Size size, {
+    required double tipFraction,
+    required double tailFraction,
+    required double baseHalfFraction,
+    required double tipHalfFraction,
+    required double rawAngle,
+    required Color color,
+    required Color highlightColor,
+    required Color shadowColor,
+  }) {
     final center = _center(size);
     final radius = _radius(size) * dialFraction;
 
-    // Elegant taper — slightly shorter, well-proportioned.
-    final tipLength = radius * 0.52;
-    final tailLength = radius * 0.12;
-    final baseHalfWidth = radius * 0.032; // narrower than before
-    final tipHalfWidth = radius * 0.005;
+    final tipLength = radius * tipFraction;
+    final tailLength = radius * tailFraction;
+    final baseHalfWidth = radius * baseHalfFraction;
+    final tipHalfWidth = radius * tipHalfFraction;
 
     final path = _buildTaperedHandPath(
       tipLength: tipLength,
@@ -94,57 +104,49 @@ class HandsPainter extends CustomPainter {
       tipHalfWidth: tipHalfWidth,
     );
 
-    final angle = hourAngle - math.pi / 2.0;
-
     _renderHand(
       canvas: canvas,
       center: center,
       radius: radius,
       path: path,
-      angle: angle,
+      angle: rawAngle - math.pi / 2.0,
       tipLength: tipLength,
+      color: color,
+      highlightColor: highlightColor,
+      shadowColor: shadowColor,
+      strokeWidth: baseHalfWidth * 2.0,
+    );
+  }
+
+  // ── Hour hand ──────────────────────────────────────────────────────────────
+
+  void _drawHourHand(Canvas canvas, Size size) {
+    _drawTaperedHand(
+      canvas, size,
+      tipFraction: 0.52,
+      tailFraction: 0.12,
+      baseHalfFraction: 0.032,
+      tipHalfFraction: 0.005,
+      rawAngle: hourAngle,
       color: handColor,
       highlightColor: AppColors.goldLight,
       shadowColor: const Color(0x80000000),
-      strokeWidth: baseHalfWidth * 2.0,
     );
   }
 
   // ── Minute hand ────────────────────────────────────────────────────────────
 
   void _drawMinuteHand(Canvas canvas, Size size) {
-    final center = _center(size);
-    final radius = _radius(size) * dialFraction;
-
-    // Thinner, slightly longer — reaches close to hour markers.
-    final tipLength = radius * 0.78;
-    final tailLength = radius * 0.15;
-    final baseHalfWidth = radius * 0.020; // thinner than hour hand
-    final tipHalfWidth = radius * 0.004;
-
-    final path = _buildTaperedHandPath(
-      tipLength: tipLength,
-      tailLength: tailLength,
-      baseHalfWidth: baseHalfWidth,
-      tipHalfWidth: tipHalfWidth,
-    );
-
-    final angle = minuteAngle - math.pi / 2.0;
-
-    // Slightly lighter gold for the minute hand.
-    final minuteColor = Color.lerp(handColor, AppColors.goldLight, 0.25)!;
-
-    _renderHand(
-      canvas: canvas,
-      center: center,
-      radius: radius,
-      path: path,
-      angle: angle,
-      tipLength: tipLength,
-      color: minuteColor,
+    _drawTaperedHand(
+      canvas, size,
+      tipFraction: 0.78,
+      tailFraction: 0.15,
+      baseHalfFraction: 0.020,
+      tipHalfFraction: 0.004,
+      rawAngle: minuteAngle,
+      color: Color.lerp(handColor, AppColors.goldLight, 0.25)!,
       highlightColor: AppColors.goldPale,
       shadowColor: const Color(0x60000000),
-      strokeWidth: baseHalfWidth * 2.0,
     );
   }
 

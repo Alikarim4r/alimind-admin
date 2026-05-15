@@ -147,9 +147,16 @@ class BackgroundPainter extends CustomPainter {
 
   // ── Layer 2: Star field ────────────────────────────────────────────────────
 
+  // Static cache: star positions are deterministic — no need to rebuild on every frame.
+  static List<_Star>? _starCache;
+  static double _starCacheRadius = -1.0;
+
   /// Returns a pseudo-random but deterministic list of star positions seeded
   /// from trigonometric values so no external PRNG state is needed.
   List<_Star> _buildStars(double radius) {
+    if (_starCacheRadius == radius && _starCache != null) {
+      return _starCache!;
+    }
     const int count = 110;
     final stars = <_Star>[];
     for (int i = 0; i < count; i++) {
@@ -174,6 +181,8 @@ class BackgroundPainter extends CustomPainter {
         brightness: brightness,
       ));
     }
+    _starCacheRadius = radius;
+    _starCache = stars;
     return stars;
   }
 

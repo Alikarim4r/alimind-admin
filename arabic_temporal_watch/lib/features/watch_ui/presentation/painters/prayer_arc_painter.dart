@@ -92,6 +92,14 @@ class PrayerArcPainter extends CustomPainter {
 
   // ── Segment building ───────────────────────────────────────────────────────
 
+  // Static cache: segments depend on prayer times + date, not the current time.
+  // Rebuilt only when prayer times are recalculated (typically once per day).
+  static List<_ArcSegment>? _segmentsCache;
+  static DateTime? _cachedDate;
+  static PrayerTimes? _cachedPrayerTimes;
+  static DateTime? _cachedSunrise;
+  static DateTime? _cachedSunset;
+
   /// Builds an ordered list of [_ArcSegment] covering the full 24-hour day.
   ///
   /// The boundary times for each segment are:
@@ -103,6 +111,13 @@ class PrayerArcPainter extends CustomPainter {
   ///   Isha    : isha → midnight(tomorrow)
   List<_ArcSegment> _buildSegments() {
     final midnight = DateTime(now.year, now.month, now.day);
+    if (_segmentsCache != null &&
+        _cachedDate == midnight &&
+        _cachedPrayerTimes == prayerTimes &&
+        _cachedSunrise == sunrise &&
+        _cachedSunset == sunset) {
+      return _segmentsCache!;
+    }
     final nextMidnight = midnight.add(const Duration(days: 1));
 
     final boundaries = <PrayerName, _DateTimePair>{
@@ -114,7 +129,7 @@ class PrayerArcPainter extends CustomPainter {
       PrayerName.isha: _DateTimePair(prayerTimes.isha.time, nextMidnight),
     };
 
-    return boundaries.entries.map((e) {
+    final segments = boundaries.entries.map((e) {
       final name = e.key;
       final pair = e.value;
       return _ArcSegment(
@@ -124,6 +139,13 @@ class PrayerArcPainter extends CustomPainter {
         color: _segmentColors[name] ?? AppColors.goldPrimary,
       );
     }).toList();
+
+    _cachedDate = midnight;
+    _cachedPrayerTimes = prayerTimes;
+    _cachedSunrise = sunrise;
+    _cachedSunset = sunset;
+    _segmentsCache = segments;
+    return segments;
   }
 
   /// Determines which prayer segment is currently active.
