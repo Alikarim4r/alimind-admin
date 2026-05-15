@@ -163,18 +163,23 @@ class _WatchScreenState extends ConsumerState<WatchScreen>
     final temporal = temporalAsync.valueOrNull;
     if (temporal == null) return;
 
-    // CCW formula: target brings the current period's start to 12 o'clock.
-    //   rawTarget = −(globalIdx + progress) × π/12
     final globalIdx = temporal.currentPeriod.period.globalIndex;
-    final rawTarget =
+
+    // rawTarget ∈ [−2π, 0] — resets to ≈ 0 at every day/night boundary.
+    // Make it CONTINUOUS by pulling it down by multiples of 2π until it is
+    // at or below _currentRingRotation. This eliminates the boundary jump
+    // where rawTarget would otherwise flip from ≈ −2π back to ≈ 0, causing
+    // either a CW reversal or a huge CCW snap.
+    double rawTarget =
         -(globalIdx + temporal.progressFraction) * kSegmentAngle;
+    const twoPi = 2.0 * math.pi;
+    while (rawTarget > _currentRingRotation + 1e-9) {
+      rawTarget -= twoPi;
+    }
 
-    // CCW-only smoothing: the ring can only move counter-clockwise or stop.
-    // It NEVER reverses to CW, even at the day-wraparound boundary.
-    _targetRingRotation =
-        _ringCalculator.smoothRotationCCW(_currentRingRotation, rawTarget);
+    _targetRingRotation = rawTarget;
 
-    // Exponential lerp toward the target — only in the CCW direction.
+    // Exponential approach — ring only ever moves CCW (delta is always ≤ 0).
     const lerpFactor = 0.04;
     final delta = _targetRingRotation - _currentRingRotation;
 
@@ -228,16 +233,19 @@ class _WatchScreenState extends ConsumerState<WatchScreen>
     return markers;
   }
 
-  /// Returns the natural ring angle (radians) for [prayerTime] by finding
-  /// which temporal-hour slot contains it and interpolating within that slot.
+  /// Returns the ring angle (radians) for [prayerTime] pinned to the START
+  /// of whichever temporal-hour slot contains the prayer.
+  ///
+  /// Pinning to startAngle keeps the marker fixed on the ring's period divider
+  /// so it doesn't drift as the ring rotates — e.g. the Fajr marker stays
+  /// exactly aligned with the first day-period entry tick.
   /// Returns null when the prayer time falls outside all known slots.
   double? _prayerRingAngle(
       DateTime prayerTime, List<ArabicPeriodSlot> allPeriods) {
     for (final slot in allPeriods) {
       if (!prayerTime.isBefore(slot.startTime) &&
           prayerTime.isBefore(slot.endTime)) {
-        final p = slot.progressAt(prayerTime);
-        return slot.startAngle + p * (slot.endAngle - slot.startAngle);
+        return slot.startAngle;
       }
     }
     return null;

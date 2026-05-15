@@ -1,21 +1,20 @@
 // hands_painter.dart
 //
-// Paints the three luxury Swiss-style analog clock hands.
+// Paints the three luxury Swiss-Islamic analog clock hands.
 //
 // Design:
-//   • Hour hand   — thick tapered gold shape, 55 % of radius, counterweight tail.
-//   • Minute hand — thinner tapered gold shape, 80 % of radius, elegant profile.
-//   • Seconds hand — thin red/orange sweep pointer, 90 % of radius, lollipop tail.
+//   • Hour hand   — wide lancet-profile gold baton, 72 % of face radius.
+//   • Minute hand — slimmer lancet gold baton, 93 % of face radius.
+//   • Seconds hand — ultra-thin rose-red sweep pointer, 88 % of face radius.
 //
-// Each hand is rendered in three passes:
+// Each main hand renders four passes (bottom → top):
+//   0. Glow halo   — wide blurred copy; soft golden bloom for depth.
 //   1. Drop shadow  — dark translucent blurred copy, offset 2 px SE.
-//   2. Main shape   — LinearGradient for a 3-D bevel appearance.
-//   3. Center highlight — bright line down the spine.
+//   2. Main shape   — 5-stop LinearGradient bevel (dark → gold → pale → gold → dark).
+//   3. Spine highlight — bright hairline along the center ridge.
 //
-// Angles:
-//   Hour   : (hours % 12 + minutes / 60) * π / 6
-//   Minute : (minutes + seconds / 60) * π / 30
-//   Second : seconds * π / 30
+// Hand profile: lancet / leaf shape with slightly convex bezier sides — the
+// canonical form of a high-grade Swiss dress-watch hand.
 
 import 'dart:math' as math;
 
@@ -25,11 +24,6 @@ import '../../../../core/constants/app_colors.dart';
 
 // ── HandsPainter ──────────────────────────────────────────────────────────────
 
-/// [CustomPainter] that draws the three clock hands on top of the dial face.
-///
-/// The painter is intentionally decoupled from time sources — callers must
-/// pre-compute the three angles using the formulas documented in the file
-/// header and pass them in.
 class HandsPainter extends CustomPainter {
   const HandsPainter({
     required this.hourAngle,
@@ -38,42 +32,67 @@ class HandsPainter extends CustomPainter {
     this.showSeconds = true,
     this.handColor = AppColors.goldPrimary,
     this.opacity = 1.0,
-    this.dialFraction = 0.46,
+    this.dialFraction = 0.70,
   });
 
   /// Hour-hand rotation angle in radians, measured clockwise from 12 o'clock.
-  ///
-  /// Correct formula: `(hours % 12 + minutes / 60) * math.pi / 6`
   final double hourAngle;
 
   /// Minute-hand rotation angle in radians, measured clockwise from 12 o'clock.
-  ///
-  /// Correct formula: `(minutes + seconds / 60) * math.pi / 30`
   final double minuteAngle;
 
   /// Second-hand rotation angle in radians, measured clockwise from 12 o'clock.
-  ///
-  /// Correct formula: `seconds * math.pi / 30`
   final double secondAngle;
 
   /// When false the seconds hand is not drawn (minimal / power-save mode).
   final bool showSeconds;
 
-  /// Tint color for the hour and minute hands.  Defaults to luxury gold.
+  /// Tint color for the hour and minute hands.
   final Color handColor;
 
-  /// Overall opacity applied to all hands.  Used for fade-in/out transitions.
+  /// Overall opacity applied to all hands.
   final double opacity;
 
-  /// Fraction of the canvas half-size within which the hands are drawn.
-  /// Must match [ClockFacePainter.scaleFactor] so hands stay within the dial.
+  /// Fraction of the canvas half-size used as the hand-calculation radius.
+  /// 0.70 → hands fill the inner dial, staying inside the Arabic ring.
   final double dialFraction;
 
   // ── Geometry helpers ───────────────────────────────────────────────────────
 
   Offset _center(Size size) => Offset(size.width / 2, size.height / 2);
-
   double _radius(Size size) => math.min(size.width, size.height) / 2.0;
+
+  // ── Hour hand ──────────────────────────────────────────────────────────────
+
+  void _drawHourHand(Canvas canvas, Size size) {
+    _drawTaperedHand(
+      canvas, size,
+      tipFraction: 0.73,
+      tailFraction: 0.23,
+      baseHalfFraction: 0.048,
+      tipHalfFraction: 0.007,
+      rawAngle: hourAngle,
+      color: handColor,
+      highlightColor: AppColors.goldLight,
+      shadowColor: const Color(0x90000000),
+    );
+  }
+
+  // ── Minute hand ────────────────────────────────────────────────────────────
+
+  void _drawMinuteHand(Canvas canvas, Size size) {
+    _drawTaperedHand(
+      canvas, size,
+      tipFraction: 0.93,
+      tailFraction: 0.27,
+      baseHalfFraction: 0.030,
+      tipHalfFraction: 0.005,
+      rawAngle: minuteAngle,
+      color: Color.lerp(handColor, AppColors.goldLight, 0.30)!,
+      highlightColor: AppColors.goldPale,
+      shadowColor: const Color(0x70000000),
+    );
+  }
 
   // ── Shared tapered-hand builder ────────────────────────────────────────────
 
@@ -97,7 +116,7 @@ class HandsPainter extends CustomPainter {
     final baseHalfWidth = radius * baseHalfFraction;
     final tipHalfWidth = radius * tipHalfFraction;
 
-    final path = _buildTaperedHandPath(
+    final path = _buildLancetHandPath(
       tipLength: tipLength,
       tailLength: tailLength,
       baseHalfWidth: baseHalfWidth,
@@ -111,42 +130,11 @@ class HandsPainter extends CustomPainter {
       path: path,
       angle: rawAngle - math.pi / 2.0,
       tipLength: tipLength,
+      tailLength: tailLength,
       color: color,
       highlightColor: highlightColor,
       shadowColor: shadowColor,
       strokeWidth: baseHalfWidth * 2.0,
-    );
-  }
-
-  // ── Hour hand ──────────────────────────────────────────────────────────────
-
-  void _drawHourHand(Canvas canvas, Size size) {
-    _drawTaperedHand(
-      canvas, size,
-      tipFraction: 0.52,
-      tailFraction: 0.12,
-      baseHalfFraction: 0.032,
-      tipHalfFraction: 0.005,
-      rawAngle: hourAngle,
-      color: handColor,
-      highlightColor: AppColors.goldLight,
-      shadowColor: const Color(0x80000000),
-    );
-  }
-
-  // ── Minute hand ────────────────────────────────────────────────────────────
-
-  void _drawMinuteHand(Canvas canvas, Size size) {
-    _drawTaperedHand(
-      canvas, size,
-      tipFraction: 0.78,
-      tailFraction: 0.15,
-      baseHalfFraction: 0.020,
-      tipHalfFraction: 0.004,
-      rawAngle: minuteAngle,
-      color: Color.lerp(handColor, AppColors.goldLight, 0.25)!,
-      highlightColor: AppColors.goldPale,
-      shadowColor: const Color(0x60000000),
     );
   }
 
@@ -157,13 +145,12 @@ class HandsPainter extends CustomPainter {
 
     final center = _center(size);
     final radius = _radius(size) * dialFraction;
-
     final angle = secondAngle - math.pi / 2.0;
 
-    // Ultra-thin rose/red accent line — precision instrument style.
-    final tipLength = radius * 0.85;
-    final tailLength = radius * 0.20;
-    final handHalfWidth = radius * 0.004; // very thin
+    final tipLength = radius * 0.88;
+    final tailLength = radius * 0.24;
+    // Always at least 1 px half-width so it stays visible on small screens.
+    final handHalfWidth = math.max(radius * 0.009, 1.0);
 
     final cosA = math.cos(angle);
     final sinA = math.sin(angle);
@@ -173,81 +160,101 @@ class HandsPainter extends CustomPainter {
     final tailX = center.dx - cosA * tailLength;
     final tailY = center.dy - sinA * tailLength;
 
-    // ── Subtle drop shadow ──
+    // ── Subtle shadow ──
     _drawShadow(
       canvas: canvas,
       center: center,
       angle: angle,
       tipLength: tipLength,
       tailLength: tailLength,
-      halfWidth: handHalfWidth * 1.5,
-      shadowColor: const Color(0x50000000),
+      halfWidth: handHalfWidth * 1.6,
+      shadowColor: const Color(0x55000000),
     );
 
-    // ── Main stem — rose-red, ultra-thin ──
-    // Slight gradient: brighter at tip, deeper at tail.
+    // ── Main stem — rose-red ──
     final stemPaint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = handHalfWidth * 2.0
       ..strokeCap = StrokeCap.round
-      ..color = const Color(0xFFD4364A).withAlpha((opacity * 255).round()); // rose-red
+      ..color = const Color(0xFFD4364A).withAlpha((opacity * 255).round());
 
     canvas.drawLine(Offset(tailX, tailY), Offset(tipX, tipY), stemPaint);
 
-    // ── Small flat counterweight (no lollipop — more refined) ──
-    // Just a slightly wider section near the tail.
+    // ── Thicker counterweight section (refined, no lollipop) ──
     final counterPaint = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = handHalfWidth * 4.0
+      ..strokeWidth = handHalfWidth * 5.0
       ..strokeCap = StrokeCap.round
       ..color = const Color(0xFFD4364A).withAlpha((opacity * 255).round());
 
     canvas.drawLine(
       Offset(tailX, tailY),
-      Offset(center.dx - cosA * tailLength * 0.5, center.dy - sinA * tailLength * 0.5),
+      Offset(
+        center.dx - cosA * tailLength * 0.45,
+        center.dy - sinA * tailLength * 0.45,
+      ),
       counterPaint,
     );
 
-    // ── Center cap — small, gold ──
-    final collarPaint = Paint()
+    // ── Center jewel cap ──
+    final capR = radius * 0.022;
+    final capGlow = Paint()
+      ..style = PaintingStyle.fill
+      ..color = AppColors.goldPrimary.withAlpha((opacity * 50).round())
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 5.0);
+    canvas.drawCircle(center, capR * 1.7, capGlow);
+
+    final capPaint = Paint()
       ..style = PaintingStyle.fill
       ..shader = RadialGradient(
-        colors: const [AppColors.goldLight, AppColors.goldPrimary],
-      ).createShader(Rect.fromCircle(center: center, radius: radius * 0.012));
-    canvas.drawCircle(center, radius * 0.012, collarPaint);
+        center: const Alignment(-0.35, -0.5),
+        colors: const [AppColors.goldPale, AppColors.goldPrimary, AppColors.goldDark],
+        stops: const [0.0, 0.55, 1.0],
+      ).createShader(Rect.fromCircle(center: center, radius: capR));
+    canvas.drawCircle(center, capR, capPaint);
+
+    // Hairline bezel ring
+    final bezelPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = capR * 0.12
+      ..color = const Color(0xFF1A1400).withAlpha((opacity * 200).round());
+    canvas.drawCircle(center, capR * 0.88, bezelPaint);
   }
 
-  // ── Shared helpers ─────────────────────────────────────────────────────────
+  // ── Lancet hand path ───────────────────────────────────────────────────────
 
-  /// Builds a tapered, pointed hand shape pointing toward positive-Y (6 o'clock
-  /// in canvas space).  The caller rotates [canvas] before stroking.
-  ///
-  /// The path is centred on the origin.  Tip extends [tipLength] upward
-  /// (negative Y), tail extends [tailLength] downward (positive Y).
-  Path _buildTaperedHandPath({
+  /// Builds a lancet / leaf-profile hand shape. The hand points toward −Y
+  /// (12 o'clock). Slightly convex bezier sides give the classical Swiss
+  /// dress-watch profile rather than a flat trapezoid.
+  Path _buildLancetHandPath({
     required double tipLength,
     required double tailLength,
     required double baseHalfWidth,
     required double tipHalfWidth,
   }) {
-    // We draw in a canonical frame where the hand points toward negative-Y
-    // (12 o'clock direction in standard math orientation with y-up).
-    // Flutter's y-axis is flipped, but we rotate so the net effect is correct.
     final path = Path();
 
-    // Right side: from tail → base → taper to tip.
-    path.moveTo(tipHalfWidth, -tipLength);
-    path.lineTo(baseHalfWidth, 0);
-    path.lineTo(baseHalfWidth * 0.75, tailLength);
+    // Right side: fine tip → bulge at ~38% of tip-length from pivot → pivot → tail
+    path.moveTo(tipHalfWidth * 0.5, -tipLength);
+    path.quadraticBezierTo(
+      baseHalfWidth * 1.08, -tipLength * 0.38,
+      baseHalfWidth, 0,
+    );
+    path.lineTo(baseHalfWidth * 0.55, tailLength);
 
-    // Left side: mirror.
-    path.lineTo(-baseHalfWidth * 0.75, tailLength);
+    // Left side (mirror)
+    path.lineTo(-baseHalfWidth * 0.55, tailLength);
     path.lineTo(-baseHalfWidth, 0);
-    path.lineTo(-tipHalfWidth, -tipLength);
+    path.quadraticBezierTo(
+      -baseHalfWidth * 1.08, -tipLength * 0.38,
+      -tipHalfWidth * 0.5, -tipLength,
+    );
 
     path.close();
     return path;
   }
+
+  // ── Render helper ──────────────────────────────────────────────────────────
 
   void _renderHand({
     required Canvas canvas,
@@ -256,6 +263,7 @@ class HandsPainter extends CustomPainter {
     required Path path,
     required double angle,
     required double tipLength,
+    required double tailLength,
     required Color color,
     required Color highlightColor,
     required Color shadowColor,
@@ -265,46 +273,57 @@ class HandsPainter extends CustomPainter {
     canvas.translate(center.dx, center.dy);
     canvas.rotate(angle);
 
+    // ── 0. Soft golden glow beneath the hand ──
+    final glowPaint = Paint()
+      ..style = PaintingStyle.fill
+      ..color = color.withAlpha((opacity * 45).round())
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 11.0);
+    canvas.drawPath(path, glowPaint);
+
     // ── 1. Drop shadow ──
     final shadowPaint = Paint()
       ..style = PaintingStyle.fill
       ..color = shadowColor.withAlpha((opacity * shadowColor.alpha).round())
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3.0);
-
     canvas.save();
-    canvas.translate(2.0, 2.0); // SE offset
+    canvas.translate(2.0, 2.5);
     canvas.drawPath(path, shadowPaint);
     canvas.restore();
 
-    // ── 2. Main hand with linear gradient bevel ──
+    // ── 2. Main hand — 5-stop metallic bevel ──
     final gradientPaint = Paint()
       ..style = PaintingStyle.fill
       ..shader = LinearGradient(
         begin: Alignment.centerLeft,
         end: Alignment.centerRight,
         colors: [
-          AppColors.goldDark.withAlpha((opacity * 255).round()),
+          AppColors.goldDark.withAlpha((opacity * 220).round()),
           color.withAlpha((opacity * 255).round()),
           highlightColor.withAlpha((opacity * 255).round()),
           color.withAlpha((opacity * 255).round()),
           AppColors.goldDark.withAlpha((opacity * 200).round()),
         ],
-        stops: const [0.0, 0.2, 0.5, 0.8, 1.0],
+        stops: const [0.0, 0.25, 0.5, 0.75, 1.0],
       ).createShader(
-        Rect.fromLTWH(-strokeWidth / 2, -tipLength, strokeWidth, tipLength),
+        Rect.fromLTWH(
+          -strokeWidth / 2,
+          -tipLength,
+          strokeWidth,
+          tipLength + tailLength,
+        ),
       );
 
     canvas.drawPath(path, gradientPaint);
 
-    // ── 3. Center highlight line ──
+    // ── 3. Spine highlight ──
     final highlightPaint = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth * 0.12
+      ..strokeWidth = strokeWidth * 0.14
       ..strokeCap = StrokeCap.round
-      ..color = highlightColor.withAlpha((opacity * 160).round());
+      ..color = highlightColor.withAlpha((opacity * 185).round());
 
     canvas.drawLine(
-      Offset(0, -tipLength * 0.95),
+      Offset(0, -tipLength * 0.94),
       Offset(0, 0),
       highlightPaint,
     );
@@ -329,11 +348,11 @@ class HandsPainter extends CustomPainter {
       ..strokeWidth = halfWidth * 2.2
       ..strokeCap = StrokeCap.round
       ..color = shadowColor.withAlpha((opacity * shadowColor.alpha).round())
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2.5);
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3.0);
 
     canvas.drawLine(
-      Offset(center.dx - cosA * tailLength + 2, center.dy - sinA * tailLength + 2),
-      Offset(center.dx + cosA * tipLength + 2, center.dy + sinA * tipLength + 2),
+      Offset(center.dx - cosA * tailLength + 2, center.dy - sinA * tailLength + 2.5),
+      Offset(center.dx + cosA * tipLength + 2, center.dy + sinA * tipLength + 2.5),
       paint,
     );
   }
