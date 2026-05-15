@@ -288,7 +288,7 @@ class _WatchScreenState extends ConsumerState<WatchScreen>
                 CustomPaint(
                   size: size,
                   painter: ClockFacePainter(
-                    showNumerals: settings.watchMode != WatchMode.minimal,
+                    showNumerals: settings.watchMode.toString().split('.').last != 'minimal',
                     mode: _mapWatchMode(settings.watchMode),
                   ),
                 ),

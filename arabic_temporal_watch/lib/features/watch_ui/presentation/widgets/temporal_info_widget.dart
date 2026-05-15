@@ -57,7 +57,6 @@ class _TemporalCard extends StatelessWidget {
     final total = data.totalDuration.inMinutes;
     final fraction = data.progressFraction.clamp(0.0, 1.0);
     final primaryColor = data.primaryColor;
-    final secondaryColor = data.secondaryColor;
 
     final elapsedAr = _toArabicNumerals(elapsed);
     final totalAr = _toArabicNumerals(total);
