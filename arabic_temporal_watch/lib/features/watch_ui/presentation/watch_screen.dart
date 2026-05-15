@@ -152,26 +152,22 @@ class _WatchScreenState extends ConsumerState<WatchScreen>
     final temporal = temporalAsync.valueOrNull;
     if (temporal == null) return;
 
-    final now = DateTime.now();
-    final hAngle = _hourAngle(now);
-
-    // Global period index (0–23): day=0–11, night=12–23.
+    // CCW formula: target brings the current period's start to 12 o'clock.
+    //   rawTarget = −(globalIdx + progress) × π/12
     final globalIdx = temporal.currentPeriod.period.globalIndex;
-
-    // Target rotation: align the current period's ring position with the
-    // clock hour hand.
-    //   rotation = hourAngle − (globalIdx + progress) × segmentAngle
     final rawTarget =
-        hAngle - (globalIdx + temporal.progressFraction) * kSegmentAngle;
+        -(globalIdx + temporal.progressFraction) * kSegmentAngle;
 
+    // CCW-only smoothing: the ring can only move counter-clockwise or stop.
+    // It NEVER reverses to CW, even at the day-wraparound boundary.
     _targetRingRotation =
-        _ringCalculator.smoothRotation(_currentRingRotation, rawTarget);
+        _ringCalculator.smoothRotationCCW(_currentRingRotation, rawTarget);
 
-    // Exponential lerp toward the target (τ ≈ 0.04 → fast but smooth).
+    // Exponential lerp toward the target — only in the CCW direction.
     const lerpFactor = 0.04;
     final delta = _targetRingRotation - _currentRingRotation;
 
-    if (mounted && delta.abs() > 1e-5) {
+    if (mounted && delta < -1e-5) {
       setState(() {
         _currentRingRotation += delta * lerpFactor;
       });
@@ -358,12 +354,10 @@ class _WatchScreenState extends ConsumerState<WatchScreen>
                 // ── Layer 3: Rotating Arabic ring ─────────────────────────
                 temporalAsync.when(
                   data: (temporal) {
-                    final hAngle = _hourAngle(now);
                     final ringState = _ringCalculator.buildRingState(
                       temporalData: temporal,
                       currentRotation: _currentRingRotation,
                       animationTime: now.millisecondsSinceEpoch / 1000.0,
-                      hourAngle: hAngle,
                     );
 
                     final markers = prayerAsync.valueOrNull != null

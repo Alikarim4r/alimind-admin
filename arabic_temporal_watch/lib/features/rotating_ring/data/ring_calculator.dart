@@ -154,44 +154,44 @@ class RingCalculator {
     return segments;
   }
 
-  /// Calculate the smooth rotation angle that brings [targetSegmentIndex] to
-  /// the 12 o'clock position via the shortest rotational path.
-  ///
-  /// [current] and [target] are both in radians.  This function resolves the
-  /// 0/2π boundary discontinuity so the animation never spins the wrong way.
-  ///
-  /// Returns a value suitable for direct use with [Transform.rotate] (negative
-  /// = counter-clockwise).
+  /// Compute the smooth rotation toward [target] via the shortest path
+  /// (can go either CW or CCW).  Preserved for potential non-ring uses.
   double smoothRotation(double current, double target) {
-    // Normalise both angles to [0, 2π).
     final normCurrent = _normalise(current);
     final normTarget = _normalise(target);
-
-    // Compute the signed shortest delta (range: [−π, π]).
     double delta = normTarget - normCurrent;
     if (delta > math.pi) delta -= 2 * math.pi;
     if (delta < -math.pi) delta += 2 * math.pi;
-
-    // Return the new angle without normalising, so the animator can track
-    // cumulative rotation and avoid sudden jumps at the 0/2π wrap point.
     return current + delta;
   }
 
-  /// Compute the target ring rotation (radians) needed to align the current
-  /// period's start with the [hourAngle] (the clock hand direction).
+  /// CCW-only rotation toward [target].
   ///
-  /// The ring has 24 equal segments of [_equalSegmentAngle] = π/12 each.
-  /// Segment [globalIndex] starts at natural angle [globalIndex × π/12].
-  /// After rotation, that angle must equal [hourAngle] (adjusted for _startOffset):
+  /// Unlike [smoothRotation], this method **never** returns a value larger than
+  /// [current] — the ring can only move counter-clockwise or stop:
   ///
-  ///   rotation = hourAngle − (globalIndex + progressFraction) × π/12
-  double targetRotationForHourAlignment({
-    required double hourAngle,
-    required int globalIndex,
-    required double progressFraction,
-  }) {
-    return hourAngle -
-        (globalIndex + progressFraction.clamp(0.0, 1.0)) * _equalSegmentAngle;
+  ///   • delta < 0  → CCW step (normal case, ring advances).
+  ///   • delta = 0  → stop (already aligned, e.g. exactly at day-start).
+  ///   • delta > 0  → would require CW movement; forced to go CCW the long
+  ///                  way (delta − 2π), which at a period-boundary is ≈ 0
+  ///                  (ring stops for that tick rather than reversing).
+  ///
+  /// This guarantees that the outer ring **never** appears to spin with the
+  /// clock hands, regardless of wrap-around arithmetic.
+  double smoothRotationCCW(double current, double target) {
+    final normCurrent = _normalise(current);
+    final normTarget = _normalise(target);
+    double delta = normTarget - normCurrent;
+    // Force CCW: if shortest path is CW (delta > 0), take CCW long way.
+    // At day-wraparound the delta is 0, so the ring simply stops for one tick.
+    if (delta > 1e-9) delta -= 2 * math.pi;
+    return current + delta;
+  }
+
+  /// Compute the target ring rotation (radians, CCW = negative) needed to
+  /// place [segmentStartAngle] at the 12 o'clock (top) reader position.
+  double targetRotationForSegment(double segmentStartAngle) {
+    return -_normalise(segmentStartAngle);
   }
 
   /// Determine the glow pulse intensity for the current segment at [time]
@@ -249,14 +249,13 @@ class RingCalculator {
   ///
   /// [currentRotation] is the ring's current rendered rotation (radians).
   /// [animationTime] is elapsed wall-clock time in seconds (glow pulse).
-  /// [hourAngle] is the current clock-hand angle in radians [0, 2π), used to
-  /// compute the target rotation so the current period aligns with the
-  /// hour hand rather than always snapping to 12 o'clock.
+  ///
+  /// The ring always rotates CCW (or stops) — never CW — bringing the current
+  /// period to the 12 o'clock reader position.
   RingState buildRingState({
     required TemporalData temporalData,
     required double currentRotation,
     required double animationTime,
-    required double hourAngle,
   }) {
     // ── Day/night blend ──────────────────────────────────────────────────────
     // During a day→night or night→day transition the blend eases between 0 and
@@ -275,15 +274,13 @@ class RingCalculator {
     // ── Segments ─────────────────────────────────────────────────────────────
     final segments = buildSegments(temporalData, dayNightBlend: dayNightBlend);
 
-    // ── Target rotation ───────────────────────────────────────────────────────
-    // Align the current period's position with the clock hour hand.
-    final globalIdx = temporalData.currentPeriod.period.globalIndex;
-    final rawTarget = targetRotationForHourAlignment(
-      hourAngle: hourAngle,
-      globalIndex: globalIdx,
-      progressFraction: temporalData.progressFraction,
-    );
-    final targetAngle = smoothRotation(currentRotation, rawTarget);
+    // ── Target rotation (CCW only) ────────────────────────────────────────────
+    // Bring the current period to 12 o'clock.  smoothRotationCCW ensures the
+    // ring never steps CW — at the day-wraparound boundary it stops for one
+    // tick then continues CCW.
+    final currentSlotStartAngle = temporalData.currentPeriod.startAngle;
+    final rawTarget = targetRotationForSegment(currentSlotStartAngle);
+    final targetAngle = smoothRotationCCW(currentRotation, rawTarget);
 
     // ── Transition state ──────────────────────────────────────────────────────
     final isTransitioning = temporalData.transitionProgress > 0.0 &&
