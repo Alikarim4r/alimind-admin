@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/theme/app_theme.dart';
@@ -76,12 +77,9 @@ class ArabicTemporalWatchApp extends ConsumerWidget {
         Locale('en', 'US'), // English – US (secondary)
       ],
       localizationsDelegates: const [
-        // Flutter's built-in delegates for Material, Cupertino, and Widgets.
-        DefaultMaterialLocalizations.delegate,
-        DefaultWidgetsLocalizations.delegate,
-        // TODO: Replace with generated AppLocalizations delegate once
-        //       flutter gen-l10n / ARB files are created.
-        //   AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
       ],
 
       // ── Global RTL direction wrapper ──────────────────────────────────────
