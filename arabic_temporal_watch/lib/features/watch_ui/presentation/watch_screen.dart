@@ -42,7 +42,7 @@ import '../../temporal_engine/domain/arabic_period.dart';
 import '../../temporal_engine/presentation/temporal_provider.dart';
 import 'painters/background_painter.dart';
 import 'painters/clock_face_painter.dart'
-    show ClockFacePainter, WatchMode;
+    show ClockFacePainter, NumeralStyle;
 import 'painters/hands_painter.dart';
 import 'painters/prayer_arc_painter.dart';
 import 'painters/temporal_progress_painter.dart';
@@ -438,7 +438,7 @@ class _WatchScreenState extends ConsumerState<WatchScreen>
 
   /// Maps the app-level [WatchMode] enum from settings to the painter-level
   /// [WatchMode] used by [ClockFacePainter].
-  WatchMode _mapWatchMode(
+  NumeralStyle _mapWatchMode(
     covariant dynamic mode,
   ) {
     // Import aliases:
@@ -449,14 +449,14 @@ class _WatchScreenState extends ConsumerState<WatchScreen>
     // We resolve by name to avoid circular dependency.
     switch (mode.toString().split('.').last) {
       case 'minimal':
-        return WatchMode.minimal;
+        return NumeralStyle.minimal;
       case 'fullArabic':
-        return WatchMode.arabicIndic;
+        return NumeralStyle.arabicIndic;
       case 'astronomical':
-        return WatchMode.arabicIndic;
+        return NumeralStyle.arabicIndic;
       case 'hybrid':
       default:
-        return WatchMode.arabicIndic;
+        return NumeralStyle.arabicIndic;
     }
   }
 }

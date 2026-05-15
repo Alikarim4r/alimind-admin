@@ -17,10 +17,10 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_colors.dart';
 
-// ── WatchMode ─────────────────────────────────────────────────────────────────
+// ── NumeralStyle ──────────────────────────────────────────────────────────────
 
 /// Controls which numeral style to render on the watch dial.
-enum WatchMode {
+enum NumeralStyle {
   /// No numerals — markers only.
   minimal,
 
@@ -42,7 +42,7 @@ class ClockFacePainter extends CustomPainter {
     this.dialColor = AppColors.backgroundMid,
     this.markerColor = AppColors.goldPrimary,
     this.showNumerals = true,
-    this.mode = WatchMode.arabicIndic,
+    this.mode = NumeralStyle.arabicIndic,
   });
 
   /// Background fill for the dial surface.
@@ -55,7 +55,7 @@ class ClockFacePainter extends CustomPainter {
   final bool showNumerals;
 
   /// Numeral style when [showNumerals] is true.
-  final WatchMode mode;
+  final NumeralStyle mode;
 
   // ── Geometry helpers ───────────────────────────────────────────────────────
 
@@ -322,7 +322,7 @@ class ClockFacePainter extends CustomPainter {
   // ── Layer 6: Hour numerals ─────────────────────────────────────────────────
 
   void _drawNumerals(Canvas canvas, Size size) {
-    if (!showNumerals || mode == WatchMode.minimal) return;
+    if (!showNumerals || mode == NumeralStyle.minimal) return;
 
     final center = _center(size);
     final radius = _radius(size);
@@ -339,7 +339,7 @@ class ClockFacePainter extends CustomPainter {
         color: AppColors.goldPrimary,
         fontSize: radius * 0.095,
         fontWeight: FontWeight.w600,
-        fontFamily: mode == WatchMode.arabicIndic ? 'ArabicDisplay' : null,
+        fontFamily: mode == NumeralStyle.arabicIndic ? 'ArabicDisplay' : null,
         height: 1.0,
         shadows: const [
           Shadow(
@@ -364,7 +364,7 @@ class ClockFacePainter extends CustomPainter {
   }
 
   String _labelFor(int hour) {
-    if (mode == WatchMode.arabicIndic) {
+    if (mode == NumeralStyle.arabicIndic) {
       const labels = [
         '', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩', '١٠', '١١', '١٢',
       ];
