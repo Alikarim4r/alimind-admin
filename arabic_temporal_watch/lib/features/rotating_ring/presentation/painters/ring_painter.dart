@@ -4,13 +4,20 @@
 //
 // Rendering layers (back to front)
 // ──────────────────────────────────
-//   1. Arc tick marks  — 24 small gold tick marks at 75% of canvas radius,
-//                        one at each period boundary.
+//   1. Arc tick marks  — 13 fading gold tick marks within the visible ±6 window,
+//                        at 75% of canvas radius (outer ticks fade at window edge).
 //   2. Floating labels — 13 Arabic period labels (offset -6 to +6 from current),
 //                        with distance-based opacity and font-size gradient.
 //                        Current period: white with gold glow.
 //                        Night periods: moonlight/silver color.
 //                        Others: gold.
+//
+// Sliding 12-hour window
+// ──────────────────────
+//   All 24 Arabic hours exist and the ring continuously rotates CCW.  Only a
+//   sliding window of 13 periods (6 past + current + 6 future) is rendered at
+//   any moment.  Labels and ticks at the outer edges of the window fade to zero
+//   opacity, creating the "hours streaming endlessly around the clock" effect.
 //
 // Coordinate system
 // ─────────────────
@@ -113,7 +120,8 @@ class RingPainter extends CustomPainter {
   static const double _startOffset = -math.pi / 2.0;
 
   /// Number of visible label offsets on each side of the current period.
-  static const int _labelHalfRange = 4;
+  /// 6 → shows 13 labels total: 6 past + current + 6 future (sliding 12-hour window).
+  static const int _labelHalfRange = 6;
 
   // ── paint ──────────────────────────────────────────────────────────────────
 
@@ -168,30 +176,51 @@ class RingPainter extends CustomPainter {
     double tickR,
     double halfW,
   ) {
-    // 24 small arc tick marks at period boundaries.
-    // Drawn in the painter's local coordinate system (before parent rotation).
+    // Tick marks for the visible ±(_labelHalfRange + 1) window only.
+    // Each tick fades using the same opacity curve as the floating labels so
+    // ticks and labels appear / disappear together at the window edges.
+    final segments = ringState.segments;
+    if (segments.isEmpty) return;
+
+    final currentIdx = segments.indexWhere((s) => s.isCurrent);
+    if (currentIdx < 0) return;
+
+    const segmentAngle = math.pi * 2.0 / 24.0;
+    final totalSegs = segments.length;
+
     final tickPaint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 0.5
-      ..strokeCap = StrokeCap.round
-      ..color = AppColors.goldPrimary.withAlpha(107); // ~42% opacity
+      ..strokeCap = StrokeCap.round;
 
-    const segmentAngle = math.pi * 2.0 / 24.0;
+    for (int i = 0; i < totalSegs; i++) {
+      // Signed offset from current period, wrapped to [−12, 12].
+      int rawOffset = i - currentIdx;
+      if (rawOffset > 12) rawOffset -= 24;
+      if (rawOffset < -12) rawOffset += 24;
 
-    for (int i = 0; i < 24; i++) {
-      // Natural ring angle: 0 = 12 o'clock start, shifted by _startOffset for flutter.
+      // Ignore ticks outside the visible window.
+      if (rawOffset.abs() > _labelHalfRange + 1) continue;
+
+      // Fade using the same formula as the floating labels for visual coherence.
+      final dist = (rawOffset - progressFraction).abs();
+      final norm = math.max(0.0, 1.0 - dist / 6.4);
+      final tickOpacity = math.pow(norm, 1.35).toDouble();
+      if (tickOpacity < 0.02) continue;
+
       final angle = _startOffset + i * segmentAngle;
       final cosA = math.cos(angle);
       final sinA = math.sin(angle);
 
-      // Short tick outward: 2px long.
       const tickLen = 2.0;
-      final outerX = cx + (tickR + tickLen) * cosA;
-      final outerY = cy + (tickR + tickLen) * sinA;
-      final innerX = cx + (tickR - tickLen) * cosA;
-      final innerY = cy + (tickR - tickLen) * sinA;
+      tickPaint.color =
+          AppColors.goldPrimary.withAlpha((107 * tickOpacity).round());
 
-      canvas.drawLine(Offset(innerX, innerY), Offset(outerX, outerY), tickPaint);
+      canvas.drawLine(
+        Offset(cx + (tickR - tickLen) * cosA, cy + (tickR - tickLen) * sinA),
+        Offset(cx + (tickR + tickLen) * cosA, cy + (tickR + tickLen) * sinA),
+        tickPaint,
+      );
     }
   }
 
