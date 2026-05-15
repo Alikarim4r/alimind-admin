@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:just_audio/just_audio.dart';
 
 import '../domain/adhan_model.dart';
@@ -5,6 +7,7 @@ import '../domain/adhan_model.dart';
 class AdhanService {
   final AudioPlayer _player = AudioPlayer();
   bool _isPlaying = false;
+  StreamSubscription<PlayerState>? _stateSub;
 
   bool get isPlaying => _isPlaying;
 
@@ -14,11 +17,16 @@ class AdhanService {
   }) async {
     try {
       if (_isPlaying) await stop();
+
+      // Cancel any previous completion listener before starting a new one.
+      await _stateSub?.cancel();
+
       await _player.setAsset(muezzin.assetPath(isFajr: isFajr));
       await _player.play();
       _isPlaying = true;
-      _player.playerStateStream.listen((state) {
-        if (state.processingState == ProcessingState.completed) {
+
+      _stateSub = _player.playerStateStream.listen((ps) {
+        if (ps.processingState == ProcessingState.completed) {
           _isPlaying = false;
         }
       });
@@ -33,6 +41,7 @@ class AdhanService {
   }
 
   void dispose() {
+    _stateSub?.cancel();
     _player.dispose();
   }
 }

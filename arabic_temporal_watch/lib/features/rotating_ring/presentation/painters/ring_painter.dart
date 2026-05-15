@@ -117,10 +117,12 @@ class RingPainter extends CustomPainter {
   static const double _ringInnerFraction = 0.73;
 
   /// Radial position of arc tick marks as a fraction of half-canvas width.
-  static const double _tickRadiusFraction = 0.835;
+  /// Placed near the inner edge of the ring band so they don't overlap labels.
+  static const double _tickRadiusFraction = 0.762;
 
   /// Radial position of floating labels as a fraction of half-canvas width.
-  static const double _labelRadiusFraction = 0.835;
+  /// Centered in the ring band (inner=0.73, outer=0.94 → center≈0.835).
+  static const double _labelRadiusFraction = 0.840;
 
   /// Flutter canvas offset so that 0 rad = 12 o'clock (−π/2).
   static const double _startOffset = -math.pi / 2.0;

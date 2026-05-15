@@ -307,19 +307,6 @@ class RingCalculator {
     return Offset(cx + r * math.cos(angle), cy + r * math.sin(angle));
   }
 
-  /// Check that the slot list has non-trivial start/end angles (i.e. the
-  /// calculator has run and set real proportional angles, not all zeros).
-  bool _hasValidAngles(List<ArabicPeriodSlot> slots) {
-    if (slots.isEmpty) return false;
-    // If more than one slot has a non-zero endAngle the angles are real.
-    var nonZero = 0;
-    for (final slot in slots) {
-      if (slot.endAngle.abs() > 1e-6) nonZero++;
-      if (nonZero >= 2) return true;
-    }
-    return false;
-  }
-
   /// Blend a segment's primary/secondary colors based on [dayNightBlend] and
   /// whether the segment is active.
   ///
