@@ -31,6 +31,7 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../prayer_engine/presentation/prayer_provider.dart';
+import '../../prayer_engine/presentation/prayer_provider.dart' show tomorrowPrayerTimesProvider;
 import '../data/temporal_calculator.dart';
 import '../domain/arabic_period.dart';
 
@@ -66,16 +67,14 @@ final _sunsetProvider = Provider<DateTime?>(
   name: '_sunsetProvider',
 );
 
-/// Provides tomorrow's sunrise as today's sunrise + 24 hours.
-///
-/// This is a best-effort approximation suitable for day-to-day use (solar
-/// drift ≈ ±1 min/day).  Replace with a proper tomorrow calculation once a
-/// dedicated next-day prayer-times provider is available.
+/// Provides tomorrow's accurate sunrise by computing next-day prayer times
+/// using the same location and calculation method as today.
 final _tomorrowSunriseProvider = Provider<DateTime?>(
   (ref) {
-    final sunrise = ref.watch(_sunriseProvider);
-    if (sunrise == null) return null;
-    return sunrise.add(const Duration(hours: 24));
+    final tomorrowTimesAsync = ref.watch(tomorrowPrayerTimesProvider);
+    return tomorrowTimesAsync.whenOrNull(
+      data: (times) => times.sunrise.time,
+    );
   },
   name: '_tomorrowSunriseProvider',
 );

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/services.dart' show HapticFeedback;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/adhan_service.dart';
@@ -57,6 +58,9 @@ class AdhanNotifier extends StateNotifier<bool> {
       final diff = now.difference(prayer.time);
       if (diff.inSeconds >= 0 && diff.inSeconds < 60) {
         _triggeredToday.add(triggerKey);
+        if (settings.enableVibration) {
+          HapticFeedback.vibrate();
+        }
         _playAndUpdateState(
           muezzin: settings.muezzin,
           isFajr: prayer.name == PrayerName.fajr,

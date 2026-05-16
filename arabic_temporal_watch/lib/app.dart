@@ -3,7 +3,11 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/theme/app_theme.dart';
+import 'features/onboarding/presentation/onboarding_screen.dart';
+import 'features/period_detail/presentation/period_detail_screen.dart';
+import 'features/permissions/presentation/permissions_screen.dart';
 import 'features/settings/presentation/settings_screen.dart';
+import 'features/temporal_engine/domain/arabic_period.dart' show ArabicPeriodSlot;
 import 'features/watch_ui/presentation/watch_screen.dart';
 
 // ── Route name constants ──────────────────────────────────────────────────────
@@ -14,10 +18,13 @@ import 'features/watch_ui/presentation/watch_screen.dart';
 /// compile-time string constants that can be used directly in [MaterialApp.routes]
 /// and [Navigator.pushNamed] without any `.name` conversion.
 abstract final class AppRoutes {
+  /// First-run onboarding flow (3 pages: welcome → concept → setup).
+  static const String onboarding = '/onboarding';
+
   /// The primary watch-face screen — the app's home.
   static const String watch = '/';
 
-  /// Permissions / on-boarding screen shown when location access is unavailable.
+  /// Permissions screen shown when location access is unavailable.
   static const String permissions = '/permissions';
 
   /// App settings: appearance, manual location, prayer calculation method, etc.
@@ -26,6 +33,15 @@ abstract final class AppRoutes {
   /// Detailed astronomical information panel for the currently active period.
   static const String periodDetail = '/period-detail';
 }
+
+// ── Initial route provider ────────────────────────────────────────────────────
+
+/// Determines whether to show onboarding or jump straight to the watch face.
+/// Must be overridden in the root [ProviderScope] at startup.
+final initialRouteProvider = Provider<String>(
+  (_) => AppRoutes.watch,
+  name: 'initialRouteProvider',
+);
 
 // ── Locale provider ───────────────────────────────────────────────────────────
 
@@ -93,7 +109,7 @@ class ArabicTemporalWatchApp extends ConsumerWidget {
       },
 
       // ── Navigation ────────────────────────────────────────────────────────
-      initialRoute: AppRoutes.watch,
+      initialRoute: ref.watch(initialRouteProvider),
       routes: _buildRouteTable(),
       onGenerateRoute: _onGenerateRoute,
       onUnknownRoute: _onUnknownRoute,
@@ -109,10 +125,12 @@ class ArabicTemporalWatchApp extends ConsumerWidget {
   /// development.  Placeholder widgets are replaced as real screens are built.
   static Map<String, WidgetBuilder> _buildRouteTable() {
     return {
+      AppRoutes.onboarding: (_) => const OnboardingScreen(),
       AppRoutes.watch: (_) => const WatchScreen(),
-      AppRoutes.permissions: (_) => const _PermissionsScreenPlaceholder(),
+      AppRoutes.permissions: (_) => const PermissionsScreen(),
       AppRoutes.settings: (_) => const SettingsScreen(),
-      AppRoutes.periodDetail: (_) => const _PeriodDetailScreenPlaceholder(),
+      // period-detail requires an ArabicPeriodSlot argument — handled in
+      // _onGenerateRoute below rather than in the static table.
     };
   }
 
@@ -124,8 +142,16 @@ class ArabicTemporalWatchApp extends ConsumerWidget {
   /// Applies a luxury fade + scale transition to every generated route,
   /// consistent with the app's premium aesthetic.
   static Route<dynamic>? _onGenerateRoute(RouteSettings settings) {
-    // At this stage all routes are in the static table; this method exists as
-    // the extension point for argument-bearing routes added in future sprints.
+    // period-detail carries an ArabicPeriodSlot argument.
+    if (settings.name == AppRoutes.periodDetail) {
+      final slot = settings.arguments as ArabicPeriodSlot?;
+      if (slot != null) {
+        return LuxuryPageRoute(
+          settings: settings,
+          builder: (_) => PeriodDetailScreen(slot: slot),
+        );
+      }
+    }
     return null;
   }
 

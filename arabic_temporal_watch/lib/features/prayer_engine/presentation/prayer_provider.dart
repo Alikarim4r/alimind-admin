@@ -306,3 +306,32 @@ final isPrayerTimeProvider = Provider<AsyncValue<bool>>(
   },
   name: 'isPrayerTimeProvider',
 );
+
+/// Computes [PrayerTimes] for tomorrow (today + 1 day) using the same
+/// location and settings as today.
+///
+/// Used by the temporal engine to get tomorrow's accurate sunrise time
+/// instead of the approximation today + 24 h.
+final tomorrowPrayerTimesProvider = Provider<AsyncValue<PrayerTimes>>(
+  (ref) {
+    final positionAsync = ref.watch(_devicePositionProvider);
+    final settings = ref.watch(prayerSettingsProvider);
+
+    return positionAsync.when(
+      data: (position) {
+        const calculator = PrayerCalculator();
+        final tomorrow = DateTime.now().add(const Duration(days: 1));
+        final times = calculator.calculate(
+          latitude: position.latitude,
+          longitude: position.longitude,
+          date: tomorrow,
+          params: settings.parameters,
+        );
+        return AsyncValue.data(times);
+      },
+      loading: () => const AsyncValue.loading(),
+      error: (err, stack) => AsyncValue.error(err, stack),
+    );
+  },
+  name: 'tomorrowPrayerTimesProvider',
+);

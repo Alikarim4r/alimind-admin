@@ -23,6 +23,7 @@ dependencies:
   flutter_animate: ^4.5.0
   just_audio: ^0.9.36
   sensors_plus: ^4.0.2
+  wakelock_plus: ^1.2.8
 
 dev_dependencies:
   flutter_test:

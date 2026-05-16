@@ -28,6 +28,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../../astronomical_engine/presentation/astronomical_provider.dart'
@@ -106,6 +107,8 @@ class _WatchScreenState extends ConsumerState<WatchScreen>
 
   static const _ringCalculator = RingCalculator();
 
+  int _lastPeriodGlobalIndex = -1;
+
   // ── Lifecycle ─────────────────────────────────────────────────────────────
 
   @override
@@ -141,6 +144,12 @@ class _WatchScreenState extends ConsumerState<WatchScreen>
     // When the tick fires, update the ring lerp.
     _tickController.addListener(_onTick);
 
+    // Apply keep-screen-on setting after first frame.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final settings = ref.read(settingsProvider);
+      if (settings.keepScreenOn) WakelockPlus.enable();
+    });
+
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   }
 
@@ -153,6 +162,7 @@ class _WatchScreenState extends ConsumerState<WatchScreen>
     _ringController.dispose();
     _glowController.dispose();
     _skyController.dispose();
+    WakelockPlus.disable();
     super.dispose();
   }
 
@@ -162,6 +172,14 @@ class _WatchScreenState extends ConsumerState<WatchScreen>
     final temporalAsync = ref.read(temporalDataProvider);
     final temporal = temporalAsync.valueOrNull;
     if (temporal == null) return;
+
+    // Haptic feedback when the Arabic temporal period changes.
+    final newIdx = temporal.currentPeriod.period.globalIndex;
+    if (_lastPeriodGlobalIndex != -1 && newIdx != _lastPeriodGlobalIndex) {
+      final settings = ref.read(settingsProvider);
+      if (settings.enableVibration) HapticFeedback.mediumImpact();
+    }
+    _lastPeriodGlobalIndex = newIdx;
 
     final globalIdx = temporal.currentPeriod.period.globalIndex;
 
@@ -288,6 +306,14 @@ class _WatchScreenState extends ConsumerState<WatchScreen>
         });
       } else {
         _shakeDetector.stop();
+      }
+    });
+
+    ref.listen<AppSettings>(settingsProvider, (_, settings) {
+      if (settings.keepScreenOn) {
+        WakelockPlus.enable();
+      } else {
+        WakelockPlus.disable();
       }
     });
 
@@ -430,11 +456,17 @@ class _WatchScreenState extends ConsumerState<WatchScreen>
 
                 // ── Layer 4: Temporal period progress arc ─────────────────
                 temporalAsync.when(
-                  data: (temporal) => CustomPaint(
-                    size: size,
-                    painter: TemporalProgressPainter(
-                      temporalData: temporal,
-                      animationValue: animValue,
+                  data: (temporal) => GestureDetector(
+                    onTap: () => Navigator.of(context).pushNamed(
+                      '/period-detail',
+                      arguments: temporal.currentPeriod,
+                    ),
+                    child: CustomPaint(
+                      size: size,
+                      painter: TemporalProgressPainter(
+                        temporalData: temporal,
+                        animationValue: animValue,
+                      ),
                     ),
                   ),
                   loading: () => const SizedBox.shrink(),

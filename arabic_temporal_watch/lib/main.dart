@@ -7,7 +7,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'app.dart';
+import 'app.dart' show ArabicTemporalWatchApp, AppRoutes, initialRouteProvider;
 
 /// Entry point for the Arabic Temporal Watch application.
 ///
@@ -50,7 +50,12 @@ void main() {
       // ── 4. Location permission flow ───────────────────────────────────────────
       final locationPermissionStatus = await _requestLocationPermission();
 
-      // ── 5. Run app ────────────────────────────────────────────────────────────
+      // ── 5. Determine initial route ────────────────────────────────────────────
+      final onboardingDone = prefs.getBool('onboarding_completed') ?? false;
+      final initialRoute =
+          onboardingDone ? AppRoutes.watch : AppRoutes.onboarding;
+
+      // ── 6. Run app ────────────────────────────────────────────────────────────
       runApp(
         ProviderScope(
           overrides: [
@@ -58,6 +63,7 @@ void main() {
             initialLocationPermissionProvider.overrideWithValue(
               locationPermissionStatus,
             ),
+            initialRouteProvider.overrideWithValue(initialRoute),
           ],
           child: const ArabicTemporalWatchApp(),
         ),
