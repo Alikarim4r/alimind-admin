@@ -118,11 +118,6 @@ class ArabicTemporalWatchApp extends ConsumerWidget {
 
   // ── Route table ────────────────────────────────────────────────────────────
 
-  /// Builds the static named-route table.
-  ///
-  /// Screens are imported lazily via factory functions to avoid importing
-  /// not-yet-created files and to keep this file compilable at all stages of
-  /// development.  Placeholder widgets are replaced as real screens are built.
   static Map<String, WidgetBuilder> _buildRouteTable() {
     return {
       AppRoutes.onboarding: (_) => const OnboardingScreen(),
@@ -219,132 +214,16 @@ class LuxuryPageRoute<T> extends PageRouteBuilder<T> {
         );
 }
 
-// ── Placeholder screens ───────────────────────────────────────────────────────
-// Each placeholder will be replaced by its real implementation in a separate
-// file as the project progresses.  They are defined here so this file and
-// main.dart compile correctly at every stage of development.
+// ── Unknown route fallback ────────────────────────────────────────────────────
 
-/// Deep navy background + centred Arabic gold text — the base for all screens.
 class _BaseScaffold extends StatelessWidget {
   const _BaseScaffold({required this.child});
-
   final Widget child;
-
   @override
-  Widget build(BuildContext context) {
-    return ColoredBox(
-      color: const Color(0xFF05081A),
-      child: SafeArea(child: child),
-    );
-  }
-}
-
-class _WatchScreenPlaceholder extends StatelessWidget {
-  const _WatchScreenPlaceholder();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold(
-      backgroundColor: Color(0xFF05081A),
-      body: _BaseScaffold(
-        child: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'الساعة العربية',
-                style: TextStyle(
-                  fontFamily: 'ArabicDisplay',
-                  fontSize: 36,
-                  color: Color(0xFFD4AF37),
-                  letterSpacing: 2,
-                  height: 1.4,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(height: 12),
-              Text(
-                'Arabic Temporal Watch',
-                style: TextStyle(
-                  fontFamily: 'ArabicDisplay',
-                  fontSize: 14,
-                  color: Color(0xFF8A7040),
-                  letterSpacing: 3,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _PermissionsScreenPlaceholder extends StatelessWidget {
-  const _PermissionsScreenPlaceholder();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold(
-      backgroundColor: Color(0xFF05081A),
-      body: _BaseScaffold(
-        child: Center(
-          child: Text(
-            'إذن الموقع مطلوب',
-            style: TextStyle(
-              fontFamily: 'ArabicDisplay',
-              fontSize: 24,
-              color: Color(0xFFD4AF37),
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _SettingsScreenPlaceholder extends StatelessWidget {
-  const _SettingsScreenPlaceholder();
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF05081A),
-      appBar: AppBar(
-        title: const Text(
-          'الإعدادات',
-          style: TextStyle(fontFamily: 'ArabicDisplay'),
-        ),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        centerTitle: true,
-      ),
-      body: const SizedBox.shrink(),
-    );
-  }
-}
-
-class _PeriodDetailScreenPlaceholder extends StatelessWidget {
-  const _PeriodDetailScreenPlaceholder();
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF05081A),
-      appBar: AppBar(
-        title: const Text(
-          'تفاصيل الفترة',
-          style: TextStyle(fontFamily: 'ArabicDisplay'),
-        ),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        centerTitle: true,
-      ),
-      body: const SizedBox.shrink(),
-    );
-  }
+  Widget build(BuildContext context) => ColoredBox(
+        color: const Color(0xFF05081A),
+        child: SafeArea(child: child),
+      );
 }
 
 class _UnknownRoutePage extends StatelessWidget {
