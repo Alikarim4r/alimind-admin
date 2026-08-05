@@ -10,19 +10,27 @@ import 'package:flutter/material.dart';
 ///   * Suffix indicates lightness / variant (e.g. `Deep`, `Mid`, `Light`).
 abstract final class AppColors {
   // ── Background ─────────────────────────────────────────────────────────────
-  // Deep space / night-sky base layers for the watch face.
+  // Deep space / night-sky base layers for the watch face. Warmed toward
+  // sapphire-navy so the gold accents sing against a jewel-tone background
+  // rather than a flat black canvas.
 
-  /// Deepest background — near-black navy used for the outermost canvas.
-  static const Color backgroundDeep = Color(0xFF02040F);
+  /// Deepest background — obsidian-navy for the outermost canvas.
+  static const Color backgroundDeep = Color(0xFF01030C);
 
   /// Mid-depth background — the primary watch-body fill colour.
-  static const Color backgroundMid = Color(0xFF05081A);
+  static const Color backgroundMid = Color(0xFF060A1E);
 
   /// Slightly lighter surface for elevated cards and panels.
-  static const Color backgroundSurface = Color(0xFF0A0E2A);
+  static const Color backgroundSurface = Color(0xFF0C1230);
 
-  /// Subtle card / popover background with a hint of blue.
-  static const Color backgroundCard = Color(0xFF0E1235);
+  /// Subtle card / popover background with a hint of sapphire.
+  static const Color backgroundCard = Color(0xFF10163E);
+
+  /// Sapphire midnight — used for the deepest inner-dial gradient stop.
+  static const Color sapphireMidnight = Color(0xFF03051A);
+
+  /// Sapphire ink — the top gradient stop on the dial face.
+  static const Color sapphireInk = Color(0xFF0B1236);
 
   // ── Gold / amber accent ────────────────────────────────────────────────────
   // The primary accent — evokes Islamic geometric art, illuminated manuscripts.
@@ -44,6 +52,35 @@ abstract final class AppColors {
 
   /// Pure 24-karat gold — sparingly used for the highest-priority element.
   static const Color goldBright = Color(0xFFFFD700);
+
+  /// Champagne gold — softer warm-white gold for elegant highlights.
+  static const Color goldChampagne = Color(0xFFF7E6A8);
+
+  // ── Rose gold accent ───────────────────────────────────────────────────────
+  // A secondary warm-metal accent used sparingly for hand tips, prayer arcs,
+  // and premium bloom effects. Provides tonal contrast against the primary gold.
+
+  /// Rose gold — soft pink-warm metal accent.
+  static const Color roseGold = Color(0xFFE8B4A0);
+
+  /// Deep rose gold — burnished/shadow side of rose-gold gradients.
+  static const Color roseGoldDeep = Color(0xFFB88070);
+
+  /// Blush pearl — the lightest highlight tone in rose-gold gradients.
+  static const Color roseBlush = Color(0xFFF6D6C8);
+
+  // ── Jewel accents ──────────────────────────────────────────────────────────
+  // Reserved for occasional prestige highlights (center jewel, prayer arc
+  // gradients, twinkle stars). Never used as a primary UI colour.
+
+  /// Emerald jade — very sparing green-jewel accent.
+  static const Color jewelEmerald = Color(0xFF2F7A6A);
+
+  /// Sapphire blue — deep jewel accent for iconography.
+  static const Color jewelSapphire = Color(0xFF1F3E8A);
+
+  /// Mother-of-pearl — iridescent white for subtle highlights.
+  static const Color motherOfPearl = Color(0xFFF3EFE5);
 
   // ── Silver / moonlight ─────────────────────────────────────────────────────
   // Cooler metallic palette for the night half of the watch face.
@@ -183,6 +220,15 @@ abstract final class AppColors {
   /// Moon disc halo — cool bloom for the lunar indicator.
   static const Color glowMoon = Color(0x60C8D8F0);
 
+  /// Rose-gold bloom — warm pink halo around hand tips.
+  static const Color glowRose = Color(0x70E8B4A0);
+
+  /// Sapphire bloom — cool deep-blue halo for prayer-arc active state.
+  static const Color glowSapphire = Color(0x603A5BC8);
+
+  /// Champagne halo — the widest, most diffuse gold bloom.
+  static const Color glowChampagne = Color(0x35F7E6A8);
+
   // ── Text colours ──────────────────────────────────────────────────────────
 
   /// Primary text — used for the current period name, large numerals.
@@ -242,6 +288,57 @@ abstract final class AppColors {
   static const RadialGradient goldShimmerGradient = RadialGradient(
     colors: [goldBright, goldPrimary, goldDark],
     stops: [0.0, 0.5, 1.0],
+  );
+
+  /// Premium 5-stop metallic gold gradient — used across bezel rings,
+  /// hour markers, and hand highlights. Simulates a lathe-finished bevel
+  /// catching light along a diagonal axis.
+  static const LinearGradient metallicGoldGradient = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [
+      goldDark,
+      goldPrimary,
+      goldChampagne,
+      goldLight,
+      goldPrimary,
+      goldDark,
+    ],
+    stops: [0.0, 0.22, 0.48, 0.55, 0.78, 1.0],
+  );
+
+  /// Rose-gold metallic gradient — used for the seconds hand and premium
+  /// accent details. Diagonal orientation matches [metallicGoldGradient].
+  static const LinearGradient metallicRoseGradient = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [roseGoldDeep, roseGold, roseBlush, roseGold, roseGoldDeep],
+    stops: [0.0, 0.28, 0.52, 0.76, 1.0],
+  );
+
+  /// Radial gradient for the center jewel cap — 6-stop for gemstone depth.
+  static const RadialGradient jewelCapGradient = RadialGradient(
+    center: Alignment(-0.35, -0.35),
+    radius: 1.0,
+    colors: [
+      Color(0xFFFFFDF0),
+      goldChampagne,
+      goldLight,
+      goldPrimary,
+      goldDark,
+      Color(0xFF3A2400),
+    ],
+    stops: [0.0, 0.12, 0.28, 0.48, 0.75, 1.0],
+  );
+
+  /// Sapphire dial gradient — used behind the guilloche texture to give the
+  /// clock face a jewel-crystal depth. Off-center highlight simulates
+  /// polished sapphire crystal catching light from top-left.
+  static const RadialGradient dialSapphireGradient = RadialGradient(
+    center: Alignment(-0.18, -0.28),
+    radius: 1.15,
+    colors: [sapphireInk, backgroundMid, sapphireMidnight, backgroundDeep],
+    stops: [0.0, 0.42, 0.78, 1.0],
   );
 
   /// Sweep gradient covering all 24 temporal periods for the outer ring fill.

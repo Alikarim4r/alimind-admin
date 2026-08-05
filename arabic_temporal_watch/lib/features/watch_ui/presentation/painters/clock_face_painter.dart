@@ -68,42 +68,84 @@ class ClockFacePainter extends CustomPainter {
   double _radius(Size size) => math.min(size.width, size.height) / 2.0;
 
   // ── Layer 1: Outer bezel ───────────────────────────────────────────────────
+  //
+  // Multi-layer luxury bezel inspired by high-end Swiss watches:
+  //   • Outer diffuse gold halo   — soft champagne bloom
+  //   • Brushed gold outer ring   — metallic diagonal gradient
+  //   • Dark bezel groove         — shadowed recess
+  //   • Polished gold inner ring  — bright highlight
+  //   • Sapphire crystal dial     — jewel-tone radial fill w/ specular sheen
+  //   • Inner hairline            — burnished gold accent
 
   void _drawBezel(Canvas canvas, Size size) {
     final center = _center(size);
     final radius = _radius(size) * scaleFactor;
+    final rect = Rect.fromCircle(center: center, radius: radius);
 
-    // Dial background fill — deep navy with subtle radial gradient.
-    // Rich, precise — like polished onyx.
+    // ── Outer champagne halo — subtle bloom around the whole dial ──────────
+    final haloPaint = Paint()
+      ..color = AppColors.glowChampagne
+      ..maskFilter = MaskFilter.blur(BlurStyle.normal, radius * 0.045);
+    canvas.drawCircle(center, radius * 1.02, haloPaint);
+
+    // ── Brushed outer bezel ring — metallic diagonal gradient ──────────────
+    final outerBezelPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = radius * 0.020
+      ..shader = AppColors.metallicGoldGradient.createShader(rect);
+    canvas.drawCircle(center, radius - radius * 0.010, outerBezelPaint);
+
+    // ── Bezel groove — thin dark recess separating outer / inner rings ────
+    final groovePaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = radius * 0.006
+      ..color = const Color(0xFF040610);
+    canvas.drawCircle(center, radius - radius * 0.023, groovePaint);
+
+    // ── Polished inner bezel ring — bright highlight ──────────────────────
+    final innerBezelPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = radius * 0.008
+      ..shader = LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [
+          AppColors.goldChampagne,
+          AppColors.goldLight,
+          AppColors.goldPrimary,
+          AppColors.goldDark,
+        ],
+        stops: const [0.0, 0.35, 0.7, 1.0],
+      ).createShader(rect);
+    canvas.drawCircle(center, radius - radius * 0.032, innerBezelPaint);
+
+    // ── Sapphire-crystal dial background ──────────────────────────────────
+    final dialR = radius - radius * 0.038;
+    final dialRect = Rect.fromCircle(center: center, radius: dialR);
     final fillPaint = Paint()
       ..style = PaintingStyle.fill
+      ..shader = AppColors.dialSapphireGradient.createShader(dialRect);
+    canvas.drawCircle(center, dialR, fillPaint);
+
+    // Specular crystal sheen — a soft off-center highlight simulating light
+    // catching a polished sapphire crystal.
+    final sheenPaint = Paint()
       ..shader = RadialGradient(
-        center: const Alignment(-0.15, -0.25),
-        radius: 1.15,
-        colors: const [
-          Color(0xFF0A0E28), // very deep blue-black at top
-          Color(0xFF060818), // near-black mid
-          Color(0xFF03050F), // deepest at edges
+        center: const Alignment(-0.55, -0.65),
+        radius: 0.9,
+        colors: [
+          const Color(0x18FFFFFF),
+          const Color(0x00FFFFFF),
         ],
-        stops: const [0.0, 0.50, 1.0],
-      ).createShader(Rect.fromCircle(center: center, radius: radius));
+        stops: const [0.0, 1.0],
+      ).createShader(dialRect);
+    canvas.drawCircle(center, dialR, sheenPaint);
 
-    canvas.drawCircle(center, radius, fillPaint);
-
-    // Outer bezel ring — hairline gold stroke.
-    final outerBorderPaint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 0.8
-      ..color = AppColors.goldPrimary.withAlpha(200);
-
-    canvas.drawCircle(center, radius - 0.4, outerBorderPaint);
-
-    // Inner dial ring — slightly smaller, more subtle.
+    // ── Inner hairline — burnished gold accent inside the dial ────────────
     final innerRingPaint = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 0.5
-      ..color = AppColors.goldDark.withAlpha(120);
-
+      ..strokeWidth = 0.6
+      ..color = AppColors.goldDark.withAlpha(140);
     canvas.drawCircle(center, radius * 0.88, innerRingPaint);
   }
 
@@ -114,12 +156,12 @@ class ClockFacePainter extends CustomPainter {
     final radius = _radius(size) * scaleFactor;
     final outerR = radius * 0.82;
 
-    // Radial engine-turned lines: 72 lines every 5°, very thin and low-opacity
+    // Radial engine-turned lines — champagne-tinted for warmer sheen.
     final linePaint = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 0.3
-      ..color = const Color(0x09D4AF37);
-    const int lineCount = 72;
+      ..strokeWidth = 0.35
+      ..color = const Color(0x0EF7E6A8);
+    const int lineCount = 96;
     for (int i = 0; i < lineCount; i++) {
       final angle = (i / lineCount) * math.pi * 2.0;
       final cosA = math.cos(angle);
@@ -131,14 +173,19 @@ class ClockFacePainter extends CustomPainter {
       );
     }
 
-    // Concentric rings that cross the radial lines to create a basket-weave texture
-    final ringPaint = Paint()
+    // Concentric rings — alternating brightness for a woven-metal effect.
+    final ringPaintBright = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 0.25
-      ..color = const Color(0x08D4AF37);
-    const int ringCount = 9;
+      ..strokeWidth = 0.30
+      ..color = const Color(0x10D4AF37);
+    final ringPaintDim = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 0.22
+      ..color = const Color(0x08E8B4A0); // subtle rose-gold cross-tone
+    const int ringCount = 11;
     for (int r = 1; r <= ringCount; r++) {
-      canvas.drawCircle(center, outerR * r / ringCount, ringPaint);
+      final paint = r.isEven ? ringPaintBright : ringPaintDim;
+      canvas.drawCircle(center, outerR * r / ringCount, paint);
     }
   }
 
@@ -150,9 +197,9 @@ class ClockFacePainter extends CustomPainter {
 
     final onePaint = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 0.4
+      ..strokeWidth = 0.5
       ..strokeCap = StrokeCap.round
-      ..color = const Color(0x30B0B0C0);
+      ..color = AppColors.silverMid.withAlpha(80);
 
     for (int m = 0; m < 60; m++) {
       if (m % 5 == 0) continue; // hour positions handled by baton markers
@@ -200,29 +247,58 @@ class ClockFacePainter extends CustomPainter {
       canvas.translate(center.dx + midR * cosA, center.dy + midR * sinA);
       canvas.rotate(angle + math.pi / 2.0);
 
+      final markerRect =
+          Rect.fromCenter(center: Offset.zero, width: markerW, height: markerLen);
       final rect = RRect.fromRectAndRadius(
-        Rect.fromCenter(center: Offset.zero, width: markerW, height: markerLen),
+        markerRect,
         Radius.circular(markerW / 2.5),
       );
 
-      final alpha = isTwelve ? 240 : (isCardinal ? 220 : 190);
+      // Soft drop shadow — lifts the baton off the dial
+      final shadowRect = RRect.fromRectAndRadius(
+        Rect.fromCenter(
+          center: const Offset(0.5, 1.0),
+          width: markerW,
+          height: markerLen,
+        ),
+        Radius.circular(markerW / 2.5),
+      );
+      canvas.drawRRect(
+        shadowRect,
+        Paint()
+          ..color = AppColors.backgroundDeep.withAlpha(160)
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 1.4),
+      );
+
+      final alpha = isTwelve ? 245 : (isCardinal ? 225 : 195);
       final markerPaint = Paint()
         ..style = PaintingStyle.fill
         ..shader = LinearGradient(
           begin: Alignment.centerLeft,
           end: Alignment.centerRight,
           colors: [
-            AppColors.goldDark.withAlpha((alpha * 0.70).round()),
-            AppColors.goldLight.withAlpha(alpha),
-            AppColors.goldPale.withAlpha(alpha),
+            AppColors.goldDark.withAlpha((alpha * 0.65).round()),
             AppColors.goldPrimary.withAlpha(alpha),
-            AppColors.goldDark.withAlpha((alpha * 0.70).round()),
+            AppColors.goldChampagne.withAlpha(alpha),
+            AppColors.goldLight.withAlpha(alpha),
+            AppColors.goldPrimary.withAlpha(alpha),
+            AppColors.goldDark.withAlpha((alpha * 0.65).round()),
           ],
-          stops: const [0.0, 0.20, 0.50, 0.80, 1.0],
-        ).createShader(
-          Rect.fromCenter(center: Offset.zero, width: markerW, height: markerLen),
-        );
+          stops: const [0.0, 0.20, 0.45, 0.55, 0.80, 1.0],
+        ).createShader(markerRect);
       canvas.drawRRect(rect, markerPaint);
+
+      // Hairline highlight along the top edge — polished-metal sheen
+      final highlightPaint = Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 0.4
+        ..color = AppColors.goldChampagne.withAlpha(180);
+      canvas.drawLine(
+        Offset(-markerW / 2 + 0.6, -markerLen / 2 + 0.6),
+        Offset(markerW / 2 - 0.6, -markerLen / 2 + 0.6),
+        highlightPaint,
+      );
+
       canvas.restore();
     }
   }
@@ -244,16 +320,21 @@ class ClockFacePainter extends CustomPainter {
 
       final label = _labelFor(h);
       final textStyle = TextStyle(
-        color: AppColors.goldPrimary,
-        fontSize: radius * 0.13,
-        fontWeight: FontWeight.w600,
+        color: AppColors.goldChampagne,
+        fontSize: radius * 0.135,
+        fontWeight: FontWeight.w700,
         fontFamily: 'ArabicDisplay',
         height: 1.0,
-        shadows: const [
+        shadows: [
           Shadow(
-            color: AppColors.goldDark,
-            offset: Offset(0.5, 0.5),
-            blurRadius: 2.0,
+            color: AppColors.goldDark.withAlpha(220),
+            offset: const Offset(0.4, 0.6),
+            blurRadius: 1.6,
+          ),
+          Shadow(
+            color: AppColors.glowGold.withAlpha(80),
+            offset: Offset.zero,
+            blurRadius: 4.0,
           ),
         ],
       );
@@ -287,53 +368,89 @@ class ClockFacePainter extends CustomPainter {
   void _drawCenterCap(Canvas canvas, Size size) {
     final center = _center(size);
     final radius = _radius(size) * scaleFactor;
-    final capR = radius * 0.028;
+    final capR = radius * 0.030;
 
-    // Warm outer glow
-    final glowPaint = Paint()
-      ..color = AppColors.glowGold.withAlpha(65)
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 5.0);
-    canvas.drawCircle(center, capR * 2.8, glowPaint);
-
-    // Dark outer bezel ring (like a watch stem bearing)
+    // Wide champagne bloom — atmospheric glow
     canvas.drawCircle(
       center,
-      capR * 1.15,
-      Paint()..color = const Color(0xFF120D00),
+      capR * 3.2,
+      Paint()
+        ..color = AppColors.glowChampagne
+        ..maskFilter = MaskFilter.blur(BlurStyle.normal, capR * 2.0),
     );
 
-    // Main jewel cap — multi-stop radial gradient for gemstone depth
-    final capPaint = Paint()
-      ..style = PaintingStyle.fill
-      ..shader = RadialGradient(
-        center: const Alignment(-0.35, -0.35),
-        radius: 1.0,
-        colors: const [
-          Color(0xFFFFFBE8),
-          Color(0xFFEDD458),
-          Color(0xFFD4AF37),
-          Color(0xFF9B7D1A),
-          Color(0xFF4A3000),
-        ],
-        stops: const [0.0, 0.18, 0.45, 0.72, 1.0],
-      ).createShader(Rect.fromCircle(center: center, radius: capR));
-    canvas.drawCircle(center, capR, capPaint);
+    // Warm gold glow — closer, brighter halo
+    canvas.drawCircle(
+      center,
+      capR * 2.4,
+      Paint()
+        ..color = AppColors.glowGold.withAlpha(75)
+        ..maskFilter = MaskFilter.blur(BlurStyle.normal, capR * 1.4),
+    );
 
-    // Hairline rim
+    // Outer bezel setting — dark burnished ring around the jewel
+    canvas.drawCircle(
+      center,
+      capR * 1.28,
+      Paint()
+        ..style = PaintingStyle.fill
+        ..shader = RadialGradient(
+          colors: const [Color(0xFF1A1200), Color(0xFF060400)],
+          stops: const [0.0, 1.0],
+        ).createShader(Rect.fromCircle(center: center, radius: capR * 1.28)),
+    );
+
+    // Fine gold bezel ring around the setting
+    canvas.drawCircle(
+      center,
+      capR * 1.22,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 0.7
+        ..color = AppColors.goldDark.withAlpha(220),
+    );
+
+    // Main jewel cap — 6-stop premium gradient (from AppColors)
+    canvas.drawCircle(
+      center,
+      capR,
+      Paint()
+        ..style = PaintingStyle.fill
+        ..shader = AppColors.jewelCapGradient
+            .createShader(Rect.fromCircle(center: center, radius: capR)),
+    );
+
+    // Rim hairline — final gold outline
     canvas.drawCircle(
       center,
       capR,
       Paint()
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 0.5
-        ..color = AppColors.goldDark.withAlpha(200),
+        ..strokeWidth = 0.6
+        ..color = AppColors.goldDark.withAlpha(220),
     );
 
-    // Specular highlight — tiny bright spot simulating gem catching light
+    // Primary specular highlight — main light-catch on the gem
     canvas.drawCircle(
-      Offset(center.dx - capR * 0.28, center.dy - capR * 0.28),
-      capR * 0.22,
-      Paint()..color = const Color(0xD8FFFFFF),
+      Offset(center.dx - capR * 0.32, center.dy - capR * 0.32),
+      capR * 0.26,
+      Paint()
+        ..color = const Color(0xEEFFFFFF)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 0.6),
+    );
+
+    // Secondary micro-glint — smaller sparkle for extra depth
+    canvas.drawCircle(
+      Offset(center.dx - capR * 0.42, center.dy - capR * 0.42),
+      capR * 0.10,
+      Paint()..color = const Color(0xFFFFFFFF),
+    );
+
+    // Tiny rose-gold micro-reflection at the opposite edge — subtle warmth
+    canvas.drawCircle(
+      Offset(center.dx + capR * 0.42, center.dy + capR * 0.28),
+      capR * 0.11,
+      Paint()..color = AppColors.roseBlush.withAlpha(110),
     );
   }
 
