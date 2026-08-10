@@ -18,8 +18,11 @@ pluginManagement {
 
 plugins {
     id "dev.flutter.flutter-plugin-loader" version "1.0.0"
-    id "com.android.application" version "8.1.0" apply false
-    id "org.jetbrains.kotlin.android" version "1.9.0" apply false
+    // AGP 8.3.2 + Kotlin 1.9.22 + Gradle 8.7 is the combination that builds
+    // cleanly on both JDK 17 and JDK 21 (Android Studio ships a JBR 21, and
+    // AGP 8.1 / Gradle 8.3 refuse class-file major version 65).
+    id "com.android.application" version "8.3.2" apply false
+    id "org.jetbrains.kotlin.android" version "1.9.22" apply false
 }
 
 include ":app"
