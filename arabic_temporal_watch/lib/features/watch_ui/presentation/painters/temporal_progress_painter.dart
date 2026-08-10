@@ -65,11 +65,24 @@ class TemporalProgressPainter extends CustomPainter {
   // ── Layer 1: Background track ──────────────────────────────────────────────
 
   void _drawTrack(Canvas canvas, Offset center, double radius) {
+    // Sweep-graded track: brighter at the top (12 o'clock) where the arc
+    // begins, fading toward the bottom — suggests a machined groove.
+    final rect = Rect.fromCircle(center: center, radius: radius);
     final trackPaint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = trackStrokeWidth
       ..strokeCap = StrokeCap.round
-      ..color = const Color(0x30D4AF37); // subtle gold tint
+      ..shader = SweepGradient(
+        startAngle: _startAngle,
+        endAngle: _startAngle + math.pi * 2.0,
+        colors: [
+          AppColors.goldPrimary.withAlpha(70),
+          AppColors.goldPrimary.withAlpha(30),
+          AppColors.goldDark.withAlpha(26),
+          AppColors.goldPrimary.withAlpha(70),
+        ],
+        stops: const [0.0, 0.35, 0.7, 1.0],
+      ).createShader(rect);
 
     canvas.drawCircle(center, radius, trackPaint);
   }
@@ -83,9 +96,19 @@ class TemporalProgressPainter extends CustomPainter {
     final sweepAngle = fraction * math.pi * 2.0;
     final rect = Rect.fromCircle(center: center, radius: radius);
 
-    // Colors: period primary → brightened by 30 %.
+    // Colors: period primary → champagne-warmed mid → brightened leading edge.
     final primary = temporalData.primaryColor;
-    final bright = Color.lerp(primary, Colors.white, 0.30) ?? primary;
+    final warm = Color.lerp(primary, AppColors.goldChampagne, 0.28) ?? primary;
+    final bright = Color.lerp(primary, Colors.white, 0.35) ?? primary;
+
+    // Soft under-bloom so the arc appears lit from within.
+    final bloomPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = progressStrokeWidth * 2.6
+      ..strokeCap = StrokeCap.round
+      ..color = primary.withAlpha(46)
+      ..maskFilter = MaskFilter.blur(BlurStyle.normal, progressStrokeWidth * 1.4);
+    canvas.drawArc(rect, _startAngle, sweepAngle, false, bloomPaint);
 
     final progressPaint = Paint()
       ..style = PaintingStyle.stroke
@@ -94,11 +117,29 @@ class TemporalProgressPainter extends CustomPainter {
       ..shader = SweepGradient(
         startAngle: _startAngle,
         endAngle: _startAngle + sweepAngle,
-        colors: [primary, bright],
-        stops: const [0.0, 1.0],
+        colors: [primary, warm, bright],
+        stops: const [0.0, 0.55, 1.0],
       ).createShader(rect);
 
     canvas.drawArc(rect, _startAngle, sweepAngle, false, progressPaint);
+
+    // Hairline champagne highlight riding the outer edge of the arc — reads as
+    // light catching a raised metal band.
+    final edgePaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = progressStrokeWidth * 0.22
+      ..strokeCap = StrokeCap.round
+      ..color = AppColors.goldChampagne.withAlpha(90);
+    canvas.drawArc(
+      Rect.fromCircle(
+        center: center,
+        radius: radius + progressStrokeWidth * 0.34,
+      ),
+      _startAngle,
+      sweepAngle,
+      false,
+      edgePaint,
+    );
   }
 
   // ── Layer 3: End-point glow ────────────────────────────────────────────────
@@ -151,18 +192,23 @@ class TemporalProgressPainter extends CustomPainter {
     final faceRadius = math.min(size.width, size.height) / 2.0;
     final labelCenterY = center.dy - faceRadius * 0.38;
 
-    // ── Arabic period name — large, gold, cinematic ──
+    // ── Arabic period name — large, champagne-gold, cinematic ──
     final nameStyle = TextStyle(
-      color: AppColors.goldPrimary.withAlpha(210),
+      color: AppColors.goldChampagne.withAlpha(228),
       fontSize: math.min(size.width, size.height) * 0.052,
       fontFamily: 'ArabicDisplay',
       fontWeight: FontWeight.w700,
       letterSpacing: 0.8,
-      shadows: const [
-        Shadow(
-          color: Color(0x70000000),
+      shadows: [
+        const Shadow(
+          color: Color(0x80000000),
           offset: Offset(0, 1),
           blurRadius: 6.0,
+        ),
+        Shadow(
+          color: AppColors.glowGold.withAlpha(90),
+          offset: Offset.zero,
+          blurRadius: 12.0,
         ),
       ],
     );
@@ -186,11 +232,14 @@ class TemporalProgressPainter extends CustomPainter {
     final remainStr = _formatRemainingMinutes(remaining);
 
     final subStyle = TextStyle(
-      color: AppColors.silverDim.withAlpha(160),
+      color: AppColors.crescentSilver.withAlpha(175),
       fontSize: math.min(size.width, size.height) * 0.026,
       fontFamily: 'ArabicDisplay',
       fontWeight: FontWeight.w300,
       letterSpacing: 1.5,
+      shadows: const [
+        Shadow(color: Color(0x70000000), offset: Offset(0, 1), blurRadius: 4.0),
+      ],
     );
 
     final subPainter = TextPainter(
@@ -224,14 +273,22 @@ class TemporalProgressPainter extends CustomPainter {
   // ── Decorative outer ring accent ──────────────────────────────────────────
 
   void _drawOuterAccentRing(Canvas canvas, Offset center, double radius) {
-    // A very thin ring just outside the progress arc for visual polish.
-    final accentPaint = Paint()
+    // Two hairline rings framing the progress arc — a machined channel effect.
+    // The outer ring is champagne-warm, the inner one burnished, so the arc
+    // appears recessed between two turned metal edges.
+    final outerPaint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 0.6
-      ..color = const Color(0x25D4AF37);
+      ..color = AppColors.goldChampagne.withAlpha(48);
+    final innerPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 0.5
+      ..color = AppColors.goldDark.withAlpha(60);
 
-    canvas.drawCircle(center, radius + progressStrokeWidth / 2.0 + 2.0, accentPaint);
-    canvas.drawCircle(center, radius - progressStrokeWidth / 2.0 - 2.0, accentPaint);
+    canvas.drawCircle(
+        center, radius + progressStrokeWidth / 2.0 + 2.0, outerPaint);
+    canvas.drawCircle(
+        center, radius - progressStrokeWidth / 2.0 - 2.0, innerPaint);
   }
 
   // ── paint ──────────────────────────────────────────────────────────────────

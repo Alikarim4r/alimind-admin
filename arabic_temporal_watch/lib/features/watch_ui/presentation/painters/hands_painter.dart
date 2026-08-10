@@ -5,13 +5,15 @@
 // Design:
 //   • Hour hand   — wide lancet-profile gold baton, 72 % of face radius.
 //   • Minute hand — slimmer lancet gold baton, 93 % of face radius.
-//   • Seconds hand — ultra-thin rose-red sweep pointer, 88 % of face radius.
+//   • Seconds hand — ultra-thin rose-gold sweep pointer, 88 % of face radius.
 //
-// Each main hand renders four passes (bottom → top):
-//   0. Glow halo   — wide blurred copy; soft golden bloom for depth.
-//   1. Drop shadow  — dark translucent blurred copy, offset 2 px SE.
-//   2. Main shape   — 5-stop LinearGradient bevel (dark → gold → pale → gold → dark).
-//   3. Spine highlight — bright hairline along the center ridge.
+// Each main hand renders six passes (bottom → top):
+//   0. Glow halo      — wide blurred copy; soft golden bloom for depth.
+//   1. Drop shadow    — dark translucent blurred copy, offset 2 px SE.
+//   2. Main shape     — 7-stop bevel gradient with a champagne crest at center.
+//   3. Bevel edge     — hairline dark outline defining the silhouette.
+//   4. Spine highlight — bright ridge along the hand's axis.
+//   5. Tip jewel      — mother-of-pearl point at the reading tip.
 //
 // Hand profile: lancet / leaf shape with slightly convex bezier sides — the
 // canonical form of a high-grade Swiss dress-watch hand.
@@ -171,21 +173,51 @@ class HandsPainter extends CustomPainter {
       shadowColor: const Color(0x55000000),
     );
 
-    // ── Main stem — rose-red ──
+    // ── Rose-gold bloom along the stem — warm halo, unique to the sweep hand ──
+    final bloomPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = handHalfWidth * 4.5
+      ..strokeCap = StrokeCap.round
+      ..color = AppColors.roseGold.withAlpha((opacity * 40).round())
+      ..maskFilter = MaskFilter.blur(BlurStyle.normal, handHalfWidth * 3.0);
+    canvas.drawLine(Offset(tailX, tailY), Offset(tipX, tipY), bloomPaint);
+
+    // ── Main stem — rose gold with a graded shaft ──
+    final stemRect = Rect.fromPoints(
+      Offset(tailX, tailY),
+      Offset(tipX, tipY),
+    ).inflate(handHalfWidth * 2.0);
     final stemPaint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = handHalfWidth * 2.0
       ..strokeCap = StrokeCap.round
-      ..color = const Color(0xFFD4364A).withAlpha((opacity * 255).round());
+      ..shader = LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [
+          AppColors.roseGoldDeep.withAlpha((opacity * 255).round()),
+          AppColors.roseGold.withAlpha((opacity * 255).round()),
+          AppColors.roseBlush.withAlpha((opacity * 255).round()),
+          AppColors.roseGold.withAlpha((opacity * 255).round()),
+        ],
+        stops: const [0.0, 0.35, 0.6, 1.0],
+      ).createShader(stemRect);
 
     canvas.drawLine(Offset(tailX, tailY), Offset(tipX, tipY), stemPaint);
 
-    // ── Thicker counterweight section (refined, no lollipop) ──
+    // ── Counterweight — tapered rose-gold tail, no lollipop ──
     final counterPaint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = handHalfWidth * 5.0
       ..strokeCap = StrokeCap.round
-      ..color = const Color(0xFFD4364A).withAlpha((opacity * 255).round());
+      ..shader = LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [
+          AppColors.roseGoldDeep.withAlpha((opacity * 255).round()),
+          AppColors.roseGold.withAlpha((opacity * 255).round()),
+        ],
+      ).createShader(stemRect);
 
     canvas.drawLine(
       Offset(tailX, tailY),
@@ -196,29 +228,61 @@ class HandsPainter extends CustomPainter {
       counterPaint,
     );
 
-    // ── Center jewel cap ──
-    final capR = radius * 0.022;
-    final capGlow = Paint()
-      ..style = PaintingStyle.fill
-      ..color = AppColors.goldPrimary.withAlpha((opacity * 50).round())
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 5.0);
-    canvas.drawCircle(center, capR * 1.7, capGlow);
+    // ── Blush tip highlight — catches the eye as the hand sweeps ──
+    canvas.drawCircle(
+      Offset(tipX, tipY),
+      handHalfWidth * 1.15,
+      Paint()
+        ..color = AppColors.roseBlush.withAlpha((opacity * 235).round())
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 0.8),
+    );
 
-    final capPaint = Paint()
-      ..style = PaintingStyle.fill
-      ..shader = RadialGradient(
-        center: const Alignment(-0.35, -0.5),
-        colors: const [AppColors.goldPale, AppColors.goldPrimary, AppColors.goldDark],
-        stops: const [0.0, 0.55, 1.0],
-      ).createShader(Rect.fromCircle(center: center, radius: capR));
-    canvas.drawCircle(center, capR, capPaint);
+    // ── Center jewel cap — pivot boss sitting above all three hands ──
+    final capR = radius * 0.024;
+
+    // Champagne bloom
+    canvas.drawCircle(
+      center,
+      capR * 2.2,
+      Paint()
+        ..style = PaintingStyle.fill
+        ..color = AppColors.glowChampagne.withAlpha((opacity * 60).round())
+        ..maskFilter = MaskFilter.blur(BlurStyle.normal, capR * 1.6),
+    );
+
+    // Dark setting beneath the jewel
+    canvas.drawCircle(
+      center,
+      capR * 1.24,
+      Paint()..color = const Color(0xFF120C00).withAlpha((opacity * 255).round()),
+    );
+
+    // Jewel body — shared premium gradient
+    canvas.drawCircle(
+      center,
+      capR,
+      Paint()
+        ..style = PaintingStyle.fill
+        ..shader = AppColors.jewelCapGradient
+            .createShader(Rect.fromCircle(center: center, radius: capR)),
+    );
 
     // Hairline bezel ring
-    final bezelPaint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = capR * 0.12
-      ..color = const Color(0xFF1A1400).withAlpha((opacity * 200).round());
-    canvas.drawCircle(center, capR * 0.88, bezelPaint);
+    canvas.drawCircle(
+      center,
+      capR * 0.92,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = capR * 0.11
+        ..color = const Color(0xFF1A1400).withAlpha((opacity * 190).round()),
+    );
+
+    // Specular glint
+    canvas.drawCircle(
+      Offset(center.dx - capR * 0.34, center.dy - capR * 0.34),
+      capR * 0.24,
+      Paint()..color = Colors.white.withAlpha((opacity * 225).round()),
+    );
   }
 
   // ── Lancet hand path ───────────────────────────────────────────────────────
@@ -290,20 +354,24 @@ class HandsPainter extends CustomPainter {
     canvas.drawPath(path, shadowPaint);
     canvas.restore();
 
-    // ── 2. Main hand — 5-stop metallic bevel ──
+    // ── 2. Main hand — 7-stop metallic bevel with champagne crest ──
+    // The narrow champagne band at 0.46–0.54 reads as a polished ridge running
+    // down the center of the hand, the hallmark of a faceted dress-watch hand.
     final gradientPaint = Paint()
       ..style = PaintingStyle.fill
       ..shader = LinearGradient(
         begin: Alignment.centerLeft,
         end: Alignment.centerRight,
         colors: [
-          AppColors.goldDark.withAlpha((opacity * 220).round()),
-          color.withAlpha((opacity * 255).round()),
+          AppColors.goldDark.withAlpha((opacity * 225).round()),
+          color.withAlpha((opacity * 245).round()),
           highlightColor.withAlpha((opacity * 255).round()),
-          color.withAlpha((opacity * 255).round()),
-          AppColors.goldDark.withAlpha((opacity * 200).round()),
+          AppColors.goldChampagne.withAlpha((opacity * 255).round()),
+          highlightColor.withAlpha((opacity * 255).round()),
+          color.withAlpha((opacity * 245).round()),
+          AppColors.goldDark.withAlpha((opacity * 205).round()),
         ],
-        stops: const [0.0, 0.25, 0.5, 0.75, 1.0],
+        stops: const [0.0, 0.18, 0.38, 0.50, 0.62, 0.82, 1.0],
       ).createShader(
         Rect.fromLTWH(
           -strokeWidth / 2,
@@ -315,17 +383,33 @@ class HandsPainter extends CustomPainter {
 
     canvas.drawPath(path, gradientPaint);
 
-    // ── 3. Spine highlight ──
+    // ── 3. Bevel edge — hairline dark outline defines the silhouette ──
+    final edgePaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 0.5
+      ..color = AppColors.goldDark.withAlpha((opacity * 170).round());
+    canvas.drawPath(path, edgePaint);
+
+    // ── 4. Spine highlight — bright ridge along the hand's axis ──
     final highlightPaint = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth * 0.14
+      ..strokeWidth = strokeWidth * 0.13
       ..strokeCap = StrokeCap.round
-      ..color = highlightColor.withAlpha((opacity * 185).round());
+      ..color = AppColors.goldChampagne.withAlpha((opacity * 200).round());
 
     canvas.drawLine(
       Offset(0, -tipLength * 0.94),
       Offset(0, 0),
       highlightPaint,
+    );
+
+    // ── 5. Tip jewel — tiny bright point where the hand reads the dial ──
+    canvas.drawCircle(
+      Offset(0, -tipLength * 0.965),
+      strokeWidth * 0.11,
+      Paint()
+        ..color = AppColors.motherOfPearl.withAlpha((opacity * 210).round())
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 0.7),
     );
 
     canvas.restore();

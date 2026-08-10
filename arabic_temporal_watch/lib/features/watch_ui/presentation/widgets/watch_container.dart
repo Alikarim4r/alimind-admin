@@ -188,19 +188,43 @@ class _BezelContainer extends StatelessWidget {
             ),
           ),
 
-          // ── Bezel body ────────────────────────────────────────────────
+          // ── Bezel body — brushed metal sweep ──────────────────────────
+          // A SweepGradient (rather than a radial one) makes the bezel read as
+          // a turned metal ring catching light at four points around its
+          // circumference, the way a real case-band does.
+          Container(
+            width: outerDiameter,
+            height: outerDiameter,
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: SweepGradient(
+                startAngle: -1.5707963267948966, // 12 o'clock
+                endAngle: 4.71238898038469,      // 12 o'clock + 2π
+                colors: [
+                  Color(0xFF1A2452),
+                  Color(0xFF0B1030),
+                  Color(0xFF161E46),
+                  Color(0xFF080C24),
+                  Color(0xFF1A2452),
+                ],
+                stops: [0.0, 0.25, 0.5, 0.75, 1.0],
+              ),
+            ),
+          ),
+
+          // ── Top-light overlay — softens the sweep into a lit dome ─────
           Container(
             width: outerDiameter,
             height: outerDiameter,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               gradient: RadialGradient(
-                center: const Alignment(-0.3, -0.4),
-                radius: 0.9,
+                center: const Alignment(-0.35, -0.5),
+                radius: 0.95,
                 colors: [
-                  const Color(0xFF12193A),
-                  AppColors.backgroundMid,
-                  AppColors.backgroundDeep,
+                  Colors.white.withAlpha(20),
+                  AppColors.transparent,
+                  AppColors.backgroundDeep.withAlpha(90),
                 ],
                 stops: const [0.0, 0.55, 1.0],
               ),
@@ -214,8 +238,21 @@ class _BezelContainer extends StatelessWidget {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               border: Border.all(
-                color: AppColors.goldPrimary.withOpacity(0.7),
+                color: AppColors.goldChampagne.withAlpha(200),
                 width: 1.0,
+              ),
+            ),
+          ),
+
+          // ── Mid burnished hairline ────────────────────────────────────
+          Container(
+            width: outerDiameter - _bezelWidth * 0.8,
+            height: outerDiameter - _bezelWidth * 0.8,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: AppColors.goldDark.withAlpha(150),
+                width: 0.7,
               ),
             ),
           ),
@@ -227,7 +264,7 @@ class _BezelContainer extends StatelessWidget {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               border: Border.all(
-                color: AppColors.goldPrimary.withOpacity(0.45),
+                color: AppColors.goldPrimary.withAlpha(130),
                 width: 0.6,
               ),
             ),
@@ -291,14 +328,22 @@ class _BezelTickPainter extends CustomPainter {
     final center = Offset(size.width / 2, size.height / 2);
 
     final majorPaint = Paint()
-      ..color = AppColors.goldPrimary.withOpacity(0.55)
+      ..color = AppColors.goldChampagne.withAlpha(165)
       ..strokeWidth = 1.0
       ..strokeCap = StrokeCap.round;
 
     final minorPaint = Paint()
-      ..color = AppColors.goldAntique.withOpacity(0.35)
+      ..color = AppColors.goldAntique.withAlpha(95)
       ..strokeWidth = 0.5
       ..strokeCap = StrokeCap.round;
+
+    // Cardinal ticks (12/3/6/9) get a warm halo so the case reads as jewelled
+    // at the quarters — a detail borrowed from luxury dive-watch bezels.
+    final cardinalGlowPaint = Paint()
+      ..color = AppColors.glowChampagne
+      ..strokeWidth = 2.6
+      ..strokeCap = StrokeCap.round
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2.2);
 
     const int totalTicks = 72; // every 5°
     for (int i = 0; i < totalTicks; i++) {
@@ -312,11 +357,15 @@ class _BezelTickPainter extends CustomPainter {
       final cosA = _cos(angle);
       final sinA = _sin(angle);
 
-      canvas.drawLine(
-        Offset(center.dx + cosA * outerR, center.dy + sinA * outerR),
-        Offset(center.dx + cosA * innerR, center.dy + sinA * innerR),
-        isMajor ? majorPaint : minorPaint,
-      );
+      final start = Offset(center.dx + cosA * outerR, center.dy + sinA * outerR);
+      final end = Offset(center.dx + cosA * innerR, center.dy + sinA * innerR);
+
+      // Quarter positions: i == 0, 18, 36, 54 → 12, 3, 6, 9 o'clock.
+      if (i % 18 == 0) {
+        canvas.drawLine(start, end, cardinalGlowPaint);
+      }
+
+      canvas.drawLine(start, end, isMajor ? majorPaint : minorPaint);
     }
   }
 

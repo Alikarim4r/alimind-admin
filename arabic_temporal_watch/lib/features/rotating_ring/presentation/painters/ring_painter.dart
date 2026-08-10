@@ -162,21 +162,37 @@ class RingPainter extends CustomPainter {
   void _drawWatchBodyFill(Canvas canvas, double cx, double cy, double halfW) {
     // Fill the entire watch face area with a dark gradient so the sky background
     // painter does not show through between the inner clock (46%) and the ring.
+    final bodyRect =
+        Rect.fromCircle(center: Offset(cx, cy), radius: halfW * 0.97);
     final fillPaint = Paint()
       ..style = PaintingStyle.fill
       ..shader = RadialGradient(
-        center: const Alignment(0, -0.2),
-        radius: 1.0,
+        center: const Alignment(-0.15, -0.3),
+        radius: 1.05,
         colors: const [
-          Color(0xFF0C1230),
-          Color(0xFF071126),
-          Color(0xFF030712),
+          AppColors.sapphireInk,
+          AppColors.backgroundSurface,
+          AppColors.sapphireMidnight,
+          AppColors.backgroundDeep,
         ],
-        stops: const [0.0, 0.55, 1.0],
-      ).createShader(
-        Rect.fromCircle(center: Offset(cx, cy), radius: halfW * 0.97),
-      );
+        stops: const [0.0, 0.38, 0.74, 1.0],
+      ).createShader(bodyRect);
     canvas.drawCircle(Offset(cx, cy), halfW * 0.97, fillPaint);
+
+    // Crystal sheen — soft off-center highlight across the ring band, matching
+    // the specular treatment on the inner dial.
+    final sheenPaint = Paint()
+      ..style = PaintingStyle.fill
+      ..shader = RadialGradient(
+        center: const Alignment(-0.5, -0.7),
+        radius: 0.95,
+        colors: [
+          Colors.white.withAlpha(14),
+          Colors.white.withAlpha(0),
+        ],
+        stops: const [0.0, 1.0],
+      ).createShader(bodyRect);
+    canvas.drawCircle(Offset(cx, cy), halfW * 0.97, sheenPaint);
   }
 
   // ── Layer implementations ──────────────────────────────────────────────────
@@ -350,17 +366,18 @@ class RingPainter extends CustomPainter {
 
       final fontSize = 8.5 + norm * 7.5; // 8.5 to 16 px
 
-      // Color: current (offset == 0, closest) = white; night = moonlight/silver; other = gold.
+      // Color: current = mother-of-pearl; night = moonlight/silver; day = champagne gold.
       final Color textColor;
       if (offset == 0) {
-        // Current period — white text
-        textColor = Colors.white.withAlpha((opacity * 255).round());
+        // Current period — warm mother-of-pearl reads brighter than pure white
+        // against the sapphire ring without going harsh.
+        textColor = AppColors.motherOfPearl.withAlpha((opacity * 255).round());
       } else if (!seg.isDay) {
         // Night period — moonlight/crescent silver
         textColor = AppColors.crescentSilver.withAlpha((opacity * 255).round());
       } else {
-        // Day period — gold
-        textColor = AppColors.goldPrimary.withAlpha((opacity * 255).round());
+        // Day period — champagne gold
+        textColor = AppColors.goldChampagne.withAlpha((opacity * 235).round());
       }
 
       final fontWeight = offset == 0 ? FontWeight.w700 : FontWeight.w400;
