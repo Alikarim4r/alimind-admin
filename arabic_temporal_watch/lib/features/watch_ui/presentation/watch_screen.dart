@@ -41,6 +41,7 @@ import '../../rotating_ring/data/ring_calculator.dart';
 import '../../rotating_ring/presentation/painters/ring_painter.dart'
     show RingPainter, PrayerMarker;
 import '../../adhan/presentation/adhan_provider.dart';
+import '../../settings/domain/settings_model.dart' show AppSettings;
 import '../../settings/presentation/settings_provider.dart';
 import '../../temporal_engine/domain/arabic_period.dart';
 import '../../../core/utils/shake_detector.dart';

@@ -1,6 +1,3 @@
-import 'package:flutter/material.dart';
-import 'package:intl/intl.dart' show NumberFormat;
-
 /// Time-related utility functions used throughout the Arabic Temporal Watch app.
 ///
 /// Covers conversions between Dart's [DateTime] / [TimeOfDay] / [Duration]
@@ -9,6 +6,9 @@ import 'package:intl/intl.dart' show NumberFormat;
 ///
 /// All functions are pure and side-effect-free unless otherwise noted.
 library;
+
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart' show NumberFormat;
 
 // ── Decimal hours ─────────────────────────────────────────────────────────────
 

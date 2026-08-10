@@ -1,3 +1,7 @@
+// CupertinoPageTransitionsBuilder lives in the cupertino library (it moved
+// out of material in newer Flutter versions), so it must be imported from
+// there explicitly.
+import 'package:flutter/cupertino.dart' show CupertinoPageTransitionsBuilder;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 

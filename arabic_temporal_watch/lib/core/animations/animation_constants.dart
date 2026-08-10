@@ -1,5 +1,3 @@
-import 'package:flutter/animation.dart';
-
 /// Animation timing constants and custom easing curves for the Arabic
 /// Temporal Watch app.
 ///
@@ -11,6 +9,8 @@ import 'package:flutter/animation.dart';
 ///   * Constants are grouped by the UI element they govern so it is easy to
 ///     tune the entire animation feel by editing a single file.
 library;
+
+import 'package:flutter/animation.dart';
 
 // ── Ring rotation ─────────────────────────────────────────────────────────────
 

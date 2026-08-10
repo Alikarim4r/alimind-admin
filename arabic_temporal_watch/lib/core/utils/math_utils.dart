@@ -1,7 +1,3 @@
-import 'dart:math' as math;
-
-import 'package:vector_math/vector_math_64.dart' show Vector2;
-
 /// Mathematical utility functions used by the astronomical engine and
 /// watch-face rendering code.
 ///
@@ -13,6 +9,10 @@ import 'package:vector_math/vector_math_64.dart' show Vector2;
 /// Julian Day numbers (JD) follow the astronomical standard where JD 0 is
 /// 1 January 4713 BC noon UTC (proleptic Julian calendar).
 library;
+
+import 'dart:math' as math;
+
+import 'package:vector_math/vector_math_64.dart' show Vector2;
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 

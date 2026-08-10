@@ -74,19 +74,34 @@ void main() {
       expect(times.maghrib.time.isBefore(times.isha.time), isTrue);
     });
 
-    test('Fajr is in early morning (before 06:00)', () {
-      expect(times.fajr.time.hour, lessThan(6));
+    // The calculator returns wall-clock times in the *device's* timezone, so
+    // assertions on `.hour` only hold when the test machine happens to run at
+    // UTC+3 like Riyadh. The underlying instant is the same everywhere, so
+    // these tests assert in UTC and stay green on any developer machine.
+
+    test('Fajr precedes sunrise by 60–120 minutes', () {
+      final gap = times.sunrise.time.difference(times.fajr.time);
+      expect(gap.inMinutes, inInclusiveRange(60, 120));
     });
 
-    test('Dhuhr is around midday (11:00–13:00)', () {
-      expect(times.dhuhr.time.hour, inInclusiveRange(11, 13));
+    test('Dhuhr is around solar noon (08:00–10:00 UTC for Riyadh)', () {
+      expect(times.dhuhr.time.toUtc().hour, inInclusiveRange(8, 10));
     });
 
-    test('All prayer times are on the same calendar date', () {
+    test('Dhuhr sits midway between sunrise and maghrib', () {
+      final morning = times.dhuhr.time.difference(times.sunrise.time);
+      final afternoon = times.maghrib.time.difference(times.dhuhr.time);
+      // Solar noon is symmetric between sunrise and sunset to within a few
+      // minutes (the small drift comes from the equation of time).
+      expect((morning - afternoon).inMinutes.abs(), lessThan(15));
+    });
+
+    test('All prayer times fall on the same UTC calendar date', () {
       for (final p in times.all) {
-        expect(p.time.year, equals(date.year));
-        expect(p.time.month, equals(date.month));
-        expect(p.time.day, equals(date.day));
+        final utc = p.time.toUtc();
+        expect(utc.year, equals(date.year));
+        expect(utc.month, equals(date.month));
+        expect(utc.day, equals(date.day));
       }
     });
 
@@ -95,9 +110,11 @@ void main() {
       expect(times.nextPrayer(afterIsha), isNull);
     });
 
-    test('nextPrayer before Fajr returns Fajr', () {
-      final midnight = DateTime(date.year, date.month, date.day, 1, 0);
-      expect(times.nextPrayer(midnight)?.name, equals(PrayerName.fajr));
+    test('nextPrayer just before Fajr returns Fajr', () {
+      // Anchored to Fajr itself rather than a fixed wall-clock hour, which
+      // would land after Fajr on machines west of Riyadh.
+      final beforeFajr = times.fajr.time.subtract(const Duration(minutes: 30));
+      expect(times.nextPrayer(beforeFajr)?.name, equals(PrayerName.fajr));
     });
   });
 

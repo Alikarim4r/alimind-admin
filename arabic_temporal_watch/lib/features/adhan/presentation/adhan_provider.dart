@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/adhan_service.dart';
 import '../domain/adhan_model.dart';
+import '../../prayer_engine/domain/prayer.dart' show PrayerName;
 import '../../prayer_engine/presentation/prayer_provider.dart';
 import '../../settings/presentation/settings_provider.dart';
 
