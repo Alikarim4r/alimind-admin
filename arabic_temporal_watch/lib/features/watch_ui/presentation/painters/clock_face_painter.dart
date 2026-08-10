@@ -42,7 +42,7 @@ class ClockFacePainter extends CustomPainter {
     this.markerColor = AppColors.goldPrimary,
     this.showNumerals = true,
     this.mode = NumeralStyle.arabicIndic,
-    this.scaleFactor = 0.46,
+    this.scaleFactor = 0.715,
   });
 
   /// Background fill for the dial surface.
@@ -120,11 +120,24 @@ class ClockFacePainter extends CustomPainter {
     canvas.drawCircle(center, radius - radius * 0.032, innerBezelPaint);
 
     // ── Sapphire-crystal dial background ──────────────────────────────────
+    // Deliberately translucent: the astronomical sky layer beneath (stars,
+    // milky way, sun/moon glow) reads through the dial like a starfield under
+    // sapphire glass. Fully opaque here would waste that entire layer.
     final dialR = radius - radius * 0.038;
     final dialRect = Rect.fromCircle(center: center, radius: dialR);
     final fillPaint = Paint()
       ..style = PaintingStyle.fill
-      ..shader = AppColors.dialSapphireGradient.createShader(dialRect);
+      ..shader = RadialGradient(
+        center: const Alignment(-0.18, -0.28),
+        radius: 1.15,
+        colors: [
+          AppColors.sapphireInk.withAlpha(188),
+          AppColors.backgroundMid.withAlpha(208),
+          AppColors.sapphireMidnight.withAlpha(228),
+          AppColors.backgroundDeep.withAlpha(242),
+        ],
+        stops: const [0.0, 0.42, 0.78, 1.0],
+      ).createShader(dialRect);
     canvas.drawCircle(center, dialR, fillPaint);
 
     // Specular crystal sheen — a soft off-center highlight simulating light
@@ -310,8 +323,8 @@ class ClockFacePainter extends CustomPainter {
 
     final center = _center(size);
     final radius = _radius(size) * scaleFactor;
-    // Place numerals just inside the hour markers.
-    final numRadius = radius * 0.63;
+    // Place numerals just inside the hour batons (which sit at 0.868).
+    final numRadius = radius * 0.735;
 
     for (int h = 1; h <= 12; h++) {
       final angle = (h / 12.0) * math.pi * 2.0 - math.pi / 2.0;
@@ -321,7 +334,7 @@ class ClockFacePainter extends CustomPainter {
       final label = _labelFor(h);
       final textStyle = TextStyle(
         color: AppColors.goldChampagne,
-        fontSize: radius * 0.135,
+        fontSize: radius * 0.098,
         fontWeight: FontWeight.w700,
         fontFamily: 'ArabicDisplay',
         height: 1.0,

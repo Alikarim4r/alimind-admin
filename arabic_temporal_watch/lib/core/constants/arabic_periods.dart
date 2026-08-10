@@ -230,8 +230,8 @@ const List<ArabicPeriod> kNightPeriods = [
     transliteration: 'Al-Shafaq',
     arabicDescription:
         'الشفق الأحمر الذي يعقب الغروب مباشرة، ويُعدّ نهاية وقت المغرب',
-    primaryColor: Color(0xFF4A1942), // twilight purple
-    secondaryColor: Color(0xFF3B0F3A), // deep violet
+    primaryColor: Color(0xFF5B2350), // twilight purple
+    secondaryColor: Color(0xFF4A1846), // deep violet
   ),
 
   // ── Period 2 ── الغسق ─────────────────────────────────────────────────────
@@ -242,8 +242,8 @@ const List<ArabicPeriod> kNightPeriods = [
     transliteration: 'Al-Ghasaq',
     arabicDescription:
         'اشتداد الظلام بعد زوال الشفق، وهو وقت العشاء عند بعض الأئمة',
-    primaryColor: Color(0xFF2E0D4A), // dark indigo
-    secondaryColor: Color(0xFF1A0538), // deep navy purple
+    primaryColor: Color(0xFF3E1461), // dark indigo
+    secondaryColor: Color(0xFF2C0E4C), // deep navy purple
   ),
 
   // ── Period 3 ── العتمة ────────────────────────────────────────────────────
@@ -254,8 +254,8 @@ const List<ArabicPeriod> kNightPeriods = [
     transliteration: 'Al-Atama',
     arabicDescription:
         'أول الليل الداكن وصلاة العشاء، وهو وقت راحة الأبدان',
-    primaryColor: Color(0xFF150A3A), // midnight blue-purple
-    secondaryColor: Color(0xFF0D061F), // near-black
+    primaryColor: Color(0xFF28165C), // midnight blue-purple
+    secondaryColor: Color(0xFF1D1046), // deep violet-navy
   ),
 
   // ── Period 4 ── السدفة ────────────────────────────────────────────────────
@@ -266,8 +266,8 @@ const List<ArabicPeriod> kNightPeriods = [
     transliteration: 'Al-Sudfa',
     arabicDescription:
         'الظلام الحالك في أوائل الليل، حين تسود الريح ويهدأ الناس',
-    primaryColor: Color(0xFF0D0820), // very dark navy
-    secondaryColor: Color(0xFF080510), // near-black blue
+    primaryColor: Color(0xFF1E1550), // very dark navy
+    secondaryColor: Color(0xFF171041), // deep indigo
   ),
 
   // ── Period 5 ── الفحمة ────────────────────────────────────────────────────
@@ -278,8 +278,8 @@ const List<ArabicPeriod> kNightPeriods = [
     transliteration: 'Al-Fahma',
     arabicDescription:
         'أحلك أوقات الليل دواماً، حين يشبه الظلام سواد الفحم',
-    primaryColor: Color(0xFF05040F), // coal black
-    secondaryColor: Color(0xFF020208), // absolute dark
+    primaryColor: Color(0xFF16123C), // deepest night indigo
+    secondaryColor: Color(0xFF100D30), // near-void indigo
   ),
 
   // ── Period 6 ── الزلة ─────────────────────────────────────────────────────
@@ -290,8 +290,8 @@ const List<ArabicPeriod> kNightPeriods = [
     transliteration: 'Al-Zalla',
     arabicDescription:
         'الربع الثالث من الليل، المقاربة للنصف في الظلام التام',
-    primaryColor: Color(0xFF040612), // abyss dark
-    secondaryColor: Color(0xFF03050E), // void dark
+    primaryColor: Color(0xFF14143E), // abyss indigo
+    secondaryColor: Color(0xFF101036), // void indigo
   ),
 
   // ── Period 7 ── الزلفة ────────────────────────────────────────────────────
@@ -302,8 +302,8 @@ const List<ArabicPeriod> kNightPeriods = [
     transliteration: 'Al-Zulfa',
     arabicDescription:
         'منتصف الليل الحقيقي، وزلفات الليل المذكورة في القرآن الكريم',
-    primaryColor: Color(0xFF05081A), // deepest midnight
-    secondaryColor: Color(0xFF030614), // dark midnight blue
+    primaryColor: Color(0xFF161C48), // deepest midnight
+    secondaryColor: Color(0xFF121740), // dark midnight blue
   ),
 
   // ── Period 8 ── البهرة ────────────────────────────────────────────────────
@@ -314,8 +314,8 @@ const List<ArabicPeriod> kNightPeriods = [
     transliteration: 'Al-Bahra',
     arabicDescription:
         'النصف الثاني من الليل، حين يبدأ الكون في الاستعداد للفجر',
-    primaryColor: Color(0xFF070B1F), // post-midnight
-    secondaryColor: Color(0xFF0B1030), // hint of blue
+    primaryColor: Color(0xFF1A2454), // post-midnight
+    secondaryColor: Color(0xFF1E2A60), // hint of blue
   ),
 
   // ── Period 9 ── السحر ─────────────────────────────────────────────────────
@@ -326,8 +326,8 @@ const List<ArabicPeriod> kNightPeriods = [
     transliteration: 'Al-Sahar',
     arabicDescription:
         'وقت السحر قبيل الفجر، من أفضل أوقات الدعاء والاستغفار',
-    primaryColor: Color(0xFF0D1540), // pre-dawn navy
-    secondaryColor: Color(0xFF151E5A), // dawn-approaching blue
+    primaryColor: Color(0xFF203067), // pre-dawn navy
+    secondaryColor: Color(0xFF27397A), // dawn-approaching blue
   ),
 
   // ── Period 10 ── الفجر ────────────────────────────────────────────────────

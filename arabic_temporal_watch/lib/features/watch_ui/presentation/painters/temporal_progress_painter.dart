@@ -31,9 +31,11 @@ class TemporalProgressPainter extends CustomPainter {
   const TemporalProgressPainter({
     required this.temporalData,
     this.animationValue = 0.0,
-    this.progressRadiusFraction = 0.70,
+    // Sits just inside the dial's outer bezel, reading as a chapter ring
+    // rather than a hoop floating in empty space.
+    this.progressRadiusFraction = 0.655,
     this.trackStrokeWidth = 1.0,   // thinner — precision instrument feel
-    this.progressStrokeWidth = 3.5, // slimmer progress indicator
+    this.progressStrokeWidth = 2.6, // slimmer progress indicator
   });
 
   /// Full temporal state snapshot — supplies progress fraction, period colors,
@@ -97,9 +99,11 @@ class TemporalProgressPainter extends CustomPainter {
     final rect = Rect.fromCircle(center: center, radius: radius);
 
     // Colors: period primary → champagne-warmed mid → brightened leading edge.
-    final primary = temporalData.primaryColor;
-    final warm = Color.lerp(primary, AppColors.goldChampagne, 0.28) ?? primary;
-    final bright = Color.lerp(primary, Colors.white, 0.35) ?? primary;
+    // Deliberately restrained: a bright, wide arc reads as a neon hoop and
+    // fights the dial for attention.
+    final primary = temporalData.primaryColor.withAlpha(190);
+    final warm = Color.lerp(primary, AppColors.goldChampagne, 0.22) ?? primary;
+    final bright = Color.lerp(primary, Colors.white, 0.22) ?? primary;
 
     // Soft under-bloom so the arc appears lit from within.
     final bloomPaint = Paint()
@@ -123,23 +127,6 @@ class TemporalProgressPainter extends CustomPainter {
 
     canvas.drawArc(rect, _startAngle, sweepAngle, false, progressPaint);
 
-    // Hairline champagne highlight riding the outer edge of the arc — reads as
-    // light catching a raised metal band.
-    final edgePaint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = progressStrokeWidth * 0.22
-      ..strokeCap = StrokeCap.round
-      ..color = AppColors.goldChampagne.withAlpha(90);
-    canvas.drawArc(
-      Rect.fromCircle(
-        center: center,
-        radius: radius + progressStrokeWidth * 0.34,
-      ),
-      _startAngle,
-      sweepAngle,
-      false,
-      edgePaint,
-    );
   }
 
   // ── Layer 3: End-point glow ────────────────────────────────────────────────

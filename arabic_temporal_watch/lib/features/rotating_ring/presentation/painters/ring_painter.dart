@@ -132,6 +132,13 @@ class RingPainter extends CustomPainter {
   /// 6 → shows 13 labels total: 6 past + current + 6 future (sliding 12-hour window).
   static const int _labelHalfRange = 6;
 
+  /// Floor brightness for the sector furthest from the reader line. The whole
+  /// 24-period band stays visible; distance only dims it.
+  static const double _minSectorOpacity = 0.58;
+
+  /// Floor brightness for labels and ticks on the far side of the ring.
+  static const double _minLabelOpacity = 0.30;
+
   // ── paint ──────────────────────────────────────────────────────────────────
 
   @override
@@ -159,25 +166,38 @@ class RingPainter extends CustomPainter {
     _drawFloatingLabels(canvas, cx, cy, labelR, size);
   }
 
+  /// Radius (fraction of half-canvas) where the inner dial ends. The body fill
+  /// starts here so it never paints over the dial's markers and numerals.
+  static const double _dialEdgeFraction = 0.700;
+
   void _drawWatchBodyFill(Canvas canvas, double cx, double cy, double halfW) {
-    // Fill the entire watch face area with a dark gradient so the sky background
-    // painter does not show through between the inner clock (46%) and the ring.
-    final bodyRect =
-        Rect.fromCircle(center: Offset(cx, cy), radius: halfW * 0.97);
+    // An ANNULUS, not a disc. It seals the band between the dial edge and the
+    // outer case so the sky layer does not leak a bright rim there, while
+    // leaving the dial itself — and the starfield showing through it —
+    // untouched. Filling a full circle here hid the entire clock face.
+    final center = Offset(cx, cy);
+    final outerR = halfW; // reach the very edge: no sky-coloured rim
+    final innerR = halfW * _dialEdgeFraction;
+    final bodyRect = Rect.fromCircle(center: center, radius: outerR);
+
+    final band = Path()
+      ..fillType = PathFillType.evenOdd
+      ..addOval(Rect.fromCircle(center: center, radius: outerR))
+      ..addOval(Rect.fromCircle(center: center, radius: innerR));
+
     final fillPaint = Paint()
       ..style = PaintingStyle.fill
       ..shader = RadialGradient(
         center: const Alignment(-0.15, -0.3),
         radius: 1.05,
         colors: const [
-          AppColors.sapphireInk,
           AppColors.backgroundSurface,
           AppColors.sapphireMidnight,
           AppColors.backgroundDeep,
         ],
-        stops: const [0.0, 0.38, 0.74, 1.0],
+        stops: const [0.0, 0.62, 1.0],
       ).createShader(bodyRect);
-    canvas.drawCircle(Offset(cx, cy), halfW * 0.97, fillPaint);
+    canvas.drawPath(band, fillPaint);
 
     // Crystal sheen — soft off-center highlight across the ring band, matching
     // the specular treatment on the inner dial.
@@ -187,12 +207,12 @@ class RingPainter extends CustomPainter {
         center: const Alignment(-0.5, -0.7),
         radius: 0.95,
         colors: [
-          Colors.white.withAlpha(14),
+          Colors.white.withAlpha(16),
           Colors.white.withAlpha(0),
         ],
         stops: const [0.0, 1.0],
       ).createShader(bodyRect);
-    canvas.drawCircle(Offset(cx, cy), halfW * 0.97, sheenPaint);
+    canvas.drawPath(band, sheenPaint);
   }
 
   // ── Layer implementations ──────────────────────────────────────────────────
@@ -217,15 +237,18 @@ class RingPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = 0.9;
 
-    for (int offset = -_labelHalfRange; offset <= _labelHalfRange; offset++) {
+    // Every one of the 24 periods is drawn so the band closes into a complete
+    // ring. Distance from the reader line only modulates brightness — the far
+    // side dims to _minSectorOpacity rather than vanishing, which is what left
+    // the lower half of the dial looking unfinished.
+    for (int offset = -12; offset <= 11; offset++) {
       final idx = ((currentIdx + offset) % totalSegs + totalSegs) % totalSegs;
       final seg = segments[idx];
 
-      // Same fade curve used by ticks and labels for visual coherence.
       final dist = (offset - progressFraction).abs();
-      final norm = math.max(0.0, 1.0 - dist / 6.5);
-      final sectorOpacity = math.pow(norm, 1.1).toDouble();
-      if (sectorOpacity < 0.02) continue;
+      final norm = math.max(0.0, 1.0 - dist / 13.0);
+      final sectorOpacity = _minSectorOpacity +
+          (1.0 - _minSectorOpacity) * math.pow(norm, 1.35).toDouble();
 
       final startAngle = _startOffset + idx * segAngle + gap / 2;
       final sweepAngle = segAngle - gap;
@@ -233,22 +256,25 @@ class RingPainter extends CustomPainter {
       final path = _annularSectorPath(cx, cy, innerR, outerR, startAngle, sweepAngle);
 
       // Fill with segment color modulated by window opacity.
-      fillPaint.color = seg.segmentColor.withOpacity(sectorOpacity * 0.72);
+      fillPaint.color = seg.segmentColor.withValues(alpha: sectorOpacity * 0.92);
       canvas.drawPath(path, fillPaint);
 
-      // Subtle top-light sheen: RadialGradient from above gives each sector a
-      // slight luminous highlight that separates it from a flat painted look.
-      final shineRect = Rect.fromCircle(center: Offset(cx, cy), radius: halfW);
+      // Bevel sheen: a radial ramp across the band itself (bright at the outer
+      // edge, dark at the inner) so each sector reads as a slightly domed
+      // enamel inlay. Anchoring this to the canvas top instead washed a grey
+      // rectangle over whichever sector sat at 12 o'clock.
       final shinePaint = Paint()
         ..style = PaintingStyle.fill
         ..shader = RadialGradient(
-          center: const Alignment(0.0, -0.85),
-          radius: 0.8,
+          center: Alignment.center,
+          radius: 1.0,
           colors: [
-            Colors.white.withOpacity(0.10 * sectorOpacity),
-            Colors.transparent,
+            Colors.black.withValues(alpha: 0.22 * sectorOpacity),
+            Colors.white.withValues(alpha: 0.05 * sectorOpacity),
+            Colors.white.withValues(alpha: 0.11 * sectorOpacity),
           ],
-        ).createShader(shineRect);
+          stops: [innerR / outerR, (innerR / outerR + 1.0) / 2.0, 1.0],
+        ).createShader(Rect.fromCircle(center: Offset(cx, cy), radius: outerR));
       canvas.drawPath(path, shinePaint);
 
       // Gold border on the current-period sector.
@@ -302,14 +328,12 @@ class RingPainter extends CustomPainter {
       if (rawOffset > 12) rawOffset -= 24;
       if (rawOffset < -12) rawOffset += 24;
 
-      // Ignore ticks outside the visible window.
-      if (rawOffset.abs() > _labelHalfRange + 1) continue;
-
-      // Fade using the same formula as the floating labels for visual coherence.
+      // All 24 dividers are drawn — they are what makes the band read as a
+      // complete 24-hour scale rather than a floating arc.
       final dist = (rawOffset - progressFraction).abs();
-      final norm = math.max(0.0, 1.0 - dist / 6.4);
-      final tickOpacity = math.pow(norm, 1.35).toDouble();
-      if (tickOpacity < 0.02) continue;
+      final norm = math.max(0.0, 1.0 - dist / 13.0);
+      final tickOpacity = _minLabelOpacity +
+          (1.0 - _minLabelOpacity) * math.pow(norm, 1.35).toDouble();
 
       final angle = _startOffset + i * segmentAngle;
       final cosA = math.cos(angle);
@@ -343,8 +367,10 @@ class RingPainter extends CustomPainter {
 
     const segmentAngle = kSegmentAngle;
 
-    // Draw labels for offsets -6 to +6 from current period.
-    for (int offset = -_labelHalfRange; offset <= _labelHalfRange; offset++) {
+    // All 24 period names ride the ring; the ones opposite the reader line are
+    // dimmer and smaller but still legible, so the dial reads as a full
+    // 24-hour Arabic scale.
+    for (int offset = -12; offset <= 11; offset++) {
       // Wrap-around index in the 24-period cycle.
       final idx = ((currentIdx + offset) % totalSegs + totalSegs) % totalSegs;
       final seg = segments[idx];
@@ -359,12 +385,14 @@ class RingPainter extends CustomPainter {
       // Distance-based opacity and font size.
       // dist = |offset - progressFraction| — how far from the reader-aligned position.
       final dist = (offset - progressFraction).abs();
-      final norm = math.max(0.0, 1.0 - dist / 6.4);
-      final opacity = math.pow(norm, 1.35).toDouble();
+      final norm = math.max(0.0, 1.0 - dist / 13.0);
+      final opacity = _minLabelOpacity +
+          (1.0 - _minLabelOpacity) * math.pow(norm, 1.35).toDouble();
 
-      if (opacity < 0.02) continue; // skip nearly invisible labels
-
-      final fontSize = 8.5 + norm * 7.5; // 8.5 to 16 px
+      // Scale with the canvas so the labels fill the band on a phone and on a
+      // desktop window alike, instead of being fixed at 8–16 logical pixels.
+      final bandScale = math.min(size.width, size.height) / 420.0;
+      final fontSize = (9.0 + norm * 6.0) * bandScale;
 
       // Color: current = mother-of-pearl; night = moonlight/silver; day = champagne gold.
       final Color textColor;
@@ -382,12 +410,12 @@ class RingPainter extends CustomPainter {
 
       final fontWeight = offset == 0 ? FontWeight.w700 : FontWeight.w400;
 
-      // ── Gold glow for current period ──────────────────────────────────────
-      if (offset == 0 && opacity > 0.5) {
-        _drawLabelGlow(canvas, cx, cy, labelR, segCenterAngle, seg.arabicName, fontSize);
-      }
-
       // ── Arabic label ──────────────────────────────────────────────────────
+      // The current period glows via text shadows. The previous implementation
+      // wrapped it in saveLayer(null, blurPaint), which blurred the LAYER'S
+      // bounds and painted a grey rectangle across whatever sector sat under
+      // the reader line.
+      final isCurrent = offset == 0;
       final textPainter = TextPainter(
         text: TextSpan(
           text: seg.arabicName,
@@ -397,6 +425,21 @@ class RingPainter extends CustomPainter {
             color: textColor,
             fontWeight: fontWeight,
             letterSpacing: 0.3,
+            shadows: isCurrent
+                ? [
+                    Shadow(
+                      color: AppColors.goldPrimary
+                          .withValues(alpha: 0.55 * opacity * glowIntensity),
+                      blurRadius: fontSize * 0.55,
+                    ),
+                    Shadow(
+                      color: AppColors.backgroundDeep.withValues(alpha: 0.8),
+                      blurRadius: fontSize * 0.18,
+                    ),
+                  ]
+                : const [
+                    Shadow(color: Color(0x99000000), blurRadius: 2.0),
+                  ],
           ),
         ),
         textDirection: ui.TextDirection.rtl,
@@ -409,8 +452,17 @@ class RingPainter extends CustomPainter {
 
       canvas.save();
       canvas.translate(labelX, labelY);
-      // Rotate label to face outward along the radial direction.
-      canvas.rotate(segCenterAngle + math.pi / 2.0);
+
+      // Rotate the label to sit tangentially on the band. The painter draws in
+      // the ring's own (rotating) frame, so the angle a viewer actually sees is
+      // the segment angle plus the ring rotation; when that lands on the lower
+      // half the text would appear upside down, so flip it by π.
+      final screenAngle = segCenterAngle + ringState.rotationAngle;
+      final isUpsideDown = math.sin(screenAngle) > 0.0;
+      canvas.rotate(
+        segCenterAngle + math.pi / 2.0 + (isUpsideDown ? math.pi : 0.0),
+      );
+
       textPainter.paint(
         canvas,
         Offset(-textPainter.width / 2.0, -textPainter.height / 2.0),
@@ -522,51 +574,6 @@ class RingPainter extends CustomPainter {
         canvas.restore();
       }
     }
-  }
-
-  void _drawLabelGlow(
-    Canvas canvas,
-    double cx,
-    double cy,
-    double labelR,
-    double angle,
-    String text,
-    double fontSize,
-  ) {
-    // Draw the label twice with a gold MaskFilter blur for a glow effect.
-    final glowPainter = TextPainter(
-      text: TextSpan(
-        text: text,
-        style: TextStyle(
-          fontFamily: 'ArabicDisplay',
-          fontSize: fontSize,
-          color: AppColors.goldPrimary.withAlpha(140),
-          fontWeight: FontWeight.w700,
-        ),
-      ),
-      textDirection: ui.TextDirection.rtl,
-      textAlign: TextAlign.center,
-      maxLines: 1,
-    )..layout();
-
-    final labelX = cx + labelR * math.cos(angle);
-    final labelY = cy + labelR * math.sin(angle);
-
-    canvas.save();
-    canvas.translate(labelX, labelY);
-    canvas.rotate(angle + math.pi / 2.0);
-
-    // Save and apply blur paint layer for glow.
-    final glowPaint = Paint()
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4.0);
-    canvas.saveLayer(null, glowPaint);
-    glowPainter.paint(
-      canvas,
-      Offset(-glowPainter.width / 2.0, -glowPainter.height / 2.0),
-    );
-    canvas.restore(); // restore saveLayer
-
-    canvas.restore(); // restore translate+rotate
   }
 
   // ── shouldRepaint ──────────────────────────────────────────────────────────

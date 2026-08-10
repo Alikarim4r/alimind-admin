@@ -324,13 +324,16 @@ class RingCalculator {
     // Base color interpolated between primary (day/night mode) and secondary.
     final base = Color.lerp(primary, secondary, 0.3) ?? primary;
 
-    // For the current segment, boost luminance regardless of day/night.
+    // For the current segment, boost luminance while KEEPING its hue.
+    // Lerping toward gold/silver instead washed the active period out to a
+    // grey block that read as a rendering artefact rather than a highlight —
+    // the gold border and label glow already mark which period is active.
     if (isCurrent) {
-      return Color.lerp(
-        base,
-        isDay ? AppColors.goldLight : AppColors.silverLight,
-        0.25,
-      )!;
+      final hsl = HSLColor.fromColor(base);
+      return hsl
+          .withLightness((hsl.lightness + 0.17).clamp(0.0, 0.90))
+          .withSaturation((hsl.saturation + 0.10).clamp(0.0, 1.0))
+          .toColor();
     }
 
     // Non-current segments: modulate opacity to recede visually.

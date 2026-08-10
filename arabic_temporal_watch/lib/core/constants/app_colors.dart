@@ -183,17 +183,23 @@ abstract final class AppColors {
   static const Color periodGhurubb  = Color(0xFF6A1E4B); // Sunset
 
   // Night periods ─
-  static const Color periodShafaq   = Color(0xFF4A1942); // Twilight
-  static const Color periodGhasaq   = Color(0xFF2E0D4A); // Dusk
-  static const Color periodAtama    = Color(0xFF150A3A); // Deep night start
-  static const Color periodSudfa    = Color(0xFF0D0820); // Darkness
-  static const Color periodFahma    = Color(0xFF05040F); // Pitch black
-  static const Color periodZalla    = Color(0xFF040612); // Midnight approach
-  static const Color periodZulfa    = Color(0xFF05081A); // Midnight
-  static const Color periodBahra    = Color(0xFF070B1F); // Post-midnight
-  static const Color periodSahar    = Color(0xFF0D1540); // Pre-dawn
-  static const Color periodFajr     = Color(0xFF1A2A7A); // Dawn
-  static const Color periodSubh     = Color(0xFF3A5BA8); // Early morning light
+  //
+  // Tuned to stay unmistakably "night" while remaining VISIBLE on the ring.
+  // The earlier values bottomed out near #050410, which rendered the whole
+  // night half of the band as black-on-black — the dial looked as though it
+  // only covered half the circle. These are deep indigo/violet jewel tones:
+  // still dark, still ordered darkest at Al-Fahma, but readable.
+  static const Color periodShafaq   = Color(0xFF5B2350); // Twilight
+  static const Color periodGhasaq   = Color(0xFF3E1461); // Dusk
+  static const Color periodAtama    = Color(0xFF28165C); // Deep night start
+  static const Color periodSudfa    = Color(0xFF1E1550); // Darkness
+  static const Color periodFahma    = Color(0xFF16123C); // Deepest night
+  static const Color periodZalla    = Color(0xFF14143E); // Midnight approach
+  static const Color periodZulfa    = Color(0xFF161C48); // Midnight
+  static const Color periodBahra    = Color(0xFF1A2454); // Post-midnight
+  static const Color periodSahar    = Color(0xFF203067); // Pre-dawn
+  static const Color periodFajr     = Color(0xFF2C4290); // Dawn
+  static const Color periodSubh     = Color(0xFF3F63B0); // Early morning light
   static const Color periodSabah    = Color(0xFF7BAFD4); // Morning begins
 
   // ── Glow / radiance colours ────────────────────────────────────────────────

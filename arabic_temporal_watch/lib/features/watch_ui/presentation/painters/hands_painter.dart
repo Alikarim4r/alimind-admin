@@ -34,7 +34,9 @@ class HandsPainter extends CustomPainter {
     this.showSeconds = true,
     this.handColor = AppColors.goldPrimary,
     this.opacity = 1.0,
-    this.dialFraction = 0.70,
+    // Matches ClockFacePainter.scaleFactor so hand length is measured against
+    // the dial the hands actually point at.
+    this.dialFraction = 0.715,
   });
 
   /// Hour-hand rotation angle in radians, measured clockwise from 12 o'clock.
@@ -69,10 +71,12 @@ class HandsPainter extends CustomPainter {
   void _drawHourHand(Canvas canvas, Size size) {
     _drawTaperedHand(
       canvas, size,
-      tipFraction: 0.73,
-      tailFraction: 0.23,
-      baseHalfFraction: 0.048,
-      tipHalfFraction: 0.007,
+      // 0.58 of the dial radius — the tip lands between the numerals and the
+      // hour batons (which sit at 0.868), the classic dress-watch proportion.
+      tipFraction: 0.58,
+      tailFraction: 0.19,
+      baseHalfFraction: 0.058,
+      tipHalfFraction: 0.010,
       rawAngle: hourAngle,
       color: handColor,
       highlightColor: AppColors.goldLight,
@@ -85,10 +89,11 @@ class HandsPainter extends CustomPainter {
   void _drawMinuteHand(Canvas canvas, Size size) {
     _drawTaperedHand(
       canvas, size,
-      tipFraction: 0.93,
-      tailFraction: 0.27,
-      baseHalfFraction: 0.030,
-      tipHalfFraction: 0.005,
+      // 0.82 — reaches the minute track just inside the hour batons.
+      tipFraction: 0.82,
+      tailFraction: 0.21,
+      baseHalfFraction: 0.040,
+      tipHalfFraction: 0.007,
       rawAngle: minuteAngle,
       color: Color.lerp(handColor, AppColors.goldLight, 0.30)!,
       highlightColor: AppColors.goldPale,
@@ -149,10 +154,10 @@ class HandsPainter extends CustomPainter {
     final radius = _radius(size) * dialFraction;
     final angle = secondAngle - math.pi / 2.0;
 
-    final tipLength = radius * 0.88;
-    final tailLength = radius * 0.24;
+    final tipLength = radius * 0.86;
+    final tailLength = radius * 0.20;
     // Always at least 1 px half-width so it stays visible on small screens.
-    final handHalfWidth = math.max(radius * 0.009, 1.0);
+    final handHalfWidth = math.max(radius * 0.0075, 1.0);
 
     final cosA = math.cos(angle);
     final sinA = math.sin(angle);
