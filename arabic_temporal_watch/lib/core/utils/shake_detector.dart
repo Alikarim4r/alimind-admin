@@ -9,11 +9,23 @@ class ShakeDetector {
   static const int _shakesRequired = 2;
   static const Duration _shakeWindow = Duration(milliseconds: 700);
 
+  /// Whether this platform exposes an accelerometer.
+  ///
+  /// `sensors_plus` only implements Android and iOS; on macOS, Windows, Linux
+  /// and web, subscribing throws [MissingPluginException]. Shake-to-silence is
+  /// simply unavailable there — the adhan is still silenced by tapping.
+  static bool get isSupported =>
+      !kIsWeb &&
+      (defaultTargetPlatform == TargetPlatform.android ||
+          defaultTargetPlatform == TargetPlatform.iOS);
+
   int _shakeCount = 0;
   DateTime? _firstShakeTime;
   StreamSubscription<UserAccelerometerEvent>? _subscription;
 
   void start(VoidCallback onShake) {
+    if (!isSupported) return;
+
     _subscription =
         userAccelerometerEventStream().listen((UserAccelerometerEvent event) {
       final magnitude =
@@ -38,6 +50,10 @@ class ShakeDetector {
           _shakeCount = 1;
         }
       }
+    }, onError: (Object _) {
+      // A platform without a usable accelerometer — stop listening rather
+      // than letting the error surface as an unhandled stream exception.
+      stop();
     });
   }
 

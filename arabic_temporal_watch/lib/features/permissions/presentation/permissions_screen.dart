@@ -6,6 +6,8 @@
 //   2. Open app settings (permanently denied — OS settings page).
 //   3. Use Makkah as default location and continue without GPS.
 
+import 'package:flutter/foundation.dart'
+    show defaultTargetPlatform, kIsWeb, TargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart' as ph;
@@ -59,7 +61,7 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
           _loading = false;
         });
       }
-    } catch (e) {
+    } catch (_) {
       setState(() {
         _errorMessage = 'حدث خطأ أثناء طلب الإذن. حاول مرة أخرى.';
         _loading = false;
@@ -67,9 +69,35 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
     }
   }
 
+  /// Opens the OS settings page for this app.
+  ///
+  /// `permission_handler` implements Android and iOS only; on macOS and the
+  /// other desktop targets the call throws, so surface an instruction the user
+  /// can act on instead of failing silently.
   Future<void> _openSettings() async {
-    await ph.openAppSettings();
+    if (!_supportsAppSettings) {
+      setState(() {
+        _errorMessage = 'افتح إعدادات النظام ← الخصوصية والأمان ← خدمات '
+            'الموقع، وفعّل الوصول لهذا التطبيق.';
+      });
+      return;
+    }
+
+    try {
+      await ph.openAppSettings();
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _errorMessage = 'تعذّر فتح الإعدادات تلقائياً. افتحها يدوياً وفعّل '
+            'إذن الموقع.';
+      });
+    }
   }
+
+  static bool get _supportsAppSettings =>
+      !kIsWeb &&
+      (defaultTargetPlatform == TargetPlatform.android ||
+          defaultTargetPlatform == TargetPlatform.iOS);
 
   void _useMakkah() {
     Navigator.of(context).pushReplacementNamed('/');

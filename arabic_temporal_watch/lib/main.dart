@@ -118,6 +118,19 @@ final initialLocationPermissionProvider = Provider<LocationPermission>(
 ///
 /// Returns the final [LocationPermission] so the UI can branch accordingly.
 Future<LocationPermission> _requestLocationPermission() async {
+  try {
+    return await _requestLocationPermissionImpl();
+  } catch (error) {
+    // Geolocator has no implementation on some desktop targets. Start the app
+    // anyway — it falls back to the Makkah coordinates — instead of dying
+    // before runApp() and showing an empty window.
+    debugPrint('[ArabicTemporalWatch] Location lookup unavailable on this '
+        'platform: $error');
+    return LocationPermission.unableToDetermine;
+  }
+}
+
+Future<LocationPermission> _requestLocationPermissionImpl() async {
   // ── Check if location services are enabled at the device level ─────────────
   final serviceEnabled = await Geolocator.isLocationServiceEnabled();
   if (!serviceEnabled) {
@@ -150,11 +163,25 @@ Future<LocationPermission> _requestLocationPermission() async {
   // Some Android OEM variants (MIUI, ColorOS, etc.) require the
   // permission_handler plugin to complete the runtime permission grant even
   // after Geolocator reports success.
-  if (permission == LocationPermission.whileInUse ||
-      permission == LocationPermission.always) {
-    final pHandlerStatus = await Permission.locationWhenInUse.status;
-    if (pHandlerStatus.isDenied) {
-      await Permission.locationWhenInUse.request();
+  //
+  // Android only: permission_handler ships no macOS/Windows/Linux
+  // implementation, so calling it there throws MissingPluginException — and
+  // because this runs before runApp(), that would leave a blank window.
+  final isAndroid =
+      !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
+  if (isAndroid &&
+      (permission == LocationPermission.whileInUse ||
+          permission == LocationPermission.always)) {
+    try {
+      final pHandlerStatus = await Permission.locationWhenInUse.status;
+      if (pHandlerStatus.isDenied) {
+        await Permission.locationWhenInUse.request();
+      }
+    } catch (error) {
+      // Never let a permission-plugin quirk block start-up; Geolocator has
+      // already reported the authoritative status.
+      debugPrint('[ArabicTemporalWatch] permission_handler alignment '
+          'skipped: $error');
     }
   }
 
