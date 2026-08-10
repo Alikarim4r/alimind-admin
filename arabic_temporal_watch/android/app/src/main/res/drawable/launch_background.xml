@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Deep navy field — identical to the watch face background so the
+         launch window blends into the first Flutter frame. -->
+    <item android:drawable="@color/launch_background" />
+
+    <!-- Centred watch mark -->
+    <item>
+        <bitmap
+            android:gravity="center"
+            android:src="@mipmap/ic_launcher" />
+    </item>
+</layer-list>

@@ -1,0 +1,97 @@
+// App-level build configuration for the arabic_temporal_watch module.
+
+plugins {
+    id 'com.android.application'
+    id 'kotlin-android'
+}
+
+android {
+    compileSdk 34
+
+    // Namespace mirrors the applicationId and is required by AGP 8+.
+    namespace 'com.alimind.arabic_temporal_watch'
+
+    // Java 17 — required by AGP 8 and by several plugins (geolocator,
+    // permission_handler) whose AARs are compiled against 17.
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = '17'
+    }
+
+    sourceSets {
+        main.java.srcDirs += 'src/main/kotlin'
+    }
+
+    defaultConfig {
+        applicationId 'com.alimind.arabic_temporal_watch'
+        // 23 is the floor required by several plugins (just_audio,
+        // permission_handler); 21 fails to resolve their manifests.
+        minSdk 23
+        targetSdk 34
+        versionCode 1
+        versionName '1.0.0'
+
+        // Enables multidex support for apps that exceed the 64K method limit.
+        multiDexEnabled true
+
+        // Inject the version into BuildConfig for runtime access.
+        buildConfigField 'String', 'APP_VERSION', '"1.0.0"'
+    }
+
+    buildTypes {
+        debug {
+            applicationIdSuffix '.debug'
+            debuggable true
+            minifyEnabled false
+        }
+
+        release {
+            debuggable false
+            minifyEnabled false
+            shrinkResources false
+            proguardFiles(
+                getDefaultProguardFile('proguard-android-optimize.txt'),
+                'proguard-rules.pro'
+            )
+
+            // Signed with the debug key so `flutter build apk --release`
+            // produces an installable APK out of the box. Replace this with a
+            // real keystore before publishing to Play — see README_BUILD.md.
+            signingConfig signingConfigs.debug
+        }
+    }
+
+    // Suppress lint errors that would otherwise abort the release build.
+    // (`lintOptions` was removed in AGP 8 — the block is now `lint`.)
+    lint {
+        disable 'InvalidPackage'
+        checkReleaseBuilds false
+    }
+
+    buildFeatures {
+        buildConfig true
+    }
+}
+
+flutter {
+    source '../..'
+}
+
+dependencies {
+    // Kotlin standard library — keep in step with the plugin version declared
+    // in android/settings.gradle.
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.22"
+
+    // AndroidX core
+    implementation 'androidx.core:core-ktx:1.12.0'
+
+    // Multidex support for API < 21 (still useful as a transitive dep)
+    implementation 'androidx.multidex:multidex:2.0.1'
+
+    // Window manager — allows Flutter to handle edge-to-edge display correctly
+    implementation 'androidx.window:window:1.2.0'
+}

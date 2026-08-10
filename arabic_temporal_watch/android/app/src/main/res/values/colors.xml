@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Deepest background navy — AppColors.backgroundDeep -->
+    <color name="launch_background">#01030C</color>
+
+    <!-- Adaptive-icon background layer — AppColors.sapphireMidnight -->
+    <color name="ic_launcher_background">#03051A</color>
+</resources>

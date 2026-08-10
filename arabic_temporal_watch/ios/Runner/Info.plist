@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+    "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+
+    <!-- ============================================================
+         Application identity
+         ============================================================ -->
+
+    <key>CFBundleName</key>
+    <string>arabic_temporal_watch</string>
+
+    <key>CFBundleDisplayName</key>
+    <string>Arabic Temporal Watch</string>
+
+    <key>CFBundleIdentifier</key>
+    <string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+
+    <key>CFBundleVersion</key>
+    <string>$(FLUTTER_BUILD_NUMBER)</string>
+
+    <key>CFBundleShortVersionString</key>
+    <string>$(FLUTTER_BUILD_NAME)</string>
+
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+
+    <key>CFBundleSignature</key>
+    <string>????</string>
+
+    <key>CFBundleExecutable</key>
+    <string>$(EXECUTABLE_NAME)</string>
+
+    <key>CFBundleDevelopmentRegion</key>
+    <string>ar</string>
+
+    <key>CFBundleInfoDictionaryVersion</key>
+    <string>6.0</string>
+
+    <!-- ============================================================
+         Localisation
+         ============================================================ -->
+
+    <key>CFBundleLocalizations</key>
+    <array>
+        <string>ar</string>
+        <string>en</string>
+    </array>
+
+    <!-- ============================================================
+         Location permissions
+         ============================================================ -->
+
+    <!-- Shown when the app requests "When In Use" location access -->
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>يحتاج التطبيق إلى موقعك الجغرافي لحساب أوقات الصلاة والأوقات الفلكية بدقة.</string>
+
+    <!-- Shown when the app upgrades to "Always" access (for background updates) -->
+    <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+    <string>يستخدم التطبيق موقعك الجغرافي في الخلفية لتحديث أوقات الصلاة تلقائياً طوال اليوم.</string>
+
+    <!-- Legacy key required for iOS 10 and earlier -->
+    <key>NSLocationAlwaysUsageDescription</key>
+    <string>يستخدم التطبيق موقعك الجغرافي في الخلفية لتحديث أوقات الصلاة تلقائياً طوال اليوم.</string>
+
+    <!-- ============================================================
+         Background modes
+         ============================================================ -->
+
+    <key>UIBackgroundModes</key>
+    <array>
+        <!-- Allow periodic location updates while backgrounded -->
+        <string>location</string>
+        <!-- Allow background fetch for prayer-time data refresh -->
+        <string>fetch</string>
+    </array>
+
+    <!-- ============================================================
+         Device capabilities
+         ============================================================ -->
+
+    <key>UIRequiredDeviceCapabilities</key>
+    <array>
+        <string>arm64</string>
+    </array>
+
+    <!-- ============================================================
+         Supported interface orientations — iPhone
+         ============================================================ -->
+
+    <key>UISupportedInterfaceOrientations</key>
+    <array>
+        <string>UIInterfaceOrientationPortrait</string>
+        <string>UIInterfaceOrientationLandscapeLeft</string>
+        <string>UIInterfaceOrientationLandscapeRight</string>
+    </array>
+
+    <!-- ============================================================
+         Supported interface orientations — iPad
+         ============================================================ -->
+
+    <key>UISupportedInterfaceOrientations~ipad</key>
+    <array>
+        <string>UIInterfaceOrientationPortrait</string>
+        <string>UIInterfaceOrientationPortraitUpsideDown</string>
+        <string>UIInterfaceOrientationLandscapeLeft</string>
+        <string>UIInterfaceOrientationLandscapeRight</string>
+    </array>
+
+    <!-- ============================================================
+         Status bar
+         ============================================================ -->
+
+    <key>UIStatusBarStyle</key>
+    <string>UIStatusBarStyleLightContent</string>
+
+    <key>UIViewControllerBasedStatusBarAppearance</key>
+    <false/>
+
+    <!-- ============================================================
+         Flutter-specific
+         ============================================================ -->
+
+    <!-- Prevents the system from flipping the view to match the device
+         orientation before Flutter has had a chance to respond. -->
+    <key>CADisableMinimumFrameDurationOnPhone</key>
+    <true/>
+
+    <!-- Opt in to the indirect input events API (pointer / trackpad) -->
+    <key>UIApplicationSupportsIndirectInputEvents</key>
+    <true/>
+
+</dict>
+</plist>
