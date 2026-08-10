@@ -52,6 +52,14 @@ flutter create --platforms=macos .
 
 [[ -f "$INFO_PLIST" ]] || fail "$INFO_PLIST was not generated — check the flutter create output above."
 
+# `flutter create` also drops its default counter-app widget test, which
+# references a MyApp class this project does not have and would break
+# `flutter test`. The real tests live alongside it in test/.
+if [[ -f test/widget_test.dart ]] && grep -q "MyApp" test/widget_test.dart; then
+  info "Removing the generated placeholder test (test/widget_test.dart)"
+  rm -f test/widget_test.dart
+fi
+
 # ── 2. Location usage description ─────────────────────────────────────────────
 
 set_string() {

@@ -158,6 +158,8 @@ assets/audio/adhan_afasy_fajr.mp3
 | `SDK location not found` | افتح المشروع مرة في Android Studio ليولّد `android/local.properties` |
 | فشل التثبيت `INSTALL_FAILED_UPDATE_INCOMPATIBLE` | احذف النسخة القديمة من الجوال أولاً |
 | بناء بطيء جداً أول مرة | طبيعي — Gradle ينزّل الاعتماديات؛ المرات التالية أسرع بكثير |
+| `version solving failed` بسبب `intl` | حدّث المشروع (`git pull`) — قيد `intl` أصبح نطاقاً يقبل 0.19 و0.20 |
+| `flutter test` يفشل في `widget_test.dart` | احذفه: `rm test/widget_test.dart` — ملف افتراضي يولّده `flutter create` |
 
 ---
 

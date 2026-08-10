@@ -17,7 +17,11 @@ dependencies:
   geolocator: ^11.0.0
   permission_handler: ^11.3.0
   shared_preferences: ^2.2.2
-  intl: ^0.19.0
+  # flutter_localizations pins intl to an exact version that changes with the
+  # Flutter SDK (0.19.x on Flutter 3.19–3.24, 0.20.x on 3.27+). A range keeps
+  # `pub get` resolving on both instead of failing version solving. Only
+  # NumberFormat is used, and its API is identical across the two.
+  intl: ">=0.19.0 <0.21.0"
   vector_math: ^2.1.4
   equatable: ^2.0.5
   flutter_animate: ^4.5.0
